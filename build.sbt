@@ -6,4 +6,6 @@ scalaVersion := "2.12.4"
 
 lazy val assthw = (project in file("assignment-helloworld"))
 
-lazy val root = (project in file(".")).aggregate(assthw)
+lazy val asstmd = (project in file("assignment-movie-database"))
+
+lazy val root = (project in file(".")).aggregate(assthw, asstmd)
