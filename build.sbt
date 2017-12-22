@@ -10,4 +10,6 @@ lazy val asstmd = (project in file("assignment-movie-database"))
 
 lazy val asstrs = (project in file("assignment-random-state"))
 
-lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs)
+lazy val asstfc = (project in file("assignment-functional-composition"))
+
+lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc)
