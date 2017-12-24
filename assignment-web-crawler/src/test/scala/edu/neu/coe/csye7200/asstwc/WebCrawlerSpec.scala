@@ -4,6 +4,7 @@ import java.io.FileNotFoundException
 import java.net.{MalformedURLException, URL}
 
 import org.scalatest.concurrent.{Futures, ScalaFutures}
+import org.scalatest.tagobjects.Slow
 import org.scalatest.time._
 import org.scalatest.{FlatSpec, Matchers, _}
 
@@ -19,29 +20,29 @@ class WebCrawlerSpec extends FlatSpec with Matchers with Futures with ScalaFutur
   val goodURL = "http://www.rubecula.com/RobinHillyard.html"
   val badURL = "http://www.rubecula.com/junk"
 
-  "getURLContent" should s"succeed for $goodURL" in {
+  "getURLContent" should s"succeed for $goodURL" taggedAs(Slow) in {
     val wf = WebCrawler.getURLContent(new URL(goodURL))
     whenReady(wf, timeout(Span(6, Seconds))) { w => w.length shouldBe 2234 }
   }
 
-  "wget(URL)" should s"succeed for $goodURL" in {
+  "wget(URL)" should s"succeed for $goodURL" taggedAs(Slow) in {
     val usfy = for {u <- Try(new URL(goodURL))} yield WebCrawler.wget(u)
     whenReady(MonadOps.flatten(usfy), timeout(Span(6, Seconds))) { us => us.length shouldBe 8 }
   }
 
-  it should s"not succeed for $badURL" in {
+  it should s"not succeed for $badURL" taggedAs(Slow) in {
     val usfy = for {u <- Try(new URL(badURL))} yield WebCrawler.wget(u)
     val usf = MonadOps.flatten(usfy)
     whenReady(usf.failed, timeout(Span(6, Seconds))) { e => e shouldBe a[FileNotFoundException] }
   }
 
-  it should s"not succeed for $goodURL" in {
+  it should s"not succeed for $goodURL" taggedAs(Slow) in {
     val usfy = for {u <- Try(new URL("x//www.htmldog.com/examples/"))} yield WebCrawler.wget(u)
     usfy.failure.exception shouldBe a[MalformedURLException]
     usfy.failure.exception should have message "no protocol: x//www.htmldog.com/examples/"
   }
 
-  "wget(Seq[URL])" should s"succeed for $goodURL, http://www.dataflowage.com/" in {
+  "wget(Seq[URL])" should s"succeed for $goodURL, http://www.dataflowage.com/" taggedAs(Slow) in {
     val ws = List(goodURL, "http://www.dataflowage.com/")
     val uys = for (w <- ws) yield Try(new URL(w))
     val usesfy = for {us <- MonadOps.sequence(uys)} yield WebCrawler.wget(us)
@@ -55,7 +56,7 @@ class WebCrawlerSpec extends FlatSpec with Matchers with Futures with ScalaFutur
     }
   }
 
-  "filterAndFlatten" should "work" in {
+  "filterAndFlatten" should "work" taggedAs(Slow) in {
     val ws = List(goodURL)
     val uys = for (w <- ws) yield Try(new URL(w))
     MonadOps.sequence(uys) match {
@@ -71,7 +72,7 @@ class WebCrawlerSpec extends FlatSpec with Matchers with Futures with ScalaFutur
     }
   }
 
-  "crawler(Seq[URL])" should s"succeed for $goodURL, depth 2" in {
+  "crawler(Seq[URL])" should s"succeed for $goodURL, depth 2" taggedAs(Slow) in {
     val args = List(s"$goodURL")
     val tries = for (arg <- args) yield Try(new URL(arg))
     //    println(s"tries: $tries")
