@@ -12,4 +12,6 @@ lazy val asstrs = (project in file("assignment-random-state"))
 
 lazy val asstfc = (project in file("assignment-functional-composition"))
 
-lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc)
+lazy val fp = (project in file("functional-programming"))
+
+lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, fp)
