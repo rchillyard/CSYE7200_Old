@@ -1,6 +1,6 @@
 package edu.neu.coe.csye7200.poets
 
-import scala.xml.{XML, Node, NodeSeq}
+import scala.xml.{Node, NodeSeq, XML}
 
 case class Name(name: String, language: String) {
   def toXML = <name language={language}>{name}</name>
@@ -36,7 +36,7 @@ object Poets extends App {
 
   def toXML(poets: PoetSeq) = poets map (_ toXML)
 
-  val xml = XML.loadFile("poets.xml")
+  val xml = XML.loadFile(getClass.getResource("poets.xml").getPath)
   val poets: PoetSeq = for (poet <- xml \\ "poet") yield Poet.fromXML(poet)
   println(poets)
   println(toXML(poets))
