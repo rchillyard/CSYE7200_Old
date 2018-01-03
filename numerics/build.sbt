@@ -1,4 +1,4 @@
-organization := "edu.neu.coe.scala"
+organization := "edu.neu.coe.csye7200"
 
 name := "Numerics"
 
@@ -8,7 +8,7 @@ scalaVersion := "2.12.4"
 
 val scalaTestVersion = "3.0.1"
 
-ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
+//ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
