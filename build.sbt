@@ -20,6 +20,8 @@ lazy val fp = (project in file("functional-programming"))
 
 lazy val num = (project in file("numerics"))
 
-lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num)
+lazy val sparkapp = (project in file("spark-app"))
+
+lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp)
 
 parallelExecution in Test := false
