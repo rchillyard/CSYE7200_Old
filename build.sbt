@@ -24,6 +24,8 @@ lazy val sparkapp = (project in file("spark-app"))
 
 lazy val mapred = (project in file("mapreduce"))
 
-lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred)
+lazy val concor = (project in file("concordance"))
+
+lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor)
 
 parallelExecution in Test := false
