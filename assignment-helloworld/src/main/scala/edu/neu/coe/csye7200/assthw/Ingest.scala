@@ -1,5 +1,18 @@
 package edu.neu.coe.csye7200.assthw
 
+/**
+  * This is the second part of assignment,
+  * You should be able to run this program
+  * with provided csv file.
+  * You task is to replace line 38 with
+  * the following 2 lines code:
+  * val kiwiMovies = for (m <- ingester(source); if (m.properties(20)=="New Zealand")) yield m
+  * println(kiwiMovies.size)
+  * Run this program with provided csv file,
+  * and submit the screenshot of the result.
+  * It should be the number of Kiwi Movies.
+  */
+
 import scala.io.Source
 
 trait Ingestible[X] {
