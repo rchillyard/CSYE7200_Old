@@ -9,6 +9,21 @@ import scala.util.Try
   * Although the limitation on 22 fields in a case class has partially gone away, it's still convenient to group the different attributes together into logical classes.
   *
   * Created by scalaprof on 9/12/16.
+  *
+  * Common questions in this assignment:
+  * 1. Where is main method?
+  * In most case, you don't need to run main method for assignments.
+  * Unit tests are provided to test your implementation.
+  * In this assignment, you will find the `object Movie extends App`,
+  * the `App` trait can be used to quickly turn objects into executable programs.
+  * You can read the official doc of Scala for more details.
+  *
+  * 2. How to understand the whole program in this assignment?
+  * I won't suggest you to understand the whole program in this assignment,
+  * there are some advanced features like `implicit` which hasn't been covered in class.
+  * You should be able to understand it before midterm.
+  * I will suggest you only focus on TODOs in the assignments.
+  *
   */
 case class Movie(title: String, format: Format, production: Production, reviews: Reviews, director: Principal, actor1: Principal, actor2: Principal, actor3: Principal, genres: Seq[String], plotKeywords: Seq[String], imdb: String)
 
@@ -166,7 +181,7 @@ object Reviews {
 }
 
 object Name {
-  // TODO this regex will not parse all names in the Movie database correctly. Still, it gets most of them.
+  // this regex will not parse all names in the Movie database correctly. Still, it gets most of them.
   val rName = """^([\p{L}\-\']+\.?)\s*(([\p{L}\-]+\.)\s)?([\p{L}\-\']+\.?)(\s([\p{L}\-]+\.?))?$""".r
 
   def apply(name: String): Name = name match {
@@ -188,6 +203,7 @@ object Principal {
 }
 
 object Rating {
+  // Hint: This regex matches three patterns: (\w*), (-(\d\d)), (\d\d), for example "PG-13", the first one matches "PG", second one "-13", third one "13".
   val rRating = """^(\w*)(-(\d\d))?$""".r
 
   /**
