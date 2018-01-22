@@ -28,6 +28,8 @@ lazy val concor = (project in file("concordance"))
 
 lazy val hedgefund = (project in file("hedge-fund"))
 
-lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund)
+lazy val sparkexp = (project in file("spark-example"))
+
+lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp)
 
 parallelExecution in Test := false
