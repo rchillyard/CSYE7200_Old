@@ -95,6 +95,7 @@ object Movie extends App {
     def fromString(w: String): Try[Movie] = Movie.parse(w.split(",").toSeq)
   }
 
+  //Hint: You may refer to the slides discussed in class for how to serialize object to json
   object MoviesProtocol extends DefaultJsonProtocol {
     ???
     // TODO 20 points
@@ -114,6 +115,7 @@ object Movie extends App {
     source.close()
   }
 
+  //Hint: Serialize the input to Json format and deserialize back to Object, check the result is still equal to original input.
   def testSerializationAndDeserialization(ms: Seq[Movie]): Boolean = {
     ???
     // TODO 5 points
