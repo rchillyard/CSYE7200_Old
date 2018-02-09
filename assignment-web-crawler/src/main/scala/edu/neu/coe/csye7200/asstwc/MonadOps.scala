@@ -8,7 +8,7 @@ import scala.util._
   */
 object MonadOps {
 
-  // TODO implement. 6 points. Hint: write as a for-comprehension, using the method asFuture (below).
+  // Hint: write as a for-comprehension, using the method asFuture (below).
   def flatten[X](xyf: Future[Try[X]])(implicit executor: ExecutionContext): Future[X] = for (xy <- xyf; x <- asFuture(xy)) yield x
 
   def flatten[X](xfy: Try[Future[X]]): Future[X] =
@@ -17,7 +17,7 @@ object MonadOps {
       case Failure(e) => Future.failed(e)
     }
 
-  // TODO implement. 6 points. Hint: write as a for-comprehension, using the method Future.sequence
+  // Hint: write as a for-comprehension, using the method Future.sequence
   def flatten[X](xsfs: Seq[Future[Seq[X]]])(implicit ec: ExecutionContext): Future[Seq[X]] = Future.sequence(xsfs) map {
     _ flatten
   }
@@ -48,7 +48,7 @@ object MonadOps {
     case Failure(e) => Future.failed(e)
   }
 
-  // TODO implement. 4 points. 
+  // implement.
   def sequence[X](xy: Try[X]): Either[Throwable, X] =
     xy match {
       case Success(s) => Right(s)
