@@ -8,7 +8,7 @@ import scala.util._
   */
 object MonadOps {
 
-  // TODO implement. 6 points. Hint: write as a for-comprehension, using the method asFuture (below).
+  // Hint: write as a for-comprehension, using the method asFuture (below).
   def flatten[X](xyf: Future[Try[X]])(implicit executor: ExecutionContext): Future[X] = ???
 
   def flatten[X](xfy: Try[Future[X]]): Future[X] =
@@ -17,7 +17,7 @@ object MonadOps {
       case Failure(e) => Future.failed(e)
     }
 
-  // TODO implement. 6 points. Hint: write as a for-comprehension, using the method Future.sequence
+  // Hint: write as a for-comprehension, using the method Future.sequence
   def flatten[X](xsfs: Seq[Future[Seq[X]]])(implicit ec: ExecutionContext): Future[Seq[X]] = ???
 
   def flattenRecover[X](esf: Future[Seq[Either[Throwable, Seq[X]]]], f: => Throwable => Unit)(implicit executor: ExecutionContext): Future[Seq[X]] = {
@@ -46,7 +46,7 @@ object MonadOps {
     case Failure(e) => Future.failed(e)
   }
 
-  // TODO implement. 4 points. 
+  // implement.
   def sequence[X](xy: Try[X]): Either[Throwable, X] = ???
 
   def sequence[X](xf: Future[X])(implicit executor: ExecutionContext): Future[Either[Throwable, X]] =
