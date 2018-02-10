@@ -4,9 +4,9 @@ import scala.annotation.tailrec
 
 object Factorial {
 
-  def factorial(n: Int): Long = {
+  def factorial(n: Int): BigInt = {
     @tailrec
-    def inner(r: Long, i: Int): Long = i match {
+    def inner(r: BigInt, i: Int): BigInt = i match {
       case 0 => r
       case _ => inner(r * i, i - 1)
     }

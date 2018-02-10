@@ -11,6 +11,6 @@ class BenchmarkSpec extends FlatSpec with Matchers {
     import Benchmark._
     val nanos = 10000.times(Factorial.factorial(40))
     // NOTE: this might need to be varied according to the speed of the machine, etc.
-    nanos shouldBe 12000.0 +- 5000
+    nanos shouldBe 10000.0 +- 9000
   }
 }
