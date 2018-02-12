@@ -118,11 +118,12 @@ class SortedSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
     val sorted = Sorted(list)
     sorted() shouldBe List(1, 2, 3)
   }
-  it should "sort List[String]" in {
+  //TODO After you fix all the TODOs in Sorted, this will work.
+/*  it should "sort List[String]" in {
     val list = List("b", "c", "a")
     val sorted = Sorted(list)
     sorted() shouldBe List("a", "b", "c")
-  }
+  }*/
   it should "sort List[Double] using create" in {
     val list = List(3.0, 1.5, 2.4)
     val sorted = Sorted.create(list)
