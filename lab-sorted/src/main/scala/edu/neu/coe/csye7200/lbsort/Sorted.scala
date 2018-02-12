@@ -2,21 +2,21 @@ package edu.neu.coe.csye7200.lbsort
 
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.implicitConversions
+import scala.language.{implicitConversions, postfixOps}
 
 trait Comparer[T] extends (((T, T)) => Comparison) {
   self =>
 
   //noinspection ConvertExpressionToSAM
   def toOrdering: Ordering[T] = new Ordering[T]() {
-    def compare(x: T, y: T): Int = self(x, y).toInt
+    def compare(x: T, y: T): Int = self(x, y).toInt // TODO implement
   }
 
-  def >(tt: (T, T)): Boolean = apply(tt.swap)().getOrElse(false)
+  def >(tt: (T, T)): Boolean = self(tt.swap)().getOrElse(false)  // TODO implement
 
-  def <(tt: (T, T)): Boolean = apply(tt)().getOrElse(false)
+  def <(tt: (T, T)): Boolean = self(tt)().getOrElse(false)
 
-  def ==(tt: (T, T)): Boolean = apply(tt)().isEmpty
+  def ==(tt: (T, T)): Boolean = self(tt)().isEmpty  // TODO implement
 
   def >=(tt: (T, T)): Boolean = ! <(tt)
 
@@ -24,13 +24,9 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
 
   def !=(tt: (T, T)): Boolean = ! ==(tt)
 
-  def compose(f: Comparison => Comparison): Comparer[T] = new Comparer[T]() {
-    def apply(tt: (T, T)): Comparison = f(self(tt))
-  }
+  def compose(f: Comparison => Comparison): Comparer[T] = (tt: (T, T)) => f(self(tt))
 
-  def orElse(o: Comparer[T]): Comparer[T] = new Comparer[T]() {
-    def apply(tt: (T, T)): Comparison = self(tt).orElse(o(tt))
-  }
+  def orElse(o: Comparer[T]): Comparer[T] = (tt: (T, T)) => self(tt).orElse(o(tt))
 
   def invert: Comparer[T] = compose(_ flip)
 }
@@ -38,11 +34,10 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
 object Comparer {
 
   implicit val intComparer: Comparer[Int] = Ordering[Int]
+  // TODO what should follow this comment? [Yuan: remove strComparer from public]
   implicit val strComparer: Comparer[String] = Ordering[String]
 
-  implicit def convert[T](x: Ordering[T]): Comparer[T] = new Comparer[T] {
-    def apply(tt: (T, T)) = Comparison(x.compare(tt._1, tt._2))
-  }
+  implicit def convert[T](x: Ordering[T]): Comparer[T] = (tt: (T, T)) => Comparison(x.compare(tt._1, tt._2))
 }
 
 trait Comparison extends (() => Option[Boolean]) {
@@ -98,14 +93,15 @@ case class Sorted[T](ts: Seq[T])(implicit f: Comparer[T]) extends (() => Seq[T])
 object Sorted {
   def create[T: Ordering](ts: Seq[T]): Sorted[T] = Sorted(ts)(implicitly[Ordering[T]])
 
-  def verify[T: Comparer](xs: Seq[T]): Boolean = xs.zip(xs.tail).forall(z => implicitly[Comparer[T]].<=(z._1,z._2))
+  def verify[T: Comparer](xs: Seq[T]): Boolean = xs.zip(xs.tail).forall(z => implicitly[Comparer[T]].<=(z._1, z._2))
 
   def parSort[T: Ordering](tst: (Seq[T], Seq[T]))(implicit ec: ExecutionContext): Future[Seq[T]] = map2(Future(tst._1.sorted), Future(tst._2.sorted))(merge)
 
-  def mergeSort[T: Ordering](ts: Seq[T])(implicit ec: ExecutionContext): Future[Seq[T]] = parSort(ts splitAt (ts.length/2))
+  def mergeSort[T: Ordering](ts: Seq[T])(implicit ec: ExecutionContext): Future[Seq[T]] = parSort(ts splitAt (ts.length / 2))
 
   def merge[T: Ordering](ts1: Seq[T], ts2: Seq[T]): Seq[T] = {
     val ordering = implicitly[Ordering[T]]
+
     @tailrec def inner(r: Seq[T], xs: Seq[T], ys: Seq[T]): Seq[T] = (xs, ys) match {
       case (_, Nil) => r ++ xs
       case (Nil, _) => r ++ ys
@@ -113,6 +109,7 @@ object Sorted {
         if (ordering.lt(x, y)) inner(r :+ x, xs1, ys)
         else inner(r :+ y, xs, ys1)
     }
+
     inner(Nil, ts1, ts2)
   }
 
