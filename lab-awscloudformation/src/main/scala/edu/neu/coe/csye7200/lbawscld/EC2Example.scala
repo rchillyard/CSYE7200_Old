@@ -5,7 +5,7 @@ import com.monsanto.arch.cloudformation.model.resource._
 import com.monsanto.arch.cloudformation.model.simple.Builders._
 
 /**
-  * aws cloudformation create-stack --stack-name "csye7200lab8" --template-body file://ec2.json --parameters ParameterKey=KeyName,ParameterValue=csye6225 ParameterKey=AllowSSHFrom,ParameterValue=0.0.0.0/0 ParameterKey=FolderName,ParameterValue=helloworld
+  * aws cloudformation create-stack --stack-name "csye7200lab8" --template-body file://ec2.json --parameters ParameterKey=KeyName,ParameterValue=csye6225 ParameterKey=AllowSSHFrom,ParameterValue=0.0.0.0/0 ParameterKey=AllowHTTPFrom,ParameterValue=0.0.0.0/0 ParameterKey=FolderName,ParameterValue=helloworld
   */
 object EC2Example extends VPCWriter with App {
 
@@ -20,12 +20,17 @@ object EC2Example extends VPCWriter with App {
     Description = Some("The net block (CIDR) that SSH is available to.")
   )
 
+  val allowHTTPFromParameter = CidrBlockParameter(
+    name = "AllowHTTPFrom",
+    Description = Some("The net block (CIDR) that HTTP/HTTPS is available to.")
+  )
+
   val folderName = StringParameter(
     name = "FolderName",
     Description = Some("Name of folder that will be created under /home/ubuntu.")
   )
 
-  val parameters = Seq(keyNameParameter,allowSSHFromParameter,folderName)
+  val parameters = Seq(keyNameParameter,allowSSHFromParameter,allowHTTPFromParameter,folderName)
 
   implicit val vpc = `AWS::EC2::VPC`("myVPC",CidrBlock(10, 0, 0, 0, 16),AmazonTag.fromName("myVPC"))
 
@@ -66,17 +71,28 @@ object EC2Example extends VPCWriter with App {
                   )))
 
   val sshToMyEC2 = ParameterRef(allowSSHFromParameter) ->- 22 ->- myEC2
+  val httpToMyEC2 = ParameterRef(allowHTTPFromParameter) ->- Seq(80, 443) ->- myEC2
 
-  val simpleTemplate = Template.fromSecurityGroupRoutable(myEC2) ++ Template.collapse(sshToMyEC2) ++ gatewayStuff ++ Template(
-      AWSTemplateFormatVersion = "2010-09-09",
-      Description = "Simple EC2 template",
-      Parameters = Some(parameters),
-      Conditions = None,
-      Mappings = None,
-      Resources = Seq(vpc,subnet),
-      Outputs = None,
-      Routables = None
-    )
+  val outputVPCId = Output("VPCId","VPC Id",ResourceRef(vpc),Some(`Fn::Sub`("${AWS::StackName}-VPCID")))
+  val outputEC2Id = Output("EC2Id","EC2 Instance Id",ResourceRef(myEC2.resource),Some(`Fn::Sub`("${AWS::StackName}-EC2ID")))
+  val outputEC2PublicIp = Output("EC2PubIp","EC2 Public Ip",`Fn::GetAtt`(Seq("myEC2","PublicIp")),Some(`Fn::Sub`("${AWS::StackName}-EC2PUBIP")))
+
+  val outputs = Seq(outputVPCId,outputEC2Id,outputEC2PublicIp)
+
+  val simpleTemplate = Template.fromSecurityGroupRoutable(myEC2) ++
+                        Template.collapse(sshToMyEC2) ++
+                        Template.collapse(httpToMyEC2) ++
+                        gatewayStuff ++
+                        Template(
+                          AWSTemplateFormatVersion = "2010-09-09",
+                          Description = "Simple EC2 template",
+                          Parameters = Some(parameters),
+                          Conditions = None,
+                          Mappings = None,
+                          Resources = Seq(vpc,subnet),
+                          Outputs = Some(outputs),
+                          Routables = None
+                        )
   writeStaxModule("ec2.json", simpleTemplate)
 
 }
