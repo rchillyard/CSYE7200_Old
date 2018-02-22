@@ -32,6 +32,8 @@ lazy val sparkexp = (project in file("spark-example"))
 
 lazy val labsort = (project in file("lab-sorted"))
 
-lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp, labsort)
+lazy val labawscld = (project in file("lab-awscloudformation"))
+
+lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp, labsort, labawscld)
 
 parallelExecution in Test := false
