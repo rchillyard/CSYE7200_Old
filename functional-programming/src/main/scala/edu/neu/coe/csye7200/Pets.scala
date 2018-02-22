@@ -52,7 +52,7 @@ trait Mammal extends Vertebrate {
   def vertebra: Int = 33
 }
 
-trait Pet {
+trait Pet extends Animal {
   def name: String
 }
 
@@ -74,11 +74,17 @@ case class Pets[+X <: Pet with Mammal, -Y <: Sound](xs: Seq[X]) {
 }
 
 object Pets extends App {
+
   def create[X <: Pet with Mammal, Y <: Sound](xs: X*): Pets[X, Y] = Pets(xs)
 
   // This method takes a Chihuahua and returns it as a Dog which works because Chihuahua is a subtype of Dog.
   // All of the required properties of Dog are specified by any instance of Chihuahua
   def asDog(x: Chihuahua): Dog = x
+
+  // Here we create a new type X which involves both covariant and contravariant types.
+  // Then we create a function of type X based on asDog
+  type X[+S, -T] = (T) => S
+  val x: X[Dog, Chihuahua] = asDog
 
   val bentley = Chihuahua("Bentley", female = false, "black")
   val gingerSnap = Chihuahua("GingerSnap", female = true, "ginger")
@@ -92,4 +98,5 @@ object Pets extends App {
   val m: Mammal = asDog(bentley)
   val ps = pets.sounders(Woof)
   println(ps.mkString(","))
+  println(x(bentley))
 }
