@@ -4,6 +4,8 @@ import edu.neu.coe.csye7200.lbsort.Comparison._
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.{FlatSpec, Matchers}
 
+import scala.concurrent.ExecutionContext
+
 /**
   * @author scalaprof
   */
@@ -156,6 +158,9 @@ class SortedSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
     val xsf = sorted.async
     whenReady(xsf) { xs => xs shouldBe List(1, 2, 3) }
   }
+
+  import ExecutionContext.Implicits.global
+
 
   behavior of "merge"
   it should "work" in {

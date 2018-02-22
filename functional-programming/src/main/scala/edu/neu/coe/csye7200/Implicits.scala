@@ -11,6 +11,27 @@ object Implicits extends App {
 
   implicit def stringToInt(x: String) = x.toInt
 
-  myAdd("1", "2")
+  println(myAdd("1", "2"))
 
+  val u = U(10)
+  import T._
+  println(u.double)
+
+  implicit class V(v: Int) {
+    override def toString: String = s"V: $v"
+  }
+
+  val v: V = 10
+  println(v)
 }
+
+case class T(t: Int) {
+  def double: Int = 2*t
+}
+
+object T {
+  implicit def conv(u: U): T = T(u.u)
+}
+
+case class U(u: Int)
+
