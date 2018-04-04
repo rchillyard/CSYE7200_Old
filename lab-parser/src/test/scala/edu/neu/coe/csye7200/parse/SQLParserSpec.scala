@@ -21,6 +21,7 @@ class SQLParserSpec extends FlatSpec with Matchers {
   private val w4 = "SELECT * FROM t LIMIT 100"
   private val w5 = "SELECT a, CASE WHEN TRUE THEN 42 END FROM t"
   private val w6 = "SELECT a, CASE WHEN TRUE THEN 42 END AS fortytwo FROM t"
+  private val w7 = "SELECT a AS b FROM t WHERE d = e AND x = y"
 
   behavior of "select"
 
@@ -63,6 +64,11 @@ class SQLParserSpec extends FlatSpec with Matchers {
   it should "parse " + w6 in {
     val expected = InvocationSelect(List(InvocationColumn(InvocationP(Left("a")), None), InvocationColumn(InvocationCaseClause(List(InvocationWhenThen(InvocationBooleanExpression(Left(true), List()), Left(42))), None), Some("fortytwo"))), "t", None, None)
     parser.parseAll(parser.select, w6) should matchPattern { case parser.Success(`expected`, _) => }
+  }
+
+  it should "parse " + w7 in {
+    val expected = InvocationSelect(List(InvocationColumn(InvocationP(Left(Scalar("a"))), Some(Scalar("b")))), Scalar("t"), Some(InvocationBooleanExpression(Right(InvocationComparison(Right(InvocationLookup("d")), "=", Right(InvocationLookup("e")))), List(BooleanTerm(And, Right(InvocationComparison(Right(InvocationLookup("x")), "=", Right(InvocationLookup("y")))))))), None)
+    parser.parseAll(parser.select, w7) should matchPattern { case parser.Success(`expected`, _) => }
   }
 
 }

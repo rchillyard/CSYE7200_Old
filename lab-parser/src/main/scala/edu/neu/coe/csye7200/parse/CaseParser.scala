@@ -14,11 +14,8 @@ import scala.util.matching.Regex
 /**
   * This class defines a parser for Strings which represent a (possibly nested) Case Clause.
   *
-  * NOTE: this is marked serializable because it is referenced in CaseClauseEvaluator.
-  * Normally, we wouldn't expect a parser to be serializable because it is only referenced in driver =
-  * code. And, indeed, FunctionParser is not Serializable (and caususes an eror if
   */
-class CaseParser extends FunctionParser with Serializable {
+class CaseParser extends FunctionParser {
 
   /**
     * The chief method of the parser: it takes a String and returns an Invocation, wrapped in Try.
