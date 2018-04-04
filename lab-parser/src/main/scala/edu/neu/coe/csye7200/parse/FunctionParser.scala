@@ -165,7 +165,8 @@ class FunctionParser extends JavaTokenParsers {
     *
     * @return a Parser of Boolean
     */
-  def boolean: Parser[Boolean] = """(?i)false|true""".r ^^ (s => s.toBoolean)
+  def boolean: Parser[Boolean] =
+    """(?i)false|true""".r ^^ (s => s.toBoolean)
 
   /**
     * The definition of a parser of a date string
@@ -183,24 +184,21 @@ class FunctionParser extends JavaTokenParsers {
     *
     *         // XXX why can't we use <~ and ~> operators here?
     */
-  def isoDate: Parser[String] = (year ~ ds ~ month ~ ds ~ day | shortYear ~ ds ~ month ~ ds ~ day | failure("isoDate")) ^^
-    { case y ~ _ ~ m ~ _ ~ d => dateString(y, m, d) }
+  def isoDate: Parser[String] = (year ~ ds ~ month ~ ds ~ day | shortYear ~ ds ~ month ~ ds ~ day | failure("isoDate")) ^^ { case y ~ _ ~ m ~ _ ~ d => dateString(y, m, d) }
 
   /**
     * Parser for date in (traditional) British sequence (in increasing order of significance)
     *
     * @return a Parser of String
     */
-  def ukTradDate: Parser[String] = (day ~ ds ~ month ~ ds ~ year | day ~ ds ~ month ~ ds ~ shortYear | failure("ukTradDate")) ^^
-    { case d ~ _ ~ m ~ _ ~ y => dateString(y, m, d) }
+  def ukTradDate: Parser[String] = (day ~ ds ~ month ~ ds ~ year | day ~ ds ~ month ~ ds ~ shortYear | failure("ukTradDate")) ^^ { case d ~ _ ~ m ~ _ ~ y => dateString(y, m, d) }
 
   /**
     * Parser for date in US sequence (in no particular order of significance)
     *
     * @return a Parser of String
     */
-  def usDate: Parser[String] = (month ~ ds ~ day ~ ds ~ year | month ~ ds ~ day ~ ds ~ shortYear | failure("usDate")) ^^
-    { case m ~ _ ~ d ~ _ ~ y => dateString(y, m, d) }
+  def usDate: Parser[String] = (month ~ ds ~ day ~ ds ~ year | month ~ ds ~ day ~ ds ~ shortYear | failure("usDate")) ^^ { case m ~ _ ~ d ~ _ ~ y => dateString(y, m, d) }
 
   def year: Parser[String] = """\d\d\d\d""".r
 

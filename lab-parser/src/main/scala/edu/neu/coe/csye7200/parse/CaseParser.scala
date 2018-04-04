@@ -10,7 +10,6 @@ import com.phasmid.laScala.{Prefix, Renderable}
 import scala.language.implicitConversions
 import scala.util._
 import scala.util.matching.Regex
-import scala.util.parsing.combinator._
 
 /**
   * This class defines a parser for Strings which represent a (possibly nested) Case Clause.
@@ -30,7 +29,7 @@ class CaseParser extends FunctionParser with Serializable {
   def parseCaseClause(s: String): Try[Invocation] = {
     parseAll(caseClause, s) match {
       case this.Success(x, _) => scala.util.Success(x)
-        // CHECK...
+      // CHECK...
       case this.Failure(x, _) => FunctionParser.parseFailure(s, "caseClause", x)
       case this.Error(x, _) => FunctionParser.parseFailure(s, "caseClause", x)
     }
@@ -41,16 +40,14 @@ class CaseParser extends FunctionParser with Serializable {
     *
     * @return a Parser of Invocation
     */
-  def caseClause: Parser[Invocation] = CaseParser.sCase ~> rep(whenThen) ~ opt(elseClause) <~ CaseParser.sEnd ^^
-    { case xs ~ eo => InvocationCaseClause(xs, eo) }
+  def caseClause: Parser[Invocation] = CaseParser.sCase ~> rep(whenThen) ~ opt(elseClause) <~ CaseParser.sEnd ^^ { case xs ~ eo => InvocationCaseClause(xs, eo) }
 
   /**
     * The definition of the parser of a when/then clause
     *
     * @return a Parser of Invocation
     */
-  def whenThen: Parser[Invocation] = CaseParser.sWhen ~ booleanExpression ~ CaseParser.sThen ~ parameter ^^
-    { case _ ~ f ~ _ ~ t => InvocationWhenThen(f, t) }
+  def whenThen: Parser[Invocation] = CaseParser.sWhen ~ booleanExpression ~ CaseParser.sThen ~ parameter ^^ { case _ ~ f ~ _ ~ t => InvocationWhenThen(f, t) }
 
   /**
     * The definition of the parser of an else clause
@@ -65,8 +62,7 @@ class CaseParser extends FunctionParser with Serializable {
 
   def booleanOp: Parser[String] = CaseParser.sAnd | CaseParser.sOr | failure("boolean operator")
 
-  def predicate: Parser[Expression] = (range | comparison | compareFunction | function | term | failure("predicate")) ^^
-    { case i: Invocation => Right(i); case x: Scalar => Left(x) }
+  def predicate: Parser[Expression] = (range | comparison | compareFunction | function | term | failure("predicate")) ^^ { case i: Invocation => Right(i); case x: Scalar => Left(x) }
 
   def compareFunction: Parser[Invocation] = openParen ~> booleanExpression <~ closeParen
 
