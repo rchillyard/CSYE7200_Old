@@ -6,9 +6,8 @@ package edu.neu.coe.csye7200.parse
 
 import com.phasmid.laScala.values.{QuotedStringScalar, Scalar}
 import com.phasmid.laScala.{Prefix, Renderable}
-import edu.neu.coe.csye7200.util.{Logger}
+import edu.neu.coe.csye7200.util.Logger
 
-import scala.reflect.ClassTag
 import scala.util._
 
 /**
@@ -23,15 +22,15 @@ sealed trait Invocation extends Renderable {
 
   def xs: Seq[Expression]
 
-//  /**
-//    * Method to yield an InvocationClosure for this Invocation
-//    *
-//    * @param functionLibrary the function library wherein names will be looked up
-//    * @tparam T the underlying parameter type
-//    * @tparam R the underlying result type
-//    * @return an InvocationClosure wrapped in Try
-//    */
-//  def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]]
+  //  /**
+  //    * Method to yield an InvocationClosure for this Invocation
+  //    *
+  //    * @param functionLibrary the function library wherein names will be looked up
+  //    * @tparam T the underlying parameter type
+  //    * @tparam R the underlying result type
+  //    * @return an InvocationClosure wrapped in Try
+  //    */
+  //  def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]]
 
   /**
     * Method to determine the required arity for this Invocation.
@@ -43,21 +42,21 @@ sealed trait Invocation extends Renderable {
     */
   def arity: Int = 0
 
-//  /**
-//    * Method to validate this Invocation. For now, it checks the arity.
-//    *
-//    * @param functionLibrary (implicit)
-//    * @return
-//    */
-//  def validate(implicit functionLibrary: FunctionLibrary): Boolean = Invocation.validateThis(this) || validateChildren
+  //  /**
+  //    * Method to validate this Invocation. For now, it checks the arity.
+  //    *
+  //    * @param functionLibrary (implicit)
+  //    * @return
+  //    */
+  //  def validate(implicit functionLibrary: FunctionLibrary): Boolean = Invocation.validateThis(this) || validateChildren
 
-//  /**
-//    * Method to validate this Invocation. For now, it checks the arity.
-//    *
-//    * @param functionLibrary (implicit)
-//    * @return true if the children are valid
-//    */
-//  def validateChildren(implicit functionLibrary: FunctionLibrary): Boolean
+  //  /**
+  //    * Method to validate this Invocation. For now, it checks the arity.
+  //    *
+  //    * @param functionLibrary (implicit)
+  //    * @return true if the children are valid
+  //    */
+  //  def validateChildren(implicit functionLibrary: FunctionLibrary): Boolean
 
   /**
     * Method to add the given parameter s to the head of the list of expressions of this invocation
@@ -80,8 +79,8 @@ abstract class InvocationBase(n: String, es: List[Expression]) extends Invocatio
 
   def xs: List[Expression] = es
 
-//  def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]] =
-//    for (f <- functionLibrary.asTry[R](name); c: InvocationClosure[R] = InvocationClosureFunction(f, es)) yield c
+  //  def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]] =
+  //    for (f <- functionLibrary.asTry[R](name); c: InvocationClosure[R] = InvocationClosureFunction(f, es)) yield c
 
   /**
     * This default implementation throws an exception.
@@ -92,12 +91,13 @@ abstract class InvocationBase(n: String, es: List[Expression]) extends Invocatio
   //noinspection ScalaStyle
   def +:(s: Expression): Invocation = throw ParserException(s"Logic error: cannot add $s to $this") // NOTE: This should never be invoked
 
-//  def validateChildren(implicit functionLibrary: FunctionLibrary): Boolean = (for (e <- es) yield e match {
-//    case i: Invocation => i.validate
-//    case _ => true
-//  }).forall(b => b)
+  //  def validateChildren(implicit functionLibrary: FunctionLibrary): Boolean = (for (e <- es) yield e match {
+  //    case i: Invocation => i.validate
+  //    case _ => true
+  //  }).forall(b => b)
 
   import Renderable.renderableTraversable
+
   def render(indent: Int)(implicit tab: (Int) => Prefix): String = name + es.render(indent + 1)
 
   /**
@@ -132,7 +132,7 @@ object InvocationBase {
     * @tparam X the underlying type of the result
     * @return a Try[X]
     */
-  def test[X](b: => Boolean, xt: => Try[X], s: => String): Try[X] = if (b) xt else Failure(TestFailed(s))  // CHECK
+  def test[X](b: => Boolean, xt: => Try[X], s: => String): Try[X] = if (b) xt else Failure(TestFailed(s)) // CHECK
 }
 
 /**
@@ -150,10 +150,10 @@ case class TestFailed(s: String) extends Exception(s"predicate failed: $s")
   *           An Expression is either a Scalar or a (nested) invocation.
   */
 case class InvocationPn1(override val xs: List[Expression]) extends InvocationBase("varargs", xs) {
-//  override def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]] = {
-//    val invocationClosureVarArgs: InvocationClosure[R] = InvocationClosureVarArgs[Seq[T]](xs).asInstanceOf[InvocationClosure[R]]
-//    Try(invocationClosureVarArgs)
-//  }
+  //  override def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]] = {
+  //    val invocationClosureVarArgs: InvocationClosure[R] = InvocationClosureVarArgs[Seq[T]](xs).asInstanceOf[InvocationClosure[R]]
+  //    Try(invocationClosureVarArgs)
+  //  }
 
   override def +:(x: Expression): Invocation = InvocationPn1(x +: xs) // CHECK
 }
@@ -193,12 +193,12 @@ case class InvocationP(x: Expression) extends InvocationBase("identity", List(x)
   */
 case class InvocationPF(x: Expression, f: Invocation) extends InvocationBase("InvocationPF", Nil) {
 
-//  override def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]] = f match {
-//    case InvocationFP(n, Right(i)) => InvocationFP(n, Right(i.+:(x))).asClosure(implicitly[ClassTag[T]], implicitly[ClassTag[R]], functionLibrary)
-//    case InvocationFP(n, z) => InvocationFPn(n, List(x, z)).asClosure(implicitly[ClassTag[T]], implicitly[ClassTag[R]], functionLibrary)
-//    case InvocationFPn(n, xs) => InvocationFPn(n, x +: xs).asClosure(implicitly[ClassTag[T]], implicitly[ClassTag[R]], functionLibrary)
-//    case _ => throw ParserException(s"Logic error: asClosure not implemented for InvocationPF($x,$f)") // CHECK
-//  }
+  //  override def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]] = f match {
+  //    case InvocationFP(n, Right(i)) => InvocationFP(n, Right(i.+:(x))).asClosure(implicitly[ClassTag[T]], implicitly[ClassTag[R]], functionLibrary)
+  //    case InvocationFP(n, z) => InvocationFPn(n, List(x, z)).asClosure(implicitly[ClassTag[T]], implicitly[ClassTag[R]], functionLibrary)
+  //    case InvocationFPn(n, xs) => InvocationFPn(n, x +: xs).asClosure(implicitly[ClassTag[T]], implicitly[ClassTag[R]], functionLibrary)
+  //    case _ => throw ParserException(s"Logic error: asClosure not implemented for InvocationPF($x,$f)") // CHECK
+  //  }
 
   override def render(indent: Int = 0)(implicit tab: (Int) => Prefix): String =
     name + "(\n" + tab(indent + 1) + x.render(indent + 1) + " " + f.render(indent + 1) + ")"
@@ -227,14 +227,14 @@ case class InvocationLookup(s: String) extends InvocationBase("lookup", List(Lef
   */
 case class InvocationCaseClause(whenThens: List[Invocation], elseClause: Option[Expression]) extends
   InvocationBase("case", (whenThens map (Right(_))) ++ elseClause.toList) {
-//  private def accumulate(a: Invocation, b: Invocation)(implicit functionLibrary: FunctionLibrary): Invocation = InvocationGetOrElse(a, b)
+  //  private def accumulate(a: Invocation, b: Invocation)(implicit functionLibrary: FunctionLibrary): Invocation = InvocationGetOrElse(a, b)
 
-//  override def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]] = {
-//    val terminator = elseClause map (InvocationWhenThen(InvocationP(Left(Scalar(true))), _))
-//    val invocation = (whenThens ++ terminator.toList).foldLeft[Invocation](InvocationWhenThen(InvocationP(Left(Scalar(false))),
-//      Right(InvocationP(Left(Scalar(0))))))(accumulate)
-//    invocation.asClosure(implicitly[ClassTag[T]], implicitly[ClassTag[R]], functionLibrary)
-//  }
+  //  override def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]] = {
+  //    val terminator = elseClause map (InvocationWhenThen(InvocationP(Left(Scalar(true))), _))
+  //    val invocation = (whenThens ++ terminator.toList).foldLeft[Invocation](InvocationWhenThen(InvocationP(Left(Scalar(false))),
+  //      Right(InvocationP(Left(Scalar(0))))))(accumulate)
+  //    invocation.asClosure(implicitly[ClassTag[T]], implicitly[ClassTag[R]], functionLibrary)
+  //  }
 }
 
 /**
@@ -264,11 +264,11 @@ case class InvocationGetOrElse(x: Invocation, y: Invocation) extends InvocationB
   */
 case class InvocationBooleanExpression(first: Expression, terms: List[BooleanTerm]) extends InvocationBase("boolean", Nil) {
 
-//  private def accumulate(i: Invocation, t: BooleanTerm)(implicit functionLibrary: FunctionLibrary): Invocation =
-//    InvocationBoolean(t.op, Right(i), t.e)
+  //  private def accumulate(i: Invocation, t: BooleanTerm)(implicit functionLibrary: FunctionLibrary): Invocation =
+  //    InvocationBoolean(t.op, Right(i), t.e)
 
-//  override def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]] =
-//    terms.foldLeft[Invocation](InvocationP(first))(accumulate).asClosure(implicitly[ClassTag[T]], implicitly[ClassTag[R]], functionLibrary)
+  //  override def asClosure[T: ClassTag, R: ClassTag](implicit functionLibrary: FunctionLibrary): Try[InvocationClosure[R]] =
+  //    terms.foldLeft[Invocation](InvocationP(first))(accumulate).asClosure(implicitly[ClassTag[T]], implicitly[ClassTag[R]], functionLibrary)
 
   override def render(indent: Int)(implicit tab: (Int) => Prefix): String =
     s"$name(${terms.foldLeft(first.render(indent + 1))(_ + " " + _.render(indent + 1))})"
@@ -294,11 +294,11 @@ object InvocationComparison {
 object Invocation {
   val logger: Logger = Logger(classOf[Invocation])
 
-//  private def validateThis(i: Invocation)(implicit functionLibrary: FunctionLibrary): Boolean = {
-//    val ok = (for (x: InvocationClosure[Any] <- i.asClosure[Any, Any]; y <- x.asClosure) yield i.arity == y.arity).getOrElse(false)
-//    if (!ok) logger.logWarning(s"Invocation.validate: $i is not valid (status of children to follow)")
-//    ok
-//  }
+  //  private def validateThis(i: Invocation)(implicit functionLibrary: FunctionLibrary): Boolean = {
+  //    val ok = (for (x: InvocationClosure[Any] <- i.asClosure[Any, Any]; y <- x.asClosure) yield i.arity == y.arity).getOrElse(false)
+  //    if (!ok) logger.logWarning(s"Invocation.validate: $i is not valid (status of children to follow)")
+  //    ok
+  //  }
 
 
 }

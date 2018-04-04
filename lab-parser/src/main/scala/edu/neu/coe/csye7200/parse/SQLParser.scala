@@ -71,8 +71,7 @@ class SQLParser extends CaseParser {
     *
     * @return a Parser of Invocation
     */
-  def pseudoColumn: Parser[Invocation] = (identifier | caseClause | failure("pseudoColumn")) ^^
-    { case i: Invocation => i; case t: Scalar => InvocationP(Left(t)) }
+  def pseudoColumn: Parser[Invocation] = (identifier | caseClause | failure("pseudoColumn")) ^^ { case i: Invocation => i; case t: Scalar => InvocationP(Left(t)) }
 
   /**
     * The definition of the parser of an alias
