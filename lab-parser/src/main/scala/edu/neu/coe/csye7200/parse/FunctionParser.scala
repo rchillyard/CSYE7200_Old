@@ -59,8 +59,6 @@ class FunctionParser extends JavaTokenParsers {
 
   /**
     * The definition of the parser of a function in the form of f(p1,p2,...pN).
-    * For example:
-    * recHierarchyLookUp(TRUE, FALSE, 'GLOBL', 'GLBR_0040_ACC_TB', '4112100000~4112200000~4112300000~4112400000~4112500000', SLR.ACCOUNT,'20161123')
     *
     * @return a Parser of Invocation
     */
@@ -70,7 +68,6 @@ class FunctionParser extends JavaTokenParsers {
 
   /**
     * The definition of the parser of a function in the form of p0 f.
-    * For example: SLR.COUNTRY_OF_INCORPORATION IN ...
     *
     * @return a Parser of Invocation
     */
