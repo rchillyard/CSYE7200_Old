@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017. HSBC
+ * Copyright (c) 2018. Phasmid Software
  */
 
 package edu.neu.coe.csye7200.parse
@@ -45,7 +45,7 @@ class FunctionParser extends JavaTokenParsers {
     *
     * @return a Parser of List[Expression]
     */
-  def parameterSet: Parser[Seq[Expression]] = openParen ~ repsep(parameter, comma) ~ closeParen ^^ { case _ ~ ps ~ _ => ps }
+  def parameterSet: Parser[Seq[Expression]] = openParen ~> repsep(parameter, comma) <~ closeParen
 
   /**
     * The definition of the parser of a function in the form of (p1,p2,...pN) where the list should be treated as a single parameter to another Invocation
@@ -90,7 +90,7 @@ class FunctionParser extends JavaTokenParsers {
     *
     * @return a Parser of Invocation
     */
-  def p: Parser[Invocation] = openParen ~> parameter <~ closeParen ^^ { x => InvocationP(x) }
+  def p: Parser[Invocation] = openParen ~> parameter <~ closeParen ^^ InvocationP
 
   /**
     * The definition of a Parser for a String which defines a pn1-type Parser (see above).
@@ -112,7 +112,7 @@ class FunctionParser extends JavaTokenParsers {
     *
     * @return Parser[String]
     */
-  def variable: Parser[Invocation] = not(reserved) ~> """[\w\._]+""".r ^^ { s => InvocationLookup(s) }
+  def variable: Parser[Invocation] = not(reserved) ~> """[\w\._]+""".r ^^ InvocationLookup
 
   def nonfunction: Parser[Expression] = (term | variable | failure("nonfunction")) ^^ {
     case i@InvocationBase(_, _) => Right(i)
@@ -155,7 +155,7 @@ class FunctionParser extends JavaTokenParsers {
     *
     * @return a Parser of Int
     */
-  def number: Parser[Int] = wholeNumber ^^ (s => s.toInt)
+  def number: Parser[Int] = wholeNumber ^^ (_.toInt)
 
   /**
     * The definition of the parser of a truth value (a Boolean)
@@ -163,7 +163,7 @@ class FunctionParser extends JavaTokenParsers {
     * @return a Parser of Boolean
     */
   def boolean: Parser[Boolean] =
-    """(?i)false|true""".r ^^ (s => s.toBoolean)
+    """(?i)false|true""".r ^^ (_.toBoolean)
 
   /**
     * The definition of a parser of a date string
@@ -172,7 +172,7 @@ class FunctionParser extends JavaTokenParsers {
     *
     * @return a Parser of IsoDate
     */
-  def date: Parser[IsoDate] = (usDate | ukTradDate | isoDate | failure("date")) ^^ { s => IsoDate(s) }
+  def date: Parser[IsoDate] = (usDate | ukTradDate | isoDate | failure("date")) ^^ IsoDate.apply
 
   /**
     * Parser for date in ISO sequence (in decreasing order of significance)

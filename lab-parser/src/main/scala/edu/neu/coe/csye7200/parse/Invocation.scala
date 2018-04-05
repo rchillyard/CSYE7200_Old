@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017. HSBC
+ * Copyright (c) 2018. Phasmid Software
  */
 
 package edu.neu.coe.csye7200.parse
@@ -282,8 +282,8 @@ case class InvocationComparison(p: Expression, c: String, q: Expression) extends
 case class InvocationColumn(i: Invocation, eo: Option[Scalar]) extends InvocationBase("column", List(Right(i)) ++ (eo.toList map (Left(_))))
 
 // CHECK
-case class InvocationSelect(is: List[Invocation], table: Scalar, wo: Option[Invocation], lo: Option[Scalar]) extends
-  InvocationBase("select", ((is map (Right(_))) :+ Left(table)) ++ (wo.toList map (Right(_))) ++ (lo.toList map (Left(_))))
+case class InvocationSelect(is: List[Invocation], table: Scalar, wo: Option[Invocation], lo: Option[Scalar], oo: Option[Scalar]) extends
+  InvocationBase("select", ((is map (Right(_))) :+ Left(table)) ++ (wo.toList map (Right(_))) ++ (lo.toList map (Left(_))) ++ (oo.toList map (Left(_))))
 
 object InvocationComparison {
   val opMap = Map(">" -> "gt", ">=" -> "ge", "=" -> "eq", "<=" -> "le", "<" -> "lt", "<>" -> "ne", "!=" -> "ne", "LIKE" -> "like")
