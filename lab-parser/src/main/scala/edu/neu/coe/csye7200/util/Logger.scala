@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017.
+ * Copyright (c) 2018. Phasmid Software
  */
 
 package edu.neu.coe.csye7200.util

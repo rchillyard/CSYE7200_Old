@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017. HSBC
+ * Copyright (c) 2018. Phasmid Software
  */
 
 package edu.neu.coe.csye7200.parse
@@ -40,8 +40,8 @@ class SQLParser extends CaseParser {
     *
     * @return a Parser of Invocation
     */
-  def select: Parser[Invocation] = SQLParser.sSelect ~ columns ~ SQLParser.sFrom ~ identifier ~ opt(whereClause) ~ opt(limitClause) ^^ {
-    case _ ~ xs ~ _ ~ p ~ wo ~ lo => InvocationSelect(xs, p, wo, lo)
+  def select: Parser[Invocation] = SQLParser.sSelect ~ columns ~ SQLParser.sFrom ~ identifier ~ opt(whereClause) ~ opt(limitClause) ~ opt(orderByClause) ^^ {
+    case _ ~ xs ~ _ ~ p ~ wo ~ lo ~ oo => InvocationSelect(xs, p, wo, lo, oo)
   }
 
   /**
@@ -94,7 +94,14 @@ class SQLParser extends CaseParser {
     */
   def limitClause: Parser[Scalar] = SQLParser.sLimit ~> term
 
-  override def reserved: Parser[String] = super.reserved | SQLParser.sLimit | SQLParser.sAs | SQLParser.sFrom | SQLParser.sWhere | SQLParser.sSelect
+  /**
+    * The definition of the parser of a limit clause
+    *
+    * @return a Parser of Scalar
+    */
+  def orderByClause: Parser[Scalar] = SQLParser.sOrderBy ~> identifier
+
+  override def reserved: Parser[String] = super.reserved | SQLParser.sLimit | SQLParser.sOrderBy | SQLParser.sAs | SQLParser.sFrom | SQLParser.sWhere | SQLParser.sSelect
 }
 
 object SQLParser {
@@ -103,6 +110,7 @@ object SQLParser {
   val sFrom: Regex = """(?i)FROM""".r
   val sWhere: Regex = """(?i)WHERE""".r
   val sLimit: Regex = """(?i)LIMIT""".r
+  val sOrderBy: Regex = """(?i)ORDER BY""".r
 }
 
 
