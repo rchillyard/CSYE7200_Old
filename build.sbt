@@ -39,3 +39,5 @@ lazy val labawscld = (project in file("lab-awscloudformation"))
 lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp, labsort, labparser, labawscld)
 
 parallelExecution in Test := false
+
+javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled")
