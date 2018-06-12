@@ -8,7 +8,7 @@ import scala.util._
 import scala.util.parsing.combinator.JavaTokenParsers
 
 case class Arg[X](name: Option[String], value: Option[X]) {
-  def map[Y](f: X => Y): Arg[Y] = Arg(name, value map f)
+  def map[Y](f: X => Y): Arg[Y] = ??? // TODO implement me
 
   def process(fm: Map[String, Option[X] => Unit]): Try[Option[X]] = {
     def processFuncMaybe(fo: Option[Option[X] => Unit]): Try[Option[X]] = fo match {
@@ -32,11 +32,11 @@ object Arg {
 }
 
 case class Args[X](xas: Seq[Arg[X]]) extends Traversable[Arg[X]] {
-  def map[Y](f: X => Y): Args[Y] = Args(for (xa <- xas) yield xa.map(f))
+  def map[Y](f: X => Y): Args[Y] = ??? // TODO implement me
 
   def process(fm: Map[String, Option[X] => Unit]): Try[Seq[X]] =
     MonadOps.sequence(for (xa <- xas) yield for (x <- xa.process(fm)) yield x) match {
-      case Success(xos) => Success(xos.flatten)
+      case Success(xos) => ??? // TODO implement me
       case Failure(x) => Failure(x)
     }
 
@@ -100,9 +100,9 @@ class SimpleArgParser extends JavaTokenParsers {
 
   def token: Parser[Token] = command | argument
 
-  def command: Parser[Command] = "-" ~> cmdR ^^ (s => Command(s))
+  def command: Parser[Command] = "-" ~> cmdR ^^ ??? // TODO implement me
 
-  def argument: Parser[Argument] = argR ^^ (s => Argument(s))
+  def argument: Parser[Argument] = argR ^^ ??? // TODO implement me
 
   private val cmdR = """[a-z]+""".r
   private val argR = """\w+""".r
