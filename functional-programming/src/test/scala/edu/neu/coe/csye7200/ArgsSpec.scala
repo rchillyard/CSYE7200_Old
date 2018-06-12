@@ -10,8 +10,8 @@ import scala.util.Success
 
 class ArgsSpec extends FlatSpec with Matchers{
 
-  def printFilename(s: String) = println(s"filename: $s")
-  val processor = Map[String,Option[String=>Unit]]("f"-> Some(printFilename))
+  private def printFilename(s: String) = println(s"filename: $s")
+  private val processor = Map[String,Option[String=>Unit]]("f"-> Some(printFilename))
 
   behavior of "SimpleArgParser"
 
