@@ -1,9 +1,10 @@
 package edu.neu.coe.csye7200
 
 import edu.neu.coe.csye7200.MonadOps._
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.concurrent._
 import java.net.URL
+
 import scala.util._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -55,6 +56,16 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     sequence(uys) match {
       case Success(us) => Assertions.assert(us.isEmpty)
       case _ => Failed
+    }
+  }
+
+  "sequence(Seq[Option[T]])" should "succeed for 1, 2, ..." in {
+    val ws = List("1", "2", "")
+    val xos: Seq[Option[Int]] = for {w <- ws; xo = Try(w.toInt).toOption} yield xo
+    println(MonadOps.sequence(xos))
+    MonadOps.sequence(xos) match {
+      case Some(xs) => Failed("failure")
+      case _ =>
     }
   }
 
