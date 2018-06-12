@@ -67,56 +67,39 @@ class SimpleArgParser extends JavaTokenParsers {
 
   def toCmd(w: String): Arg[String] = Arg(Some(w), None)
 
-  val cmdR = """[a-z]+""".r
-  val argR = """\w+""".r
+  private val cmdR = """[a-z]+""".r
+  private val argR = """\w+""".r
 }
 
 class PosixArgParser extends JavaTokenParsers {
 
-  def posixCommandLine: Parser[Args[String]] = rep(posixArgs) ^^ { case as => Args(as.flatten) }
+  def posixCommandLine: Parser[Args[String]] = rep(posixArgs) ^^ (as => Args(as.flatten))
 
   def posixArgs: Parser[List[Arg[String]]] = cmdR ~ rep(cmdR) ~ opt(argR) ^^ { case c ~ cs ~ a => (c :: cs.init).map(toCmd) :+ Arg(Some(cs.last), a) }
 
   def toCmd(w: String): Arg[String] = Arg(Some(w), None)
 
-  val cmdR = """-?([a-z])""".r
+  private val cmdR = """-?([a-z])""".r
   val argR = """\s(\w+)""".r
 }
 
 object Args {
   val p = new SimpleArgParser
 
+  def inner(r: Seq[Arg[String]], w: Seq[p.Token]): Seq[Arg[String]] = w match {
+    case Nil => r
+    case p.Command(c) :: p.Argument(a) :: t => inner(r :+ Arg(c, a), t)
+    case p.Command(c) :: t => inner(r :+ Arg(c), t)
+    case p.Argument(a) :: t => inner(r :+ Arg(None, Some(a)), t)
+  }
+
   def apply(args: Array[String]): Args[String] = {
     val tys = for (a <- args) yield p.parseToken(a)
-    val tsy: Try[Seq[p.Token]] = MonadOps.sequence(tys)
-    val ts: Seq[p.Token] = tsy match {
-      case Success(ts) => ts
+    val ts = MonadOps.sequence(tys) match {
+      case Success(ts_) => ts_
       case Failure(x) => System.err.println(x.getLocalizedMessage); Seq[p.Token]()
     }
-
-    // CONSIDER implementing this by having a variable index into the ts sequence thus eliminating lastToken and also using Arg
-
-
-
-    // CONSIDER implementing this as a finite state machine
-    var lastToken: p.Token = p.NotAToken
-
-    def processToken(i: Int): Option[Arg[String]] = ts(i) match {
-      case t2@p.Command(s2) => lastToken match {
-        case t1@p.Command(s1) => lastToken = t2; Some(Arg(s1))
-        case t1@p.Argument(s1) => lastToken = t2; Some(Arg(None, Some(s1)))
-        case p.NotAToken => lastToken = t2; None
-      }
-      case t2@p.Argument(s2) => lastToken match {
-        case t1@p.Command(s1) => lastToken = p.NotAToken; Some(Arg(s1, s2))
-        case t1@p.Argument(s1) => lastToken = t2; Some(Arg(None, Some(s1)))
-        case p.NotAToken => lastToken = t2; None
-      }
-    }
-
-    var argList = List[Option[Arg[String]]]()
-    for (i <- ts.indices) argList = argList :+ processToken(i)
-    Args(argList.flatten)
+    Args(inner(Seq(), ts))
   }
 
   //  def apply(args: Array[String]): Args[String] = {
