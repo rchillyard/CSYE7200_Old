@@ -41,6 +41,18 @@ class ArgsSpec extends FlatSpec with Matchers{
     a[java.lang.NumberFormatException] shouldBe thrownBy(target.map(_.toInt))
   }
 
+  it should "implement toY" in {
+    implicit object DerivableStringInt$ extends Derivable[Int] {
+
+      def deriveFrom[X](x: X): Int = x match {
+        case x: String => x.toInt
+        case _ => throw NotImplemented(s"deriveFrom: $x")
+      }
+    }
+    val target = Arg(sX, s1)
+    target.toY[Int] shouldBe 1
+  }
+
   it should "process " + sX + ": append" in {
     val sb = new StringBuilder
     val processor = Map[String, Option[String] => Unit](sX ->[Option[String] => Unit] { x => sb.append(x) })
@@ -71,6 +83,31 @@ class ArgsSpec extends FlatSpec with Matchers{
     val target = Args.create(Arg(sX, s1))
     val result = target.map[Int](_.toInt)
     result.head.value shouldBe Some(x1)
+  }
+
+  it should "implement getArg with good name" in {
+    val x = Arg(sX, s1)
+    val target = Args.create(x)
+    val result = target.getArg(sX)
+    result shouldBe Some(`x`)
+  }
+
+  it should "not implement getArg with bad name" in {
+    val x = Arg(sX, s1)
+    val target = Args.create(x)
+    val result = target.getArg("")
+    result shouldBe None
+  }
+
+  it should "not implement getArg with ambiguous name" in {
+    val x = Arg(sX, s1)
+    val target = Args.create(x, x)
+    a [AmbiguousNameException] shouldBe thrownBy(target.getArg(sX))
+  }
+
+  it should "implement extract" in {
+    val target = Args.create(Arg(sX, s1))
+    target.extract shouldBe Map(sX -> s1)
   }
 
   it should "process " + sX + ": append" in {
@@ -145,3 +182,5 @@ class ArgsSpec extends FlatSpec with Matchers{
   //  }
 
 }
+
+case class NotImplemented(str: String) extends Exception(s"Not Implemented for $str")
