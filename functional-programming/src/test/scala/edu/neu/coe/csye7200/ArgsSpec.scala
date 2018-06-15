@@ -53,6 +53,11 @@ class ArgsSpec extends FlatSpec with Matchers{
     target.toY[Int] shouldBe 1
   }
 
+  it should "implement byName" in {
+    val target = Arg(sX, sX)
+    target.byName(sX) should matchPattern { case Some(_) => }
+  }
+
   it should "process " + sX + ": append" in {
     val sb = new StringBuilder
     val processor = Map[String, Option[String] => Unit](sX ->[Option[String] => Unit] { x => sb.append(x) })
