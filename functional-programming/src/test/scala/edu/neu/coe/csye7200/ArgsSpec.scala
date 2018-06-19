@@ -112,7 +112,7 @@ class ArgsSpec extends FlatSpec with Matchers{
 
   it should "implement extract" in {
     val target = Args.create(Arg(sX, s1))
-    target.extract shouldBe Map(sX -> s1)
+    target.extract shouldBe Map(sX -> Some(s1))
   }
 
   it should "process " + sX + ": append" in {
@@ -140,6 +140,59 @@ class ArgsSpec extends FlatSpec with Matchers{
     xa shouldBe Args(Seq(Arg(None, Some(1)), Arg(None, Some(2)), Arg(None, Some(3))))
     val processor = Map[String, Option[Int] => Unit]()
     xa.process(processor) should matchPattern { case Success(Seq(1, 2, 3)) => }
+  }
+
+  it should "parsePosix 1 2 3" in {
+    val sa = Args.parse(Array("1", "2", "3"))
+    sa.xas.length shouldBe 3
+    sa.xas.head shouldBe Arg(None, Some("1"))
+    val xa = sa.map[Int](_.toInt)
+    xa shouldBe Args(Seq(Arg(None, Some(1)), Arg(None, Some(2)), Arg(None, Some(3))))
+    val processor = Map[String, Option[Int] => Unit]()
+    xa.process(processor) should matchPattern { case Success(Seq(1, 2, 3)) => }
+  }
+
+  it should """parsePosix "-xf argFilename 3.1415927"""" in {
+    val sa = Args.parsePosix(Array("-xf", "argFilename", "3.1415927"))
+    sa.xas.length shouldBe 3
+    sa.xas.head shouldBe Arg(Some("x"), None)
+    sa.xas.tail.head shouldBe Arg(Some("f"), Some("argFilename"))
+    sa.xas.last shouldBe Arg(None, Some("3.1415927"))
+  }
+
+  it should """parsePosix "-xf argFilename -p 3.1415927"""" in {
+    val sa = Args.parsePosix(Array("-xf", "argFilename", "-p", "3.1415927"))
+    sa.xas.length shouldBe 3
+    sa.xas.head shouldBe Arg(Some("x"), None)
+    sa.xas.tail.head shouldBe Arg(Some("f"), Some("argFilename"))
+    sa.xas.last shouldBe Arg(Some("p"), Some("3.1415927"))
+  }
+
+  it should """implement isDefined("x")""" in {
+    val sa = Args[String](Seq(Arg(Some("x"), None), Arg(Some("f"), Some("argFilename")), Arg(None, Some("3.1415927"))))
+    sa.isDefined("x") shouldBe true
+  }
+
+  it should """implement getArgValue("f")""" in {
+    implicit object DerivableStringString$ extends Derivable[String] {
+
+      def deriveFrom[X](x: X): String = x match {
+        case x: String => x
+        case _ => throw NotImplemented(s"deriveFrom: $x")
+      }
+    }
+    val sa = Args[String](Seq(Arg(Some("x"), None), Arg(Some("f"), Some("argFilename")), Arg(None, Some("3.1415927"))))
+    sa.getArgValue("f") shouldBe Some("argFilename")
+  }
+
+  it should """implement process for complex Args""" in {
+    var x = false
+    var filename = ""
+    val sa = Args[String](Seq(Arg(Some("x"), None), Arg(Some("f"), Some("argFilename")), Arg(None, Some("3.1415927"))))
+    val processor = Map[String, Option[String] => Unit]("x" -> { _ => x = true }, "f" -> { case Some(w) => filename = w; case _ => })
+    sa.process(processor) should matchPattern { case Success(Seq("3.1415927")) => }
+    x shouldBe true
+    filename shouldBe "argFilename"
   }
 
   behavior of "SimpleArgParser"
@@ -178,13 +231,113 @@ class ArgsSpec extends FlatSpec with Matchers{
     p.parseToken(argFilename) should matchPattern { case Success(p.Argument(`argFilename`)) => }
   }
 
-  //  behavior of "posixArg"
-  //
-  //  it should "parse -f argFilename" in {
-  //    val p = new PosixArgParser
-  //    val as: p.ParseResult[List[Arg[String]]] = p.parseAll(p.posixArgs,"-f argFilename")
-  //    println(s"as: $as")
-  //  }
+  behavior of "PosixArgParser"
+
+  it should "parse options from -xf;" in {
+    val p = new PosixArgParser
+    val pp: p.ParseResult[PosixArg] = p.parseAll(p.posixOptions, "-xf;")
+    pp should matchPattern { case p.Success(_, _) => }
+  }
+
+  it should "parse operand from 3.1415927;" in {
+    val p = new PosixArgParser
+    val pp: p.ParseResult[PosixArg] = p.parseAll(p.posixOperand, "3.1415927;")
+    pp should matchPattern { case p.Success(_, _) => }
+  }
+
+  it should "parse option value from -argFilename;" in {
+    val p = new PosixArgParser
+    val pp: p.ParseResult[PosixArg] = p.parseAll(p.posixOptionValue, "argFilename;")
+    pp should matchPattern { case p.Success(_, _) => }
+  }
+
+  it should "parse option set from -xf;argFilename" in {
+    val p = new PosixArgParser
+    val pp: p.ParseResult[Seq[PosixArg]] = p.parseAll(p.posixOptionSet, "-xf;argFilename;")
+    pp should matchPattern { case p.Success(_, _) => }
+    pp.get.size shouldBe 2
+    pp.get.head shouldBe PosixOptions("xf")
+    pp.get.last shouldBe PosixOptionValue("argFilename")
+  }
+
+  it should """parseCommandLine "-xf argFilename 3.1415927"""" in {
+    val p = new PosixArgParser
+    val as: Seq[PosixArg] = p.parseCommandLine(Seq("-xf", "argFilename", "3.1415927"))
+    as.size shouldBe 3
+    as.head shouldBe PosixOptions("xf")
+    as.tail.head shouldBe PosixOptionValue("argFilename")
+    as.last shouldBe PosixOperand("3.1415927")
+  }
+
+  behavior of "PosixSynopsisParser"
+  it should "parse x as OptionToken" in {
+    val p = new PosixSynopsisParser
+    val cr = p.parse(p.optionToken, "x")
+    cr should matchPattern { case p.Success(p.Command("x"), _) => }
+  }
+  it should "parse xf as two optionTokens" in {
+    val p = new PosixSynopsisParser
+    val eEr = p.parse(p.optionToken ~ p.optionToken, "xf")
+    eEr should matchPattern { case p.Success(_, _) => }
+  }
+  it should """parse "filename" as ValueToken1""" in {
+    val p = new PosixSynopsisParser
+    val wr = p.parse(p.valueToken1, "filename")
+    wr should matchPattern { case p.Success("filename", _) => }
+  }
+  it should "parse Junk as ValueToken2" in {
+    val p = new PosixSynopsisParser
+    val wr = p.parse(p.valueToken2, "Junk")
+    wr should matchPattern { case p.Success("Junk", _) => }
+  }
+  it should "parse Junk as ValueToken" in {
+    val p = new PosixSynopsisParser
+    val vr = p.parse(p.valueToken, "Junk")
+    vr should matchPattern { case p.Success(p.Value("Junk"), _) => }
+  }
+  it should """parse " filename" as ValueToken""" in {
+    val p = new PosixSynopsisParser
+    val vr = p.parse(p.valueToken, " filename")
+    vr should matchPattern { case p.Success(p.Value("filename"), _) => }
+  }
+  it should "parse x as an optionOrValueToken" in {
+    val p = new PosixSynopsisParser
+    val er = p.parse(p.optionWithOrWithoutValue, "x")
+    er should matchPattern { case p.Success(_, _) => }
+  }
+  it should "parse xf as two optionOrValueTokens" in {
+    val p = new PosixSynopsisParser
+    val eEr = p.parse(p.optionWithOrWithoutValue ~ p.optionWithOrWithoutValue, "xf")
+    eEr should matchPattern { case p.Success(_, _) => }
+  }
+  it should "parse [f] as an optionalElement" in {
+    val p = new PosixSynopsisParser
+    val er = p.parse(p.optionalElement, "[f]")
+    er should matchPattern { case p.Success(_, _) => }
+  }
+  it should "parse x[f] as one optionOrValueToken with three characters left over" in {
+    val p = new PosixSynopsisParser
+    val er = p.parse(p.optionWithOrWithoutValue, "x[f]")
+    er should matchPattern { case p.Success(p.Command("x"), _) => }
+    er.next.pos.column should matchPattern { case 2 => }
+  }
+  it should "parse x[f] as one optionOrValueToken followed by an optionalElement" in {
+    val p = new PosixSynopsisParser
+    val eEr = p.parse(p.optionWithOrWithoutValue ~ p.optionalElement, "x[f]")
+    eEr should matchPattern { case p.Success(_, _) => }
+  }
+
+  it should "parse x[f filename] as one optionOrValueToken followed by an optionalElement" in {
+    val p = new PosixSynopsisParser
+    val eEr = p.parse(p.optionWithOrWithoutValue ~ p.optionalElement, "x[f filename]")
+    eEr should matchPattern { case p.Success(_, _) => }
+  }
+
+  it should "parse -x[f filename]" in {
+    val p = new PosixSynopsisParser
+    val er: Seq[Element] = p.parseSynopsis("-x[f filename]")
+    er shouldBe Seq(p.Command("x"), p.Optional(p.CommandWithValue("f", p.Value("filename"))))
+  }
 
 }
 

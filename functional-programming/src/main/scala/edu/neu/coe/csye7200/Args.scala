@@ -5,7 +5,7 @@
 package edu.neu.coe.csye7200
 
 import scala.util._
-import scala.util.parsing.combinator.JavaTokenParsers
+import scala.util.parsing.combinator.RegexParsers
 
 case class Arg[X](name: Option[String], value: Option[X]) {
 
@@ -16,11 +16,8 @@ case class Arg[X](name: Option[String], value: Option[X]) {
 
   def map[Y](f: X => Y): Arg[Y] = Arg(name, value map f)
 
-  def asMaybeTuple: Option[(String, X)] = name match {
-    case Some(w) => value match {
-      case Some(x) => Some((w, x))
-      case _ => None
-    }
+  def asMaybeTuple: Option[(String, Option[X])] = name match {
+    case Some(w) => Some(w, value)
     case _ => None
   }
 
@@ -53,9 +50,21 @@ object Arg {
 }
 
 case class Args[X](xas: Seq[Arg[X]]) extends Traversable[Arg[X]] {
+  /**
+    * Apply the given function f to each Arg of this Args
+    *
+    * @param f a function of type X => Y
+    * @tparam Y the result type of the function f
+    * @return an Args[Y] object
+    */
   def map[Y](f: X => Y): Args[Y] = Args(for (xa <- xas) yield xa.map(f))
 
-  def extract: Map[String, X] = (for (xa <- xas) yield xa.asMaybeTuple).flatten.toMap
+  /**
+    * Get the options (i.e. args with names) as map of names to (optional) values
+    *
+    * @return the options as a map
+    */
+  def extract: Map[String, Option[X]] = (for (xa <- xas) yield xa.asMaybeTuple).flatten.toMap
 
   /**
     * Method to get an Arg whose name matches the given string.
@@ -63,12 +72,22 @@ case class Args[X](xas: Seq[Arg[X]]) extends Traversable[Arg[X]] {
     * @param w the string to match
     * @return Some(arg) if the name matches, else None
     */
-  def getArg(w: String): Option[Arg[X]] = {
-    MonadOps.sequence(for (xa <- xas) yield xa.byName(w)) match {
-      case Some(xas_) => if (xas_.size == 1) Some(xas_.head) else throw AmbiguousNameException(w)
-      case _ => None
-    }
+  def getArg(w: String): Option[Arg[X]] = (for (xa <- xas) yield xa.byName(w)).flatten.toList match {
+    case xa :: Nil => Some(xa)
+    case Nil => None
+    case _ => throw AmbiguousNameException(w)
   }
+
+  /**
+    * Get the arg value where the name matches the given string and where the resulting type is Y
+    *
+    * @param w the string to match
+    * @tparam Y the result type
+    * @return an option value of Y
+    */
+  def getArgValue[Y: Derivable](w: String): Option[Y] = getArg(w) map (xa => xa.toY)
+
+  def isDefined(w: String): Boolean = getArg(w).isDefined
 
   def process(fm: Map[String, Option[X] => Unit]): Try[Seq[X]] =
     MonadOps.sequence(for (xa <- xas) yield for (x <- xa.process(fm)) yield x) match {
@@ -103,21 +122,26 @@ object Args {
     Args(inner(Seq(), ts))
   }
 
-  //  def apply(args: Array[String]): Args[String] = {
-  //    parsePosixCommandLine(args.mkString(" ")) match {
-  //      case Success(sa) => sa
-  //      case Failure(x) => throw x
-  //    }
-  //  }
-  //
-  //  def parsePosixCommandLine(w: String): Try[Args[String]] = {
-  //    val p = new PosixArgParser
-  //    p.parseAll(p.posixCommandLine, w) match {
-  //      case p.Success(sa: Args[String], _) => Success(sa)
-  //      case p.Failure(e, _) => Failure(ParseException(e))
-  //      case p.Error(e, _) => Failure(ParseException(e))
-  //      case _ => Failure(new Exception("logic error"))
-  //    }
+  def parsePosix(args: Array[String], synopsis: String = ""): Args[String] = doParse((new PosixArgParser).parseCommandLine(args), synopsis)
+
+  private def doParse(ps: Seq[PosixArg], synopsis: String = ""): Args[String] = {
+    def processPosixArg(p: PosixArg): Seq[PosixArg] = p match {
+      case PosixOptions(w) => for (c <- w) yield PosixOptions(c.toString)
+      case x => Seq(x)
+    }
+
+    def inner(r: Seq[Arg[String]], w: Seq[PosixArg]): Seq[Arg[String]] = w match {
+      case Nil => r
+      case PosixOptions(o) :: PosixOptionValue(v) :: t => inner(r :+ Arg(o, v), t)
+      case PosixOptions(o) :: t => inner(r :+ Arg(o), t)
+      case PosixOperand(o) :: t => inner(r :+ Arg(None, Some(o)), t)
+    }
+
+    val options: Seq[Element] = (new PosixSynopsisParser).parseSynopsis(synopsis)
+    val pss = for (p <- ps) yield processPosixArg(p)
+    Args(inner(Seq(), pss.flatten))
+  }
+
 }
 
 /**
@@ -136,7 +160,7 @@ trait Derivable[T] {
   def deriveFrom[X](x: X): T
 }
 
-class SimpleArgParser extends JavaTokenParsers {
+class SimpleArgParser extends RegexParsers {
   def parseToken(s: String): Try[Token] = parseAll(token, s) match {
     case Success(t, _) => scala.util.Success(t)
     case _ => scala.util.Failure(new Exception(s"could not parse '$s' as a token"))
@@ -160,16 +184,168 @@ class SimpleArgParser extends JavaTokenParsers {
   private val argR = """\w+""".r
 }
 
-class PosixArgParser extends JavaTokenParsers {
+trait PosixArg {
+  def value: String
+}
 
-  def posixCommandLine: Parser[Args[String]] = rep(posixArgs) ^^ (as => Args(as.flatten))
+/**
+  * One or more options.
+  * Each option is a single-letter.
+  *
+  * @param value the string of options, without the "-" prefix.
+  */
+case class PosixOptions(value: String) extends PosixArg
 
-  def posixArgs: Parser[List[Arg[String]]] = cmdR ~ rep(cmdR) ~ opt(argR) ^^ { case c ~ cs ~ a => (c :: cs.init).map(toCmd) :+ Arg(Some(cs.last), a) }
+/**
+  * The value of the preceding option.
+  *
+  * @param value a String
+  */
+case class PosixOptionValue(value: String) extends PosixArg
 
-  def toCmd(w: String): Arg[String] = Arg(Some(w), None)
+/**
+  * The value of an operand, i.e. a String which follows all of the options and their values.
+  *
+  * @param value a String
+  */
+case class PosixOperand(value: String) extends PosixArg
 
-  private val cmdR = """-?([a-z])""".r
-  private val argR = """\s(\w+)""".r
+class PosixArgParser extends RegexParsers {
+
+  def parseCommandLine(ws: Seq[String]): Seq[PosixArg] = parseAll(posixCommandLine, ws.mkString("", terminator, terminator)) match {
+    case Success(t, _) => t
+    case _ => throw ParseException(s"could not parse '$ws' as a token")
+  }
+
+  /**
+    * Note that it is impossible to tell whether the first arg after an option set is an option value or the first operand.
+    * Only validating it with a command line template can do that for sure.
+    *
+    * @return
+    */
+  def posixCommandLine: Parser[Seq[PosixArg]] = rep(posixOptionSet) ~ rep(posixOperand) ^^ { case pss ~ ps => pss.flatten ++ ps }
+
+  def posixOptionSet: Parser[Seq[PosixArg]] = posixOptions ~ opt(posixOptionValue) ^^ { case p ~ po => p +: po.toSeq }
+
+  def posixOptions: Parser[PosixArg] = "-" ~> """[a-z0-9]+""".r <~ terminator ^^ (s => PosixOptions(s))
+
+  def posixOptionValue: Parser[PosixArg] = nonOption ^^ (s => PosixOptionValue(s))
+
+  def posixOperand: Parser[PosixArg] = nonOption ^^ (s => PosixOperand(s))
+
+  def nonOption: Parser[String] = """[^;]+""".r <~ terminator
+
+  val terminator = ";"
+}
+
+/**
+  * This represents an element in the synopsis for a command line
+  */
+trait Element {
+  def value: String
+}
+
+class PosixSynopsisParser extends RegexParsers {
+  def parseSynopsis(s: String): Seq[Element] = if (s.isEmpty) Seq()
+  else parseAll(synopsis, s) match {
+    case Success(t, _) => t
+    case _ => throw new Exception(s"could not parse '$s' as a synopsis")
+  }
+
+  override def skipWhitespace: Boolean = false
+
+  /**
+    * This represents an "Option" in the parlance of POSIX command line interpretation
+    *
+    * @param value the (single-character) String representing the command
+    */
+  case class Command(value: String) extends Element
+
+  /**
+    * This represents an Option Value in the parlance of POSIX.
+    *
+    * @param value the String
+    */
+  case class Value(value: String) extends Element
+
+  /**
+    * This represents an "Option" and its "Value"
+    *
+    * @param value   the command or "option" String
+    * @param element the Element which corresponds to the "value" of this synopsis command (and which may of course be Optional).
+    */
+  case class CommandWithValue(value: String, element: Element) extends Element
+
+  /**
+    * This represents an optional synopsis element, either an optional command, or an optional value.
+    *
+    * @param element the synopsis element that is optional
+    */
+  case class Optional(element: Element) extends Element {
+    def value: String = element.value
+  }
+
+  /**
+    * A "synopsis" of command line options and their potential argument values.
+    * It matches a dash ('-') followed by a list of optionalOrRequiredElement
+    *
+    * @return
+    */
+  def synopsis: Parser[Seq[Element]] = "-" ~> rep(optionalOrRequiredElement)
+
+  /**
+    * An optionalOrRequiredElement matches EITHER: an optionalElement OR: an optionWithOrWithoutValue
+    *
+    * @return a Parser[Element] which is EITHER: a Parser[Command] OR: a Parser[CommandWithValue] OR: a Parser[Optional]
+    */
+  def optionalOrRequiredElement: Parser[Element] = optionalElement | optionWithOrWithoutValue
+
+  /**
+    * An optionalElement matches a '[' followed by an optionWithOrWithoutValue followed by a ']'
+    *
+    * @return a Parser[Optional]
+    */
+  def optionalElement: Parser[Element] =
+    """\[""".r ~> optionWithOrWithoutValue <~ """\]""".r ^^ (t => Optional(t))
+
+  /**
+    * an optionWithOrWithoutValue matches EITHER: an optionToken; OR: an optionToken followed by a valueToken
+    *
+    * @return a Parser[Element] which is EITHER: a Parser[Command] OR: a Parser[CommandWithValue]
+    */
+  def optionWithOrWithoutValue: Parser[Element] = (optionToken ~ valueToken | optionToken) ^^ {
+    case o: Element => o
+    case (o: Element) ~ (v: Element) => CommandWithValue(o.value, v)
+    case _ => throw new Exception("")
+  }
+
+  /**
+    * an valueToken matches EITHER: a space [which is ignored] followed by a valueToken1 OR: a valueToken2
+    *
+    * @return a Parser[Value]
+    */
+  def valueToken: Parser[Value] = ("""\s""".r ~> valueToken1 | valueToken2) ^^ (t => Value(t))
+
+  /**
+    * an optionToken matches a single character which is either a lowercase letter or a digit
+    *
+    * @return a Parser[Command]
+    */
+  def optionToken: Parser[Command] = """[\p{Ll}\d]""".r ^^ (t => Command(t))
+
+  /**
+    * a valueToken2 matches an uppercase letter followed by any number of non-space, non-bracket symbols
+    *
+    * @return a Parser[String]
+    */
+  val valueToken2: Parser[String] = """\p{Lu}[^\[\]\s]*""".r
+
+  /**
+    * a valueToken1 matches at least one non-space, non-bracket symbol
+    *
+    * @return a Parser[String]
+    */
+  val valueToken1: Parser[String] = """[^\[\]\s]+""".r
 }
 
 abstract class ArgsException(s: String) extends Exception(s"Args exception: $s")
