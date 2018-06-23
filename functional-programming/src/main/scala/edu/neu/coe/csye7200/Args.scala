@@ -7,7 +7,12 @@ package edu.neu.coe.csye7200
 import scala.util._
 import scala.util.parsing.combinator.RegexParsers
 
-case class Arg[X](name: Option[String], value: Option[X]) {
+case class Arg[X](name: Option[String], value: Option[X]) extends Ordered[Arg[X]] {
+  def isOptional(s: Synopsis): Boolean = s.find(name) match {
+    case Some(e) => e.isOptional
+    case _ => throw InvalidOptionException(this)
+  }
+
 
   def byName(w: String): Option[Arg[X]] = name match {
     case Some(`w`) => Some(this)
@@ -41,6 +46,14 @@ case class Arg[X](name: Option[String], value: Option[X]) {
   }
 
   override def toString: String = s"Arg: command ${name.getOrElse("anonymous")} with value: ${value.getOrElse("none")}"
+
+  def compare(that: Arg[X]): Int = name match {
+    case Some(x) => that.name match {
+      case Some(y) => x compare y
+      case None => throw CompareException(s"$this vs $that")
+    }
+    case None => throw CompareException(s"$this vs $that")
+  }
 }
 
 object Arg {
@@ -50,6 +63,28 @@ object Arg {
 }
 
 case class Args[X](xas: Seq[Arg[X]]) extends Traversable[Arg[X]] {
+
+  def validate(w: String): Args[X] = validate(new PosixSynopsisParser().parseSynopsis(Some(w)))
+
+  def validate(so: Option[Synopsis]): Args[X] = so match {
+    case Some(s) => if (validate(s)) this else throw ValidationException(this, s)
+    case _ => this
+  }
+
+  def validate(s: Synopsis): Boolean = {
+    val (m, _) = s.mandatoryAndOptionalElements
+    // NOTE: the following will throw an exception if any Arg is invalid
+    val (_, mandatory) = xas.filter(_.name.isDefined).partition(_.isOptional(s))
+    if (m.size == mandatory.size) {
+      val bs = for (z <- m.sorted zip mandatory.sorted) yield (z._1.value compare z._2.name.get) == 0
+      bs.forall(_ == true)
+    }
+    else
+      false
+  }
+
+  def validate(e: Element): Boolean = false
+
   /**
     * Apply the given function f to each Arg of this Args
     *
@@ -122,9 +157,9 @@ object Args {
     Args(inner(Seq(), ts))
   }
 
-  def parsePosix(args: Array[String], synopsis: String = ""): Args[String] = doParse((new PosixArgParser).parseCommandLine(args), synopsis)
+  def parsePosix(args: Array[String], synopsis: Option[String] = None): Args[String] = doParse((new PosixArgParser).parseCommandLine(args), synopsis)
 
-  private def doParse(ps: Seq[PosixArg], synopsis: String = ""): Args[String] = {
+  private def doParse(ps: Seq[PosixArg], synopsis: Option[String] = None): Args[String] = {
     def processPosixArg(p: PosixArg): Seq[PosixArg] = p match {
       case PosixOptions(w) => for (c <- w) yield PosixOptions(c.toString)
       case x => Seq(x)
@@ -137,9 +172,9 @@ object Args {
       case PosixOperand(o) :: t => inner(r :+ Arg(None, Some(o)), t)
     }
 
-    val options: Seq[Element] = (new PosixSynopsisParser).parseSynopsis(synopsis)
+    val eso = (new PosixSynopsisParser).parseSynopsis(synopsis)
     val pss = for (p <- ps) yield processPosixArg(p)
-    Args(inner(Seq(), pss.flatten))
+    Args(inner(Seq(), pss.flatten)).validate(eso)
   }
 
 }
@@ -219,7 +254,7 @@ class PosixArgParser extends RegexParsers {
 
   /**
     * Note that it is impossible to tell whether the first arg after an option set is an option value or the first operand.
-    * Only validating it with a command line template can do that for sure.
+    * Only validating it with a command line synopsis can do that for sure.
     *
     * @return
     */
@@ -241,15 +276,35 @@ class PosixArgParser extends RegexParsers {
 /**
   * This represents an element in the synopsis for a command line
   */
-trait Element {
+trait Element extends Ordered[Element] {
   def value: String
+
+  def isOptional: Boolean = false
+
+  def compare(that: Element): Int = value compare that.value
+}
+
+/**
+  * Don't think we need this
+  */
+trait Optional
+
+case class Synopsis(es: Seq[Element]) {
+  def find(wo: Option[String]): Option[Element] = wo match {
+    case Some(w) => es.find(e => e.value == w)
+    case _ => None
+  }
+
+  def mandatoryAndOptionalElements: (Seq[Element], Seq[Element]) = es partition (!_.isOptional)
 }
 
 class PosixSynopsisParser extends RegexParsers {
-  def parseSynopsis(s: String): Seq[Element] = if (s.isEmpty) Seq()
-  else parseAll(synopsis, s) match {
-    case Success(t, _) => t
-    case _ => throw new Exception(s"could not parse '$s' as a synopsis")
+  def parseSynopsis(wo: Option[String]): Option[Synopsis] = wo match {
+    case Some(w) => parseAll(synopsis, w) match {
+      case Success(es, _) => Some(Synopsis(es))
+      case _ => throw new Exception(s"could not parse '$w' as a synopsis")
+    }
+    case _ => None
   }
 
   override def skipWhitespace: Boolean = false
@@ -272,80 +327,92 @@ class PosixSynopsisParser extends RegexParsers {
     * This represents an "Option" and its "Value"
     *
     * @param value   the command or "option" String
-    * @param element the Element which corresponds to the "value" of this synopsis command (and which may of course be Optional).
+    * @param element the Element which corresponds to the "value" of this synopsis command (and which may of course be OptionalElement).
     */
   case class CommandWithValue(value: String, element: Element) extends Element
 
   /**
     * This represents an optional synopsis element, either an optional command, or an optional value.
     *
-    * @param element the synopsis element that is optional
+    * @param element a synopsis element that is optional
     */
-  case class Optional(element: Element) extends Element {
+  case class OptionalElement(element: Element) extends Element with Optional {
     def value: String = element.value
+
+    override def isOptional: Boolean = true
   }
 
   /**
     * A "synopsis" of command line options and their potential argument values.
-    * It matches a dash ('-') followed by a list of optionalOrRequiredElement
+    * It matches a dash ('-') followed by a list of optionalOrRequiredElement OR: an optional list of optionWithOrWithoutValue
     *
-    * @return
+    * @return a Parser[Seq[Element]
     */
-  def synopsis: Parser[Seq[Element]] = "-" ~> rep(optionalOrRequiredElement)
+  def synopsis: Parser[Seq[Element]] = "-" ~> (optionalElements | rep(optionalOrRequiredElement))
 
   /**
     * An optionalOrRequiredElement matches EITHER: an optionalElement OR: an optionWithOrWithoutValue
     *
-    * @return a Parser[Element] which is EITHER: a Parser[Command] OR: a Parser[CommandWithValue] OR: a Parser[Optional]
+    * @return a Parser[Element] which is EITHER: a Parser[Command] OR: a Parser[CommandWithValue] OR: a Parser[OptionalElement]
     */
   def optionalOrRequiredElement: Parser[Element] = optionalElement | optionWithOrWithoutValue
 
   /**
     * An optionalElement matches a '[' followed by an optionWithOrWithoutValue followed by a ']'
     *
-    * @return a Parser[Optional]
+    * @return a Parser[OptionalElement]
     */
-  def optionalElement: Parser[Element] =
-    """\[""".r ~> optionWithOrWithoutValue <~ """\]""".r ^^ (t => Optional(t))
+  def optionalElement: Parser[Element] = openBracket ~> optionWithOrWithoutValue <~ closeBracket ^^ (t => OptionalElement(t))
 
   /**
-    * an optionWithOrWithoutValue matches EITHER: an optionToken; OR: an optionToken followed by a valueToken
+    * An optionalElement matches a '[' followed by an optionWithOrWithoutValue followed by a ']'
+    *
+    * @return a Parser[Seq[Element]
+    */
+  def optionalElements: Parser[Seq[Element]] = openBracket ~> rep(optionWithOrWithoutValue) <~ closeBracket ^^ (ts => for (t <- ts) yield OptionalElement(t))
+
+  /**
+    * An optionWithOrWithoutValue matches EITHER: an command; OR: an command followed by a value
     *
     * @return a Parser[Element] which is EITHER: a Parser[Command] OR: a Parser[CommandWithValue]
     */
-  def optionWithOrWithoutValue: Parser[Element] = (optionToken ~ valueToken | optionToken) ^^ {
+  def optionWithOrWithoutValue: Parser[Element] = (command ~ value | command) ^^ {
     case o: Element => o
     case (o: Element) ~ (v: Element) => CommandWithValue(o.value, v)
     case _ => throw new Exception("")
   }
 
   /**
-    * an valueToken matches EITHER: a space [which is ignored] followed by a valueToken1 OR: a valueToken2
+    * A value matches EITHER: a space [which is ignored] followed by a valueToken1 OR: a valueToken2
     *
     * @return a Parser[Value]
     */
-  def valueToken: Parser[Value] = ("""\s""".r ~> valueToken1 | valueToken2) ^^ (t => Value(t))
+  def value: Parser[Value] = ("""\s""".r ~> valueToken1 | valueToken2) ^^ (t => Value(t))
 
   /**
-    * an optionToken matches a single character which is either a lowercase letter or a digit
+    * A command matches a single character which is either a lowercase letter or a digit
     *
     * @return a Parser[Command]
     */
-  def optionToken: Parser[Command] = """[\p{Ll}\d]""".r ^^ (t => Command(t))
+  def command: Parser[Command] = """[\p{Ll}\d]""".r ^^ (t => Command(t))
 
   /**
-    * a valueToken2 matches an uppercase letter followed by any number of non-space, non-bracket symbols
+    * A valueToken2 matches an uppercase letter followed by any number of non-space, non-bracket symbols
     *
     * @return a Parser[String]
     */
   val valueToken2: Parser[String] = """\p{Lu}[^\[\]\s]*""".r
 
   /**
-    * a valueToken1 matches at least one non-space, non-bracket symbol
+    * A valueToken1 matches at least one non-space, non-bracket symbol
     *
     * @return a Parser[String]
     */
   val valueToken1: Parser[String] = """[^\[\]\s]+""".r
+
+  private val openBracket = """\[""".r
+  private val closeBracket = """\]""".r
+
 }
 
 abstract class ArgsException(s: String) extends Exception(s"Args exception: $s")
@@ -359,3 +426,9 @@ case class AmbiguousNameException(name: String) extends ArgsException(s"$name am
 case class ParseException(cause: String) extends ArgsException(cause)
 
 case class NoValueException(name: Option[String]) extends ArgsException(s"Arg: command ${name.getOrElse("anonymous")} has no value")
+
+case class ValidationException[X](a: Args[X], s: Synopsis) extends ArgsException(s"Args: validation failed for $a with synopsis: $s")
+
+case class InvalidOptionException[X](arg: Arg[X]) extends ArgsException(s"Arg ${arg.name} not valid")
+
+case class CompareException(str: String) extends ArgsException(s"Arg compare exception: $str")
