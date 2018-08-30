@@ -12,6 +12,7 @@ import scala.annotation.tailrec
 import scala.collection.GenTraversableOnce
 import scala.io.Source
 import scala.util._
+import scala.util.matching.Regex
 import scala.util.parsing.combinator._
 
 /**
@@ -26,7 +27,7 @@ import scala.util.parsing.combinator._
   * Please see inline method documentation for details of other methods.
   *
   * @author scalaprof
-  * @param < X>
+  * @tparam X the underlying type, a sub-class of Product
   */
 trait ProductStream[X <: Product] {
   /**
@@ -42,7 +43,7 @@ trait ProductStream[X <: Product] {
   /**
     * @return a materialized (non-lazy) List version of the tuples.
     */
-  lazy val asList = tuples.toList
+  lazy val asList: List[X] = tuples.toList
 
   /**
     * map method
@@ -137,7 +138,7 @@ case class ConcreteProductStream[X <: Product](header: Seq[String], tuples: Stre
   * a parser and Stream[String] such that the element types of the resulting tuples will be inferred from their representative
   * Strings.
   *
-  * @param X a Tuple which should correspond with the number of (and types inferred from) the values.
+  * @tparam X a Tuple which should correspond with the number of (and types inferred from) the values.
   */
 case class CSV[X <: Product](parser: CsvParser, input: Stream[String]) extends TupleStreamBase[X](parser, input) {
   /**
@@ -146,7 +147,7 @@ case class CSV[X <: Product](parser: CsvParser, input: Stream[String]) extends T
     *
     * @return a Stream of [X] objects
     */
-  def tuples = input.tail map stringToTuple(parser.elementParser)
+  def tuples: Stream[X] = input.tail map stringToTuple(parser.elementParser)
 
   /**
     * method to project ("slice") a ProductStream into a single column
@@ -171,10 +172,10 @@ case class CSV[X <: Product](parser: CsvParser, input: Stream[String]) extends T
   * Case class which implements ProductStream where the header and tuples are specified indirectly, by providing
   * a parser and Stream[String] such that the element types of the resulting tuples will be Strings.
   *
-  * @param X a Tuple which should correspond with the number of values (all types of the tuple should be String).
+  * @tparam X a Tuple which should correspond with the number of values (all types of the tuple should be String).
   */
 case class TupleStream[X <: Product](parser: CsvParser, input: Stream[String]) extends TupleStreamBase[X](parser, input) {
-  def tuples = input.tail map stringToTuple { x => Success(x) }
+  def tuples: Stream[X] = input.tail map stringToTuple { x => Success(x) }
 
   /**
     * method to project ("slice") a ProductStream into a single column
@@ -233,7 +234,7 @@ object CSV {
 
   def apply[X <: Product](input: URI): CSV[X] = apply(CsvParser(), input)
 
-  def project[X <: Product, Y](i: Int)(x: X) = x.productElement(i).asInstanceOf[Y]
+  def project[X <: Product, Y](i: Int)(x: X): Y = x.productElement(i).asInstanceOf[Y]
 }
 
 abstract class CsvParserBase(f: String => Try[Any]) extends JavaTokenParsers {
@@ -241,7 +242,7 @@ abstract class CsvParserBase(f: String => Try[Any]) extends JavaTokenParsers {
     * @return the trial function that will convert a String into Try[Any]
     *         This method is referenced only by CSV class (not by TupleStream, which does no element conversion).
     */
-  def elementParser = f
+  def elementParser: String => Try[Any] = f
 }
 
 case class CsvParser(
@@ -264,18 +265,17 @@ case class CsvParser(
 object CsvParser {
   val dateFormatStrings = Seq("yyyy-MM-dd", "yyyy-MM-dd-hh:mm:ss.s")
   // etc.
-  val dateParser = Trial[String, Any]((parseDate _) (dateFormatStrings))
-  val defaultParser = Trial.none[String, Any] :| { case s@(date0(_) | date4(_) | date1(_)) => dateParser(s) } :^ { case quoted(w) => w } :^ { case whole(s) => s.toInt } :^ { case truth(w) => true } :^ { case untruth(w) => false } :^ { case s => s match {
-    case floating(_) | floating(_, _) | floating(_, _, _) => s.toDouble
-  }
-  } :^ { case s => s }
-  val date0 = """(\d\d\d\d-\d\d-\d\d)""".r
+  private[parse] val dateParser = Trial[String, Any]((parseDate _) (dateFormatStrings))
+  private[parse] val defaultParser = Trial.none[String, Any] :| { case s@(date0(_) | date4(_) | date1(_)) => dateParser(s) } :^ { case quoted(w) => w } :^ { case whole(s) => s.toInt } :^ { case truth(_) => true } :^ { case untruth(_) => false } :^ {
+    case s@(floating(_) | floating(_, _) | floating(_, _, _)) => s.toDouble
+  } :^ identity
+  private[parse] val date0 = """(\d\d\d\d-\d\d-\d\d)""".r
   // ISO 8601
-  val date1 =
+  private[parse] val date1 =
     """(?m)^(0[1-9]|1\d|2[0-8]|29(?=-\d\d-(?!1[01345789]00|2[1235679]00)\d\d(?:[02468][048]|[13579][26]))|30(?!-02)|31(?=-0[13578]|-1[02]))-(0[1-9]|1[0-2])-([12]\d{3}) ([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$""".r
-  val date2 = """(?m)^\d{4}-(((0[13578]|1[02])-(0[1-9]|[12]\d|3[0-1]))|(02-(0[1-9]|[12]\d))|((0[469]|11)-(0[1-9]|[12]\d|30)))$""".r
-  val date3 = """(^(((\d\d)(([02468][048])|([13579][26]))-02-29)|(((\d\d)(\d\d)))-((((0\d)|(1[0-2]))-((0\d)|(1\d)|(2[0-8])))|((((0[13578])|(1[02]))-31)|(((0[1,3-9])|(1[0-2]))-(29|30)))))\s(([01]\d|2[0-3]):([0-5]\d):([0-5]\d))$)""".r
-  val date4 = """(?mi)^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$""".r
+  private[parse] val date2 = """(?m)^\d{4}-(((0[13578]|1[02])-(0[1-9]|[12]\d|3[0-1]))|(02-(0[1-9]|[12]\d))|((0[469]|11)-(0[1-9]|[12]\d|30)))$""".r
+  private[parse] val date3 = """(^(((\d\d)(([02468][048])|([13579][26]))-02-29)|(((\d\d)(\d\d)))-((((0\d)|(1[0-2]))-((0\d)|(1\d)|(2[0-8])))|((((0[13578])|(1[02]))-31)|(((0[1,3-9])|(1[0-2]))-(29|30)))))\s(([01]\d|2[0-3]):([0-5]\d):([0-5]\d))$)""".r
+  private[parse] val date4 = """(?mi)^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$""".r
 
   def parseDate(dfs: Seq[String])(s: String): Try[DateTime] = {
     @tailrec def loop(formats: Seq[DateTimeFormatter], result: Try[DateTime]): Try[DateTime] = formats match {
@@ -287,10 +287,10 @@ object CsvParser {
     }, Failure(new Exception(s""""$s" cannot be parsed as date""")))
   }
 
-  val quoted = """"([^"]*)"""".r
-  val whole = """(\d+)""".r
-  val floating = """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r
-  val truth = """(?i)^([ty]|true|yes)$""".r
-  val untruth = """(?i)^([fn]|false|no)$""".r
+  private val quoted = """"([^"]*)"""".r
+  private val whole = """(\d+)""".r
+  private val floating = """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r
+  private val truth = """(?i)^([ty]|true|yes)$""".r
+  val untruth: Regex = """(?i)^([fn]|false|no)$""".r
 }
 

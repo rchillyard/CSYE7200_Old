@@ -3,7 +3,7 @@ package edu.neu.coe.csye7200
 import scala.annotation.tailrec
 
 trait MyList[+A] {
-  override def toString = {
+  override def toString: String = {
     @tailrec def tos(as: MyList[A], r: StringBuffer): CharSequence = as match {
       case MyNil => r
       case MyCons(hd, tl) => tos(tl, r.append((if (r.length > 1) ", " else "") + s""""$hd""""))
@@ -19,7 +19,7 @@ trait MyList[+A] {
   def length: Int = {
     @tailrec def len(as: MyList[A], x: Int): Int = as match {
       case MyNil => x
-      case MyCons(hd, tl) => len(tl, x + 1)
+      case MyCons(_, tl) => len(tl, x + 1)
     }
     len(this, 0)
   }
@@ -33,7 +33,7 @@ trait MyList[+A] {
 
   def x1: Int = this match {
     case MyNil => 0
-    case MyCons(hd, tl) => 1 + tl.x1
+    case MyCons(_, tl) => 1 + tl.x1
   }
 
 //  def x2: A = this match {
@@ -41,16 +41,19 @@ trait MyList[+A] {
 //    case MyCons(hd, tl) => hd + tl.x2
 //  }
 
-  def x2a: A = this match {case MyNil => throw new Exception("logic error"); case MyCons(hd,tl) => hd}
+  def x2a: A = this match {
+    case MyNil => throw new Exception("logic error");
+    case MyCons(hd, _) => hd
+  }
 
   def x3: MyList[A] = this match {
     case MyNil => MyNil;
-    case MyCons(hd, tl) => tl
+    case MyCons(_, tl) => tl
   }
 
   def x3a: Option[A] = this match {
     case MyNil => None;
-    case MyCons(hd, tl) => Some(hd)
+    case MyCons(hd, _) => Some(hd)
   }
 
   def x4(x: Int): Option[A] = {

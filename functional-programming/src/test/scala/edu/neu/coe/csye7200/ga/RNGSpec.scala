@@ -2,6 +2,8 @@ package edu.neu.coe.csye7200.ga
 
 import org.scalatest.{FlatSpec, Matchers}
 
+import scala.language.postfixOps
+
 /**
   * @author scalaprof
   */
@@ -45,6 +47,6 @@ class RNGSpec extends FlatSpec with Matchers {
     println(x)
     println(x.next)
     val y = RNG.randoms(new UniformDoubleRNG(0L).next) take 10 toList;
-    y.sorted.head should equal(UniformDouble(0.052988271629967366))
+    y.min should equal(UniformDouble(0.052988271629967366))
   }
 }

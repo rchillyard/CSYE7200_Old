@@ -22,7 +22,7 @@ abstract class RNG_Java[+A](n: Long) extends RNG[A] {
   // base method -- not normally overridden
   def next: RNG_Java[A] = newRNG(nextSeed)
 
-  def state = n
+  def state: Long = n
 }
 
 object RNG_Java {
@@ -33,14 +33,14 @@ case class LongRNG(n: Long) extends RNG_Java[Long](n) {
   def newRNG(n: Long) = LongRNG(n)
 
   // ???
-  def value = n // ???
+  def value: Long = n // ???
 }
 
 case class DoubleRNG(n: Long) extends RNG_Java[Double](n) {
   def newRNG(n: Long) = DoubleRNG(n)
 
   // ???
-  def value = n.toDouble / Long.MaxValue
+  def value: Double = n.toDouble / Long.MaxValue
 
   // ???
   override def toString = s"DoubleRNG: $n->$value"
@@ -114,7 +114,7 @@ object LongRNG {
   * Note that we would like to specify a require statement but such are not legal in Value types
   */
 case class UniformDouble(x: Double) {
-  def +(y: Double) = x + y
+  def +(y: Double): Double = x + y
 }
 
 object UniformDoubleRNG {
@@ -128,5 +128,5 @@ object GaussianRNG {
 object UniformDouble {
   def apply(x: Double, y: Unit): UniformDouble = if (x >= 0 && x <= 1) new UniformDouble(x) else throw new IllegalArgumentException(s"$x is not in range 0..1")
 
-  def +(x: Double, y: UniformDouble) = y + x
+  def +(x: Double, y: UniformDouble): Double = y + x
 }

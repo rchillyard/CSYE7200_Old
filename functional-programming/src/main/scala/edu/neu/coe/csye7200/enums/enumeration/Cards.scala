@@ -14,34 +14,37 @@ object Rank extends Enumeration {
       if (isHonor) s else s.toLowerCase
     }
 
-    def isSpot = !isHonor
+    def isSpot: Boolean = !isHonor
 
-    def isHonor = rank match {
+    def isHonor: Boolean = rank match {
       case Ace | King | Queen | Knave | Ten => true
       case _ => false
     }
   }
 
-  implicit def value2RankValue(rank: Value) = new RankValue(rank)
+  implicit def value2RankValue(rank: Value): RankValue = new RankValue(rank)
 }
+
+import scala.language.implicitConversions
 
 object Suit extends Enumeration {
   type Suit = Value
   val Clubs, Diamonds, Hearts, Spades = Value
 
   class SuitValue(suit: Value) {
-    def isRed = !isBlack
+    def isRed: Boolean = !isBlack
 
-    def isBlack = suit match {
+    def isBlack: Boolean = suit match {
       case Clubs | Spades => true
       case _ => false
     }
   }
 
-  implicit def value2SuitValue(suit: Value) = new SuitValue(suit)
+  implicit def value2SuitValue(suit: Value): SuitValue = new SuitValue(suit)
 }
 
 import edu.neu.coe.csye7200.enums.enumeration.Rank._
 import edu.neu.coe.csye7200.enums.enumeration.Suit._
+
 
 case class Card(rank: Rank, suit: Suit)

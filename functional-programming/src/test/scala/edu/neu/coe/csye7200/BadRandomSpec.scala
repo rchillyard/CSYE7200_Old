@@ -8,7 +8,7 @@ import scala.util.Random
   * @author scalaprof
   */
 class BadRandomSpec extends FlatSpec with Matchers {
-  val random = Random
+  private val random = Random
   random.setSeed(0L)
   "random" should "be predictable" in {
     random.nextInt

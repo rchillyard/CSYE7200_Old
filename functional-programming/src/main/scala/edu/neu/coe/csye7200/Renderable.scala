@@ -54,6 +54,9 @@ case class RenderableEither(e: Either[_, _]) extends Renderable {
 }
 
 object Renderable {
+
+  import scala.language.implicitConversions
+
   implicit def renderableTraversable(xs: Traversable[_]): Renderable = RenderableTraversable(xs)
 
   implicit def renderableOption(xo: Option[_]): Renderable = RenderableOption(xo)
@@ -72,11 +75,11 @@ object Renderable {
   }
 }
 
-/**
-  * Bad class -- not needed
-  * @param as
-  * @tparam A
-  */
+///**
+//  * Bad class -- not needed
+//  * @param as
+//  * @tparam A
+//  */
 //case class RenderableSeq[A <: Renderable](as: Seq[A]) extends Renderable {
 //  def render: String = as map (_ render) mkString ","
 //}

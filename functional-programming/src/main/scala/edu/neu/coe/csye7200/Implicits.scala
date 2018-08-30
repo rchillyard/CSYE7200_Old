@@ -9,6 +9,7 @@ object Implicits extends App {
 
   def myAdd(x: Int, y: Int): Int = x + y
 
+  // For some reason it is best not to give a type here
   implicit def stringToInt(x: String) = x.toInt
 
   println(myAdd("1", "2"))
@@ -28,6 +29,8 @@ object Implicits extends App {
 case class T(t: Int) {
   def double: Int = 2*t
 }
+
+import scala.language.implicitConversions
 
 object T {
   implicit def conv(u: U): T = T(u.u)

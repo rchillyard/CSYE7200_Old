@@ -17,29 +17,31 @@ class Arith extends JavaTokenParsers {
     def term(t: String ~ Term): Double = t match {
       case "+" ~ x => x.eval;
       case "-" ~ x => -x.eval
+      case x ~ _ => throw ParseException(s"Expr: $x unsupported")
     }
 
-    def eval = ts.foldLeft(t.eval)(_ + term(_))
+    def eval: Double = ts.foldLeft(t.eval)(_ + term(_))
   }
 
   case class Term(f: Factor, fs: List[String ~ Factor]) extends Expression {
     def factor(t: String ~ Factor): Double = t match {
       case "*" ~ x => x.eval;
       case "/" ~ x => 1 / x.eval
+      case x ~ _ => throw ParseException(s"Term: $x unsupported")
     }
 
-    def eval = fs.foldLeft(f.eval)(_ * factor(_))
+    def eval: Double = fs.foldLeft(f.eval)(_ * factor(_))
   }
 
   case class FloatingPoint(x: Any) extends Factor {
-    def eval = x match {
+    def eval: Double = x match {
       case x: String => x.toDouble
       case _ => throw new RuntimeException("FloatingPoint: logic error: x is not a String")
     }
   }
 
   case class Parentheses(e: Expr) extends Factor {
-    def eval = e.eval
+    def eval: Double = e.eval
   }
 
   def expr: Parser[Expr] = term ~ rep("+" ~ term | "-" ~ term | failure("expr")) ^^ { case t ~ r => r match {
@@ -59,3 +61,4 @@ class Arith extends JavaTokenParsers {
   }
 }
 
+case class ParseException(s: String) extends Exception(s"Parser exception: $s")

@@ -1,5 +1,7 @@
 package edu.neu.coe.csye7200
 
+import scala.language.higherKinds
+
 trait Monoid[A] {
   def op(a1: A, a2: A): A
 

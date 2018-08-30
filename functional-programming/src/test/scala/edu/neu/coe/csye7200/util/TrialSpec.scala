@@ -28,7 +28,7 @@ class TrialSpec extends FlatSpec with Matchers {
       case x: String => x.toInt
     }
     // Note that Trial(Lift(f)) is equivalent to LiftTrial(f)
-    val trialIntString = toInt ^: Trial(Lift[String, Any] { case x: String => x })
+    val trialIntString = toInt ^: Trial(Lift[String, Any](identity))
     trialIntString("10.0") should matchPattern { case Success("10.0") => }
     trialIntString("10") should matchPattern { case Success(10) => }
   }
@@ -37,7 +37,7 @@ class TrialSpec extends FlatSpec with Matchers {
       case x: String => x
     }
     // Note that Trial.Lift(f) is also equivalent to LiftTrial(f) and so Trial(Lift(f))
-    val trialStringInt = toString ^: Trial.lift[String, Any] { case x: String => x.toInt }
+    val trialStringInt = toString ^: Trial.lift[String, Any] { x: String => x.toInt }
     trialStringInt("10.0") should matchPattern { case Success("10.0") => }
     trialStringInt("10") should matchPattern { case Success("10") => }
   }
@@ -48,7 +48,7 @@ class TrialSpec extends FlatSpec with Matchers {
     val toDouble: PartialFunction[Any, Any] = {
       case x: String => x.toDouble
     }
-    val trialIntDoubleString = toInt ^: toDouble ^: Trial(Lift[String, Any] { case x: String => x })
+    val trialIntDoubleString = toInt ^: toDouble ^: Trial(Lift[String, Any](identity))
     trialIntDoubleString("10.0") should matchPattern { case Success(10.0) => }
     trialIntDoubleString("10") should matchPattern { case Success(10) => }
     trialIntDoubleString("10.0X") should matchPattern { case Success("10.0X") => }
@@ -56,7 +56,7 @@ class TrialSpec extends FlatSpec with Matchers {
   it should "be composable using :| and work in correct order (1)" in {
     // for convenience we can use LiftMatch here but it's equivalent to Lift({case x:String => p.toInt})
     val toInt = LiftMatch { case x: String => x.toInt }
-    val trialStringInt = Trial(Lift[String, Any] { case x: String => x }) :| toInt
+    val trialStringInt = Trial(Lift[String, Any](identity)) :| toInt
     trialStringInt("10.0") should matchPattern { case Success("10.0") => }
     trialStringInt("10") should matchPattern { case Success("10") => }
   }
@@ -64,7 +64,7 @@ class TrialSpec extends FlatSpec with Matchers {
     val toString: PartialFunction[Any, Any] = {
       case x: String => x
     }
-    val trialIntString = Trial(Lift[String, Any] { case x: String => x.toInt }) :^ toString
+    val trialIntString = Trial(Lift[String, Any] { x: String => x.toInt }) :^ toString
     trialIntString("10.0") should matchPattern { case Success("10.0") => }
     trialIntString("10") should matchPattern { case Success(10) => }
   }
@@ -94,7 +94,7 @@ class TrialSpec extends FlatSpec with Matchers {
     val toInt: PartialFunction[Any, Try[Any]] = {
       case x: String => Try(x.toInt)
     }
-    val trialIntString = toInt |: Trial[String, Any] { case x: String => Success(x) }
+    val trialIntString = toInt |: Trial[String, Any] { x: String => Success(x) }
     trialIntString("10.0") should matchPattern { case Success("10.0") => }
     trialIntString("10") should matchPattern { case Success(10) => }
   }
@@ -102,7 +102,7 @@ class TrialSpec extends FlatSpec with Matchers {
     val toString: PartialFunction[Any, Try[Any]] = {
       case x: String => Success(x)
     }
-    val trialStringInt = toString |: Trial[String, Any] { case x: String => Try(x.toInt) }
+    val trialStringInt = toString |: Trial[String, Any] { x: String => Try(x.toInt) }
     trialStringInt("10.0") should matchPattern { case Success("10.0") => }
     trialStringInt("10") should matchPattern { case Success("10") => }
   }
@@ -113,7 +113,7 @@ class TrialSpec extends FlatSpec with Matchers {
     val toDouble: PartialFunction[Any, Try[Any]] = {
       case x: String => Try(x.toDouble)
     }
-    val trialIntDoubleString = toInt |: toDouble |: Trial[String, Any] { case x: String => Try(x) }
+    val trialIntDoubleString = toInt |: toDouble |: Trial[String, Any] { x: String => Try(x) }
     trialIntDoubleString("10.0") should matchPattern { case Success(10.0) => }
     trialIntDoubleString("10") should matchPattern { case Success(10) => }
     trialIntDoubleString("10.0X") should matchPattern { case Success("10.0X") => }
@@ -121,13 +121,13 @@ class TrialSpec extends FlatSpec with Matchers {
   it should "be composable using :| and work in correct order (1)" in {
     // for convenience we can use Match (or LiftMatch) here
     val toInt = LiftMatch { case x: String => x.toInt }
-    val trialStringInt = Trial[String, Any] { case x: String => Success(x) } :| toInt
+    val trialStringInt = Trial[String, Any] { x: String => Success(x) } :| toInt
     trialStringInt("10.0") should matchPattern { case Success("10.0") => }
     trialStringInt("10") should matchPattern { case Success("10") => }
   }
   it should "be composable using :| and work in correct order (2)" in {
     val toString = Match { case x: String => Success(x) }
-    val trialIntString = Trial[String, Any] { case x: String => Try(x.toInt) } :| toString
+    val trialIntString = Trial[String, Any] { x: String => Try(x.toInt) } :| toString
     trialIntString("10.0") should matchPattern { case Success("10.0") => }
     trialIntString("10") should matchPattern { case Success(10) => }
   }

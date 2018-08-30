@@ -49,7 +49,7 @@ case class MapDocument[K,T](m: Map[K,Document[K,T]]) extends Document[K,T] {
 
   def ++(d: Document[K, T])(implicit k: K = null.asInstanceOf[K]): Document[K,T] = d match {
     case MapDocument(m2) => MapDocument(m ++ m2)
-    case s @ SingletonDocument(t) => this :+ (List() -> s)
+    case s@SingletonDocument(_) => this :+ (List() -> s)
   }
 
   def size: Int = (for ((_,d) <- m) yield d.size).sum

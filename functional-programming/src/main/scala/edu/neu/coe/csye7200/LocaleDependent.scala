@@ -19,7 +19,7 @@ case class ScalaDate(date: Date) extends LocaleDependent {
 object ScalaDate {
   def apply(): ScalaDate = ScalaDate(new Date)
 
-  implicit def locale = Locale.FRANCE
+  implicit def locale: Locale = Locale.FRANCE
 
   def main(args: Array[String]): Unit = {
     println(apply())

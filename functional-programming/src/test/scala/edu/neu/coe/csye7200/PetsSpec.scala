@@ -18,7 +18,7 @@ class PetsSpec extends FlatSpec with Matchers {
     // while Sound is a supertype of Voice (and contravariant)
     val pets: Pets[Dog, Voice] = Pets.create[Chihuahua, Sound](bentley, gingerSnap, ralphie)
     // Dog is a subtype of Mammal: all of the required properties of Mammal are specified by any instance of Dog
-    val m: Mammal = asDog(bentley)
+    val _: Mammal = asDog(bentley)
     val ps: Seq[Dog] = pets.sounders(Woof)
     ps.size shouldBe 3
     ps.head shouldBe bentley

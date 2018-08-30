@@ -20,7 +20,7 @@ abstract class RNG_Java[+A](n: Long) extends RNG[A] {
   // base method -- not normally overridden
   def next: RNG[A] = newRNG(nextSeed)
 
-  def state = n
+  def state: Long = n
 }
 
 object RNG_Java {
@@ -30,13 +30,13 @@ object RNG_Java {
 case class LongRNG(n: Long) extends RNG_Java[Long](n) {
   def newRNG(n: Long): RNG[Long] = LongRNG(n)
 
-  def value = n
+  def value: Long = n
 }
 
 case class DoubleRNG(n: Long) extends RNG_Java[Double](n) {
   def newRNG(n: Long) = DoubleRNG(n)
 
-  def value = n.toDouble / Long.MaxValue
+  def value: Double = n.toDouble / Long.MaxValue
 
   override def toString = s"DoubleRNG: $n->$value"
 }
@@ -50,7 +50,7 @@ case class UniformDoubleRNG(n: Long) extends RNG_Java[UniformDouble](n) {
   import UniformDoubleRNG.u
 
   // the following, which calls the apply(Double,Unit) method will check that result is in range 0..1
-  def value = UniformDouble.create(math.abs(n.toDouble / Long.MaxValue))
+  def value: UniformDouble = UniformDouble.create(math.abs(n.toDouble / Long.MaxValue))
 
   override def toString = s"UniformDoubleRNG: $n->$value"
 }
@@ -66,9 +66,9 @@ case class GaussianRNG(n: Long) extends RNG_Java[(Double, Double)](n) {
   def newRNG(n: Long) = GaussianRNG(n)
 
   val r1 = UniformDoubleRNG(n)
-  val r2 = r1.next
+  private val r2 = r1.next
 
-  def value = {
+  def value: (Double, Double) = {
     val u = r1.value.x
     val v = r2.value.x
     val k = if (u <= 0) 0 else math.sqrt(-2 * math.log(u))
@@ -85,9 +85,9 @@ object RNG {
 
   def rngs[A](r: RNG[A]): SRNG[A] = Stream.cons(r, rngs(r.next))
 
-  def randoms[A](r: RNG[A]) = values(rngs(r))
+  def randoms[A](r: RNG[A]): Stream[A] = values(rngs(r))
 
-  def gaussians = randoms(GaussianRNG.apply) flatMap { x => Stream(x._1, x._2) }
+  def gaussians: Stream[Double] = randoms(GaussianRNG.apply) flatMap { x => Stream(x._1, x._2) }
 
   def values[A](s: SRNG[A]): Stream[A] = s map {
     _.value
@@ -106,7 +106,7 @@ object LongRNG {
   * Note that we would like to specify a require statement but such are not legal in Value types
   */
 case class UniformDouble(x: Double) extends AnyVal with Ordered[UniformDouble] {
-  def +(y: Double) = x + y
+  def +(y: Double): Double = x + y
 
   def compare(that: UniformDouble): Int = x.compare(that.x)
 }
@@ -126,7 +126,7 @@ object GaussianRNG {
 }
 
 object UniformDouble {
-  def create(x: Double)(implicit y: Unit) = if (x >= 0 && x <= 1) new UniformDouble(x) else throw new IllegalArgumentException(s"$x is not in range 0..1")
+  def create(x: Double)(implicit y: Unit): UniformDouble = if (x >= 0 && x <= 1) new UniformDouble(x) else throw new IllegalArgumentException(s"$x is not in range 0..1")
 
-  def +(x: Double, y: UniformDouble) = y + x
+  def +(x: Double, y: UniformDouble): Double = y + x
 }

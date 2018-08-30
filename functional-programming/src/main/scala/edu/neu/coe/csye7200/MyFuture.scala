@@ -1,7 +1,6 @@
 package edu.neu.coe.csye7200
 
-import scala.concurrent.{ExecutionContext}
-import scala.util.{Success, Try}
+import scala.concurrent.ExecutionContext
 
 /**
   * Created by scalaprof on 10/6/16.
@@ -36,7 +35,7 @@ case class Successful[T](t: T) extends MyFuture[T] {
   def await: T = ???
 }
 
-object MyFuture extends App {
+object MyFutureApp extends App {
 
   def sum(is: IndexedSeq[Int]): Int =
     if (is.size <= 1)
