@@ -37,6 +37,7 @@ object ConcurrencyExample extends App {
   Await.result(result, 1000 millis)
 }
 
+//noinspection NotImplementedCode
 object MoreJunk {
   def getUser(id: Int): Future[Option[String]] = ???
   def someFunction1(s: String): Int = ???

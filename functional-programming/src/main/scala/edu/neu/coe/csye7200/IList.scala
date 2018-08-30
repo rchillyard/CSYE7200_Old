@@ -7,7 +7,7 @@ trait IList {
 
   def x1: Int = this match {
     case INil => 0
-    case Cons(hd, tl) => 1 + tl.x1
+    case Cons(_, tl) => 1 + tl.x1
   }
 
   def x2: Int = this match {
@@ -15,16 +15,19 @@ trait IList {
     case Cons(hd, tl) => hd + tl.x2
   }
 
-  def x2a: Int = this match {case INil => throw new Exception("logic error"); case Cons(hd,tl) => hd}
+  def x2a: Int = this match {
+    case INil => throw new Exception("logic error");
+    case Cons(hd, _) => hd
+  }
 
   def x3: IList = this match {
     case INil => INil;
-    case Cons(hd, tl) => tl
+    case Cons(_, tl) => tl
   }
 
   def x3a: Option[Int] = this match {
     case INil => None;
-    case Cons(hd, tl) => Some(hd)
+    case Cons(hd, _) => Some(hd)
   }
 
   def x4(x: Int): Option[Int] = {

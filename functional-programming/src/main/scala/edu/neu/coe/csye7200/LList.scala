@@ -11,6 +11,7 @@ trait LList[+T] {
 }
 
 case class LCons[+T](head: T, tail: LList[T]) extends LList[T] {
+  //noinspection NotImplementedCode
   def iterator: Iterator[T] = ???
   def isEmpty: Boolean = false
 }
@@ -18,6 +19,8 @@ case class LCons[+T](head: T, tail: LList[T]) extends LList[T] {
 case object MT extends LList[Nothing] {
   def head: Nothing = throw new Exception("cannot get head from MT")
   def tail: LList[Nothing] = throw new Exception("cannot get tail from MT")
+
+  //noinspection NotImplementedCode
   def iterator: Iterator[Nothing] = ???
   def isEmpty: Boolean = true
 }

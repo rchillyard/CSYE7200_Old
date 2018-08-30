@@ -1,14 +1,14 @@
 package edu.neu.coe.csye7200
 
-import edu.neu.coe.csye7200.MonadOps._
-import org.scalatest.{FlatSpec, Matchers}
-import org.scalatest.concurrent._
 import java.net.URL
 
-import scala.util._
+import edu.neu.coe.csye7200.MonadOps._
+import org.scalatest.concurrent._
+import org.scalatest.{FlatSpec, Matchers, _}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
-import org.scalatest._
+import scala.util._
 
 /**
   * @author scalaprof
@@ -18,13 +18,13 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   "lift(Future[Try[T]])" should "succeed for http://www.google.com" in {
     val uyf = Future(Try(new URL("http://www.google.com")))
     val uf = MonadOps.flatten(uyf)
-    whenReady(uf) { u => u should matchPattern { case x: URL => } }
+    whenReady(uf) { u => u should matchPattern { case _: URL => } }
   }
 
   "lift(Try[Future[T]])" should "succeed for http://www.google.com" in {
     val ufy = Try(Future(new URL("http://www.google.com")))
     val uf = MonadOps.flatten(ufy)
-    whenReady(uf) { u => u should matchPattern { case x: URL => } }
+    whenReady(uf) { u => u should matchPattern { case _: URL => } }
   }
 
   "sequence(Seq[Future[T]])" should "succeed for http://www.google.com, etc." in {
@@ -46,7 +46,7 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val ws = List("www.google.com", "http://www.microsoft.com")
     val uys = for {w <- ws; uy = Try(new URL(w))} yield uy
     MonadOps.sequence(uys) match {
-      case Failure(e) => Succeeded
+      case Failure(_) => Succeeded
       case _ => Failed
     }
   }
@@ -64,7 +64,7 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val xos: Seq[Option[Int]] = for {w <- ws; xo = Try(w.toInt).toOption} yield xo
     println(MonadOps.sequence(xos))
     MonadOps.sequence(xos) match {
-      case Some(xs) => Failed("failure")
+      case Some(_) => Failed("failure")
       case _ =>
     }
   }
@@ -98,14 +98,14 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val uefs = for {uf <- ufs} yield MonadOps.sequence(uf)
     val uesf = Future.sequence(uefs)
     whenReady(uesf) { ues => Assertions.assert(ues.length == 3) }
-    whenReady(uesf) { ues => (ues.head, ues(1)) should matchPattern { case (Right(x), Right(y)) => } }
-    whenReady(uesf) { ues => ues(2) should matchPattern { case Left(x) => } }
+    whenReady(uesf) { ues => (ues.head, ues(1)) should matchPattern { case (Right(_), Right(_)) => } }
+    whenReady(uesf) { ues => ues(2) should matchPattern { case Left(_) => } }
   }
 
   "sequence(Future=>Future(Either))" should "succeed for http://www.google.com, www.microsoft.com" in {
     val ws = Seq("http://www.google.com", "http://www.microsoft.com", "www.microsoft.com")
     val uefs = for {w <- ws; uf = Future(new URL(w))} yield MonadOps.sequence(uf)
-    for {uef <- uefs} whenReady(uef) { case Right(u) => true; case Left(e) => true; case _ => Assertions.fail() }
+    for {uef <- uefs} whenReady(uef) { case Right(_) => true; case Left(_) => true; case _ => Assertions.fail() }
   }
 
   "Sequence[Either]" should "succeed" in {
@@ -128,16 +128,18 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   }
   "lift" should "succeed" in {
     def double(x: Int) = 2*x
-    Success(1) map double _ should matchPattern { case Success(2) => }
-    Failure(new Exception("bad")) map double _ should matchPattern { case Failure(_) => }
+
+    Success(1) map double should matchPattern { case Success(2) => }
+    Failure(new Exception("bad")) map double should matchPattern { case Failure(_) => }
   }
 
   "map2" should "succeed" in {
     val one = Success(1)
     val two = Success(2)
     def sum(x: Int,y: Int) = x+y
-    map2(one,two)(sum _) should matchPattern { case Success(3) => }
-    map2(one,Failure(new Exception("bad")))(sum _) should matchPattern { case Failure(_) => }
+
+    map2(one, two)(sum) should matchPattern { case Success(3) => }
+    map2(one, Failure(new Exception("bad")))(sum) should matchPattern { case Failure(_) => }
   }
 
   "asFuture" should "succeed" in {

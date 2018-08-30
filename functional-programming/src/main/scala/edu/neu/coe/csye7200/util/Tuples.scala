@@ -20,9 +20,9 @@ object Tuple0 extends Product0 {
 case class SeqProduct(elems: Any*) extends Product {
   override def productArity: Int = elems.size
 
-  override def productElement(i: Int) = elems(i)
+  override def productElement(i: Int): Any = elems(i)
 
-  override def toString = elems.addString(new StringBuilder(elems.size * 8 + 10), "(", ",", ")").toString()
+  override def toString: String = elems.addString(new StringBuilder(elems.size * 8 + 10), "(", ",", ")").toString()
 }
 
 object Tuples {
@@ -40,6 +40,6 @@ object Tuples {
     case size if size <= 22 =>
       val refs = for (e <- elems) yield e.asInstanceOf[AnyRef]
       ctors(size - 1).newInstance(refs: _*).asInstanceOf[Product]
-    case size if size > 22 => new SeqProduct(elems: _*)
+    case size if size > 22 => SeqProduct(elems: _*)
   }
 }

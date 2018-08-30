@@ -65,14 +65,7 @@ object Node {
     * @tparam A the underlying node type
     * @return a Parent of type Node[A]
     */
-  implicit def nodeParent[A]: Parent[Node[A]] = new Parent[Node[A]] {
-    /**
-      * Get the children of this Node, if any.
-      *
-      * @return the children as a Seq of Nodes
-      */
-    def children(t: Node[A]): Seq[Node[A]] = t.children
-  }
+  implicit def nodeParent[A]: Parent[Node[A]] = (t: Node[A]) => t.children
 }
 
 /**
@@ -118,7 +111,7 @@ sealed trait TreeLike[+A] extends Node[A]{
   def size: Int = Parent.traverse[Node[A], Int]({
     case Empty => 0
     case _ => 1
-  }, _+_, { x => false}, _ ++ _.children)(List(this), 0)
+  }, _ + _, { _ => false }, _ ++ _.children)(List(this), 0)
 
   def includes[B >: A](b: B): Boolean = Parent.traverse[Node[B], Boolean]({ n => n.get match {
     case Some(`b`) => true
@@ -131,8 +124,8 @@ sealed trait TreeLike[+A] extends Node[A]{
       case Leaf(x) => x.toString
       case c@Open => c.render
       case c@Close => c.render
-      case n => ""
-    }, _ + _, { x => false }, z)(List(this), "")
+      case _ => ""
+    }, _ + _, { _ => false }, z)(List(this), "")
 
   override def render: String = renderRecursive[A]((ns,n) => n.children.toList ++ ns)
 }
@@ -158,7 +151,7 @@ trait TreeMaker {
 }
 
 case class Leaf[+A](value: A)(implicit treeMaker: TreeMaker) extends TreeLike[A] {
-  def children = Nil
+  def children: Seq[Node[A]] = Nil
   def get = Some(value)
   def :+[B >: A : Ordering](b: Node[B]): Node[B] = treeMaker.tree(b) :+ this
   override def depth: Int = 1
@@ -167,8 +160,9 @@ case class Leaf[+A](value: A)(implicit treeMaker: TreeMaker) extends TreeLike[A]
 }
 
 case object Empty extends TreeLike[Nothing] {
-  def children = Nil
-  def get = None
+  def children: Seq[Node[Nothing]] = Nil
+
+  def get: None.type = None
   def :+[B >: Nothing : Ordering](bn: Node[B]): Node[B] = bn
   override def depth: Int = 0
 //  override def render = ""
@@ -188,7 +182,7 @@ sealed abstract class AbstractBinaryTree[+A](value: A, left: Node[A], right: Nod
 
   def children: Seq[Node[A]] = Seq(left,right)
 
-  implicit val builder = new TreeMaker {
+  implicit val builder: TreeMaker = new TreeMaker {
     def tree[T](node: Node[T]): TreeLike[T] = make(node.get.get,Empty,Empty)
   }
 
@@ -240,7 +234,7 @@ case class BinaryTree[+A](value: A, left: Node[A], right: Node[A]) extends Abstr
   */
 case class IndexedTree[+A](leftIndex: Int, rightIndex: Int, value: A, left: Node[A], right: Node[A]) extends AbstractBinaryTree[A](value, left, right) with BinaryTreeIndex {
   def make[T](x: T, l: Node[T], r: Node[T]): AbstractBinaryTree[T] = {
-    val (y,t) = IndexedTree.makeIndexedTree(0,x,l,r)
+    val (_, t) = IndexedTree.makeIndexedTree(0, x, l, r)
     t.asInstanceOf[AbstractBinaryTree[T]]
   }
 }
@@ -256,7 +250,7 @@ case class IndexedTree[+A](leftIndex: Int, rightIndex: Int, value: A, left: Node
   * @tparam A the underlying node type
   */
 case class IndexedLeaf[+A](leftIndex: Int, rightIndex: Int, value: A)(implicit treeMaker: TreeMaker) extends TreeLike[A] with BinaryTreeIndex {
-  def children = Nil
+  def children: Seq[Node[A]] = Nil
   def get = Some(value)
   def :+[B >: A : Ordering](b: Node[B]): Node[B] = treeMaker.tree(b) :+ this
   override def depth: Int = 1
@@ -293,7 +287,7 @@ object IndexedTree {
     case _ => throw TreeException(s"illegal node in IndexedTree: $node")
   }
 
-  implicit val treeMaker = new TreeMaker {
+  implicit val treeMaker: TreeMaker = new TreeMaker {
     def tree[T](node: Node[T]): TreeLike[T] = indexSubtree(0,node)._2.asInstanceOf[TreeLike[T]]
   }
 }
@@ -317,9 +311,10 @@ object BinaryTree {
   def apply[A : Ordering](as: A*): BinaryTree[A] = as.toList match {
     case Nil => Empty.asInstanceOf[BinaryTree[A]]
     case h::Nil => BinaryTree(h,Empty,Empty)
-    case h::t => (apply(h).asInstanceOf[BinaryTree[A]] :+ apply(t:_*)).asInstanceOf[BinaryTree[A]]
+    case h :: t => (apply(h) :+ apply(t: _*)).asInstanceOf[BinaryTree[A]]
   }
-  implicit val treeMaker = new TreeMaker {
+
+  implicit val treeMaker: TreeMaker = new TreeMaker {
     def tree[T](node: Node[T]): TreeLike[T] = node match {
       case t: BinaryTree[T] => t
       case _ => tree(node) // FIXME this looks recursive

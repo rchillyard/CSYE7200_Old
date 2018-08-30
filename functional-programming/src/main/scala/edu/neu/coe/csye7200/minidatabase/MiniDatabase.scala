@@ -6,7 +6,7 @@ import scala.io.Source
   * @author scalaprof
   */
 object MiniDatabase {
-  def load(filename: String) = {
+  def load(filename: String): List[Entry] = {
     val src = Source.fromFile(filename)
     val database = src.getLines.toList.map(e => Entry(e.split(",")))
     val result = database
@@ -14,7 +14,7 @@ object MiniDatabase {
     result
   }
 
-  def measure(height: Height) = height match {
+  def measure(height: Height): String = height match {
     case Height(8, _) => "giant"
     case Height(7, _) => "very tall"
     case Height(6, _) => "tall"
@@ -33,7 +33,7 @@ object MiniDatabase {
 case class Entry(name: Name, social: Social, dob: Date, height: Height, weight: Int)
 
 case class Height(feet: Int, in: Int) {
-  def inches = feet * 12 + in
+  def inches: Int = feet * 12 + in
 }
 
 object Entry {
@@ -44,8 +44,8 @@ object Entry {
 }
 
 object Height {
-  val rHeightFtIn = """^\s*(\d+)\s*(?:ft|\')(\s*(\d+)\s*(?:in|\"))?\s*$""".r
-  val rHeightFt = """^\s*(\d+)\s*(?:ft|\')$""".r
+  private val rHeightFtIn = """^\s*(\d+)\s*(?:ft|\')(\s*(\d+)\s*(?:in|\"))?\s*$""".r
+  private val rHeightFt = """^\s*(\d+)\s*(?:ft|\')$""".r
 
   def apply(ft: String, in: String) = new Height(ft.toInt, in.toInt)
 
@@ -65,16 +65,16 @@ case class Social(area: Int, group: Int, serial: Int)
 case class Date(year: Int, month: Int, day: Int)
 
 object Name {
-  val rName3 = """^(\w+)\s+(\w.*)\s+(\w+)$""".r
-  val rName2 = """^(\w+)\s+(\w+)$""".r
-  val rName1 = """^(\w+)$""".r
+  private val rName3 = """^(\w+)\s+(\w.*)\s+(\w+)$""".r
+  private val rName2 = """^(\w+)\s+(\w+)$""".r
+  private val rName1 = """^(\w+)$""".r
 
   def apply(name: String): Name = ???
 }
 
 object Date {
-  val rDate1 = """^(\w+)\s+(\d+)\w\w\s(\d{4})$""".r
-  val rDate2 = """^(\d+)\/(\d+)\/(\d+)$""".r
+  private val rDate1 = """^(\w+)\s+(\d+)\w\w\s(\d{4})$""".r
+  private val rDate2 = """^(\d+)\/(\d+)\/(\d+)$""".r
 
   def apply(year: String, month: String, day: String): Date = ???
 
@@ -82,7 +82,7 @@ object Date {
 }
 
 object Social {
-  val rSsn = """^(\d{3})\-(\d{2})\-(\d{4})$""".r
+  private val rSsn = """^(\d{3})\-(\d{2})\-(\d{4})$""".r
 
   def apply(ssn: String): Social = ???
 }

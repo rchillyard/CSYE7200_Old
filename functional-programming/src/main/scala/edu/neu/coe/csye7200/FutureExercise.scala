@@ -8,7 +8,7 @@ import scala.concurrent._
   *
   * There are two methods:
   * * the apply method which converts Seq[X] to Future[X] and
-  * * the sequence method which converts Seq[Future[X]] into Future[X]
+  * * the sequence method which converts Seq[Future[X] into Future[X]
   *
   * @param f the function to apply to apply's input parameter
   *          @param name the name of the function
@@ -44,7 +44,7 @@ object FutureExercise extends App {
   xf foreach { x => println(s"Sum: $x") }
   private val c10 = chunk * 10
   private val expected = xf filter (_ == BigInt((1L + c10) * c10 / 2))
-  expected foreach { x => println("OK") }
+  expected foreach { _ => println("OK") }
   Await.ready(expected, 10000 milli)
   println("Goodbye")
 }

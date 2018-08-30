@@ -64,17 +64,17 @@ class ProductStreamSpec extends FlatSpec with Matchers {
   it should "be (String,String) stream via TupleStream" in {
     val wWts = TupleStream[(String, String)](Stream("x,y", "3,5", "8,13")).tuples
     wWts.head match {
-      case (a, b) => assert(a == "3" && b == "5")
+      case (x, y) => assert(x == "3" && y == "5")
     }
     wWts.tail.head match {
-      case (a, b) => assert(a == "8" && b == "13")
+      case (x, y) => assert(x == "8" && y == "13")
     }
   }
   it should "map into (Int,Int) via TupleStream" in {
     val wWts = TupleStream[(String, String)](Stream("x,y", "3,5", "8,13"))
     val iIts = wWts map { case (x, y) => (x.toInt, y.toInt) }
     iIts.tuples.head match {
-      case (a, b) => assert(a == 3 && b == 5)
+      case (x, y) => assert(x == 3 && y == 5)
       case _ => fail("no match")
     }
   }
@@ -89,7 +89,7 @@ class ProductStreamSpec extends FlatSpec with Matchers {
   }
   it should "convert to map properly" in {
     val c = CSV[(Int, Int)](Stream("x,y", "3,5", "8,13"))
-    val iItIm = c toMap { case (x, y) => x }
+    val iItIm = c toMap { case (x, _) => x }
     iItIm.get(8) should matchPattern { case Some((8, 13)) => }
   }
   it should "map into (Double,Double) properly" in {
@@ -203,13 +203,13 @@ class CsvParserSpec extends FlatSpec with Matchers {
   it should """parse "1" as "1"""" in (CsvParser.defaultParser(""""1"""") should matchPattern { case Success("1") => })
   it should """parse 2016-03-08 as datetime""" in {
     val dt = CsvParser.defaultParser("2016-03-08")
-    dt should matchPattern { case Success(d) => }
+    dt should matchPattern { case Success(_) => }
     //    dt.get shouldBe new DateTime("2016-03-08")
   }
 
   def putInQuotes(w: String): Any = s"""'$w'"""
 
-  val customElemParser = CsvParser(parseElem = Lift(putInQuotes _))
+  val customElemParser = CsvParser(parseElem = Lift(putInQuotes))
   "custom element parser" should "parse 1 as '1'" in (customElemParser.elementParser("1") should matchPattern { case Success("'1'") => })
   it should "parse 1.0 as '1.0'" in (customElemParser.elementParser("1.0") should matchPattern { case Success("'1.0'") => })
   it should "parse true as 'true'" in (customElemParser.elementParser("true") should matchPattern { case Success("'true'") => })
@@ -217,7 +217,7 @@ class CsvParserSpec extends FlatSpec with Matchers {
 
   "CsvParser.parseDate" should "work" in {
     val dt = CsvParser.parseDate(CsvParser.dateFormatStrings)("2016-03-08")
-    dt should matchPattern { case Success(x) => }
+    dt should matchPattern { case Success(_) => }
     dt.get shouldBe new DateTime("2016-03-08T00:00:00.0")
   }
 }

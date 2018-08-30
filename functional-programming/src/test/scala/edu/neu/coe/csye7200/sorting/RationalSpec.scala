@@ -1,7 +1,7 @@
 package edu.neu.coe.csye7200.sorting
 
 // We really do need the following: import edu.neu.coe.csye7200.Rational.RationalHelper
-import edu.neu.coe.csye7200.sorting.{Rational, RationalException}
+//import edu.neu.coe.csye7200.sorting.{Rational, RationalException}
 import edu.neu.coe.csye7200.sorting.Rational.RationalHelper
 import org.scalatest.{FlatSpec, Matchers}
 

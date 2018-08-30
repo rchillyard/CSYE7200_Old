@@ -44,16 +44,16 @@ class MiniDatabaseSpec2 extends FlatSpec with Inside with Matchers {
     MiniDatabase2.map2(t2, t0) { case (x, y) => x + y } should matchPattern { case Failure(_) => }
   }
   "Height" should "succeed 6 ft 5 in" in {
-    Height.parse("6 ft 5 in") should matchPattern { case Success(h) => }
+    Height.parse("6 ft 5 in") should matchPattern { case Success(_) => }
   }
   it should "fail 6 ft five in" in {
-    Height.parse("6 ft five in") should matchPattern { case Failure(x) => }
+    Height.parse("6 ft five in") should matchPattern { case Failure(_) => }
   }
   it should """succeed 6' 5"""" in {
-    Height.parse("""6' 5"""") should matchPattern { case Success(h) => }
+    Height.parse("""6' 5"""") should matchPattern { case Success(_) => }
   }
   it should """fail to parse 6'""" in {
-    Height.parse("""6'""") should matchPattern { case Failure(x) => }
+    Height.parse("""6'""") should matchPattern { case Failure(_) => }
   }
   it should "succeed: equal 77 inches and be considered tall" in {
     val height = Height.parse("6 ft 5 in")
@@ -69,18 +69,18 @@ class MiniDatabaseSpec2 extends FlatSpec with Inside with Matchers {
   }
 
   "Name" should "succeed: Tom Brady" in {
-    Name.parse("Tom Brady") should matchPattern { case Success(h) => }
+    Name.parse("Tom Brady") should matchPattern { case Success(_) => }
   }
 
   it should """succeed: Thomas E. P. "Tom" Brady""" in {
-    Name.parse("""Thomas E. P. "Tom" Brady""") should matchPattern { case Success(h) => }
+    Name.parse("""Thomas E. P. "Tom" Brady""") should matchPattern { case Success(_) => }
   }
 
   "Entry" should """succeed: Thomas E. P. "Tom" Brady, etc.""" in {
-    Entry.parse("""Thomas E. P. "Tom" Brady, 078-05-1120, Aug 3rd 1977, 6 ft 4 in, 225""".split(",")) should matchPattern { case Success(h) => }
+    Entry.parse("""Thomas E. P. "Tom" Brady, 078-05-1120, Aug 3rd 1977, 6 ft 4 in, 225""".split(",")) should matchPattern { case Success(_) => }
   }
 
   it should """fail: Thomas E. P. "Tom" Brady""" in {
-    Entry.parse("""Brady, 123-45-6789""".split(",")) should matchPattern { case Failure(x) => }
+    Entry.parse("""Brady, 123-45-6789""".split(",")) should matchPattern { case Failure(_) => }
   }
 }

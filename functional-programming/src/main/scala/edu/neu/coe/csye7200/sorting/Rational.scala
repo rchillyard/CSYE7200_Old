@@ -20,7 +20,7 @@ case class Rational(n: Long, d: Long) extends Fractional[Rational] {
 
   def -(that: Long): Rational = this - Rational(that)
 
-  def unary_- = negate(this)
+  def unary_- : Rational = negate(this)
 
   def *(that: Rational): Rational = times(this, that)
 
@@ -65,13 +65,13 @@ case class Rational(n: Long, d: Long) extends Fractional[Rational] {
 
   def invert = Rational(d, n)
 
-  def isWhole = d == 1L
+  def isWhole: Boolean = d == 1L
 
-  def isZero = n == 0L
+  def isZero: Boolean = n == 0L
 
-  def isUnity = n == 1L && isWhole
+  def isUnity: Boolean = n == 1L && isWhole
 
-  def isInfinity = d == 0L
+  def isInfinity: Boolean = d == 0L
 
   def toInt: Int = toInt(this)
 
@@ -81,12 +81,12 @@ case class Rational(n: Long, d: Long) extends Fractional[Rational] {
 
   def toDouble: Double = toDouble(this)
 
-  def power(x: Int) = {
+  def power(x: Int): Rational = {
     @tailrec def inner(r: Rational, x: Int): Rational = if (x == 0) r else inner(r * this, x - 1)
     inner(Rational.one, x)
   }
 
-  def toBigDecimal = BigDecimal(n) / d
+  def toBigDecimal: BigDecimal = BigDecimal(n) / d
 
   def compare(other: Rational): Int = compare(this, other)
 
@@ -94,7 +94,7 @@ case class Rational(n: Long, d: Long) extends Fractional[Rational] {
 
   def isExactDouble: Boolean = toBigDecimal.isExactDouble // Only work with Scala 2.11 or above
 
-  override def toString = if (isWhole) toLong.toString else if (d > 100000L || isExactDouble) toDouble.toString else toRationalString
+  override def toString: String = if (isWhole) toLong.toString else if (d > 100000L || isExactDouble) toDouble.toString else toRationalString
 }
 
 class RationalException(s: String) extends Exception(s)
@@ -125,7 +125,7 @@ object Rational {
   }
 
   val zero = Rational(0)
-  val infinity = zero.invert
+  val infinity: Rational = zero.invert
   val one = Rational(1)
   val ten = Rational(10)
   val half: Rational = Rational("1/2")
@@ -156,7 +156,7 @@ object Rational {
     }
   }
 
-  def normalize(n: Long, d: Long) = {
+  def normalize(n: Long, d: Long): Rational = {
     val g = gcd(math.abs(n), math.abs(d))
     apply(n / g, d / g)
   }

@@ -7,11 +7,11 @@ import scala.util.parsing.combinator._
   * @author scalaprof
   */
 class ConcordanceParser extends RegexParsers {
-  val rWord = """[\w’]+[,;\.\-\?\!\—]?""".r
+  private val rWord = """[\w’]+[,;\.\-\?\!\—]?""".r
 
-  def word: Parser[(Int, String)] = new PositionalParser(regex(rWord) ^^ { case w => w })
+  def word: Parser[(Int, String)] = new PositionalParser(regex(rWord))
 
-  def sentence: Parser[Seq[(Int, String)]] = rep(word) ^^ { case s: Seq[(Int, String)] => s }
+  def sentence: Parser[Seq[(Int, String)]] = rep(word)
 
   class PositionalParser(p: Parser[String]) extends Parser[(Int, String)] {
     def apply(in: Input): ParseResult[(Int, String)] =
@@ -38,12 +38,12 @@ object ConcordanceParser {
     println(concordanceMap)
   }
 
-  def parseDoc(content: String) = {
+  def parseDoc(content: String): IndexedSeq[(Int, IndexedSeq[(Int, Seq[(Int, String)])])] = {
     val pages = for (p <- content.split("/p")) yield p
     for (i <- pages.indices) yield (i + 1, parsePage(pages(i)))
   }
 
-  def parsePage(content: String) = {
+  def parsePage(content: String): IndexedSeq[(Int, Seq[(Int, String)])] = {
     val lines = for (l <- content.split("\n")) yield l
     for (i <- lines.indices) yield (i + 1, parseLine(lines(i)))
   }

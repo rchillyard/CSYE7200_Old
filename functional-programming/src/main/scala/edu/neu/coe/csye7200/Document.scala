@@ -33,10 +33,10 @@ case class Leaf[V](value: V) extends Document[Any, V] {
 
   def add[L <: Any, W >: V](l: L, d: Document[L, W]): Document[L, W] = d match {
     case Clade(x) => val z = pushDown(LinearSeq(l)); val y = z.asInstanceOf[Clade[L, W]].branches; val q = x.asInstanceOf[Map[L, Document[L, W]]]; Clade[L, W](q ++ y)
-    case Leaf(v) => throw new UnsupportedOperationException("++ is not supported for two Leaf objects")
+    case Leaf(_) => throw new UnsupportedOperationException("++ is not supported for two Leaf objects")
   }
 
-  override def toString = value.toString
+  override def toString: String = value.toString
 }
 
 case class Clade[K, V](branches: Map[K, Document[K, V]]) extends Document[K, V] {
@@ -53,10 +53,10 @@ case class Clade[K, V](branches: Map[K, Document[K, V]]) extends Document[K, V] 
 
   def add[L <: K, W >: V](l: L, d: Document[L, W]): Document[L, W] = d match {
     case Clade(x) => val z = pushDown(LinearSeq(l)); val y = z.asInstanceOf[Clade[L, W]].branches; val q = x.asInstanceOf[Map[L, Document[L, W]]]; Clade[L, W](y ++ q)
-    case Leaf(v) => d add(l, this.asInstanceOf[Document[L, W]])
+    case Leaf(_) => d add(l, this.asInstanceOf[Document[L, W]])
   }
 
-  override def toString = branches.toString
+  override def toString: String = branches.toString
 }
 
 object Document {

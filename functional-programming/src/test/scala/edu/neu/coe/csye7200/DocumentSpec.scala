@@ -11,7 +11,7 @@ class DocumentSpec extends FlatSpec with Matchers {
   }
   "Document(Map)" should "be Clade(...)" in {
     val doc = Document(Map(1 -> "A", 2 -> "B"))
-    doc should matchPattern { case Clade(m) => }
+    doc should matchPattern { case Clade(_) => }
     doc.asInstanceOf[Clade[Int, String]].branches shouldBe Map(1 -> Document("A"), 2 -> Document("B"))
   }
   //  it should "add in Document OK" in {

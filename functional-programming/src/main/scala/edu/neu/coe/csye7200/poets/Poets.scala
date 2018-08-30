@@ -1,13 +1,13 @@
 package edu.neu.coe.csye7200.poets
 
-import scala.xml.{Node, NodeSeq, XML}
+import scala.xml.{Elem, Node, NodeSeq, XML}
 
 case class Name(name: String, language: String) {
-  def toXML = <name language={language}>{name}</name>
+  def toXML: Elem = <name language={language}>{name}</name>
 }
 
 case class Poet(names: Seq[Name]) {
-  def toXML = <poet>{names map (_.toXML)}</poet>
+  def toXML: Elem = <poet>{names map (_.toXML)}</poet>
 }
 
 object Poet {
@@ -15,7 +15,7 @@ object Poet {
 }
 
 object Name {
-  def getLanguage(x: Option[Seq[Node]]) = x match {
+  def getLanguage(x: Option[Seq[Node]]): String = x match {
     case Some(Seq(y)) => y.text;
     case _ => ""
   }
@@ -44,9 +44,9 @@ object Poets extends App {
   case class Poets(poets: PoetSeq)
 
   object PoetsJsonProtocol extends DefaultJsonProtocol {
-    implicit val nameFormat = jsonFormat2(Name.apply)
-    implicit val poetFormat = jsonFormat1(Poet.apply)
-    implicit val poetsFormat = jsonFormat1(Poets)
+    implicit val nameFormat: RootJsonFormat[Name] = jsonFormat2(Name.apply)
+    implicit val poetFormat: RootJsonFormat[Poet] = jsonFormat1(Poet.apply)
+    implicit val poetsFormat: RootJsonFormat[Poets] = jsonFormat1(Poets)
   }
 
   import PoetsJsonProtocol._

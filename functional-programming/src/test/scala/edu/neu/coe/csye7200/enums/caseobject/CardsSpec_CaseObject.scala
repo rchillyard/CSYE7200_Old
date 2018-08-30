@@ -5,6 +5,7 @@ import org.scalatest._
 /**
   * @author scalaprof
   */
+//noinspection NameBooleanParameters
 class CardsSpec_CaseObject extends FlatSpec with Matchers with Inside {
   "ranks" should "be ordered properly" in {
     assert(Ace > King)

@@ -25,11 +25,11 @@ abstract class ExpressionParser[T] extends JavaTokenParsers with (String => Try[
   
   abstract class Factor extends Expression
   case class Expr(t: Term, ts: List[String~Term]) extends Expression {
-    def termVal(t: String~Term): Try[T] = t match {case "+"~x => x.value; case "-"~x => lift(x.value)(negate) }
+    def termVal(t: String~Term): Try[T] = t match {case "+"~x => x.value; case "-"~x => lift(x.value)(negate); case z~_ => scala.util.Failure(ParseException(s"Expr: operator $z is not supported")) }
     def value = ts.foldLeft(t.value)((a,x) => map2(a,termVal(x))(plus))
   }
   case class Term(f: Factor, fs: List[String~Factor]) extends Expression {
-    def factorVal(t: String~Factor): Try[T] = t match {case "*"~x => x.value; case "/"~x => map2(Try(one),x.value)(div) }
+    def factorVal(t: String~Factor): Try[T] = t match {case "*"~x => x.value; case "/"~x => map2(Try(one),x.value)(div); case z~_ => scala.util.Failure(ParseException(s"Term: operator $z is not supported")) }
     def value = fs.foldLeft(f.value)((a,x)=>map2(a,factorVal(x))(times))
   }
   case class FloatingPoint(x: String) extends Factor {
@@ -43,3 +43,5 @@ abstract class ExpressionParser[T] extends JavaTokenParsers with (String => Try[
   def term: Parser[Term] = factor~rep("*"~factor | "/"~factor | failure("term")) ^^ { case f~r => r match {case x: List[String~Factor] => Term(f,x)}} 
   def factor: Parser[Factor] = (floatingPointNumber | "("~expr~")" | failure("factor")) ^^ { case "("~e~")" => e match {case x: Expr => Parentheses(x)}; case s: String => FloatingPoint(s) }
 }
+
+case class ParseException(s: String) extends Exception(s"Parse exception: $s")

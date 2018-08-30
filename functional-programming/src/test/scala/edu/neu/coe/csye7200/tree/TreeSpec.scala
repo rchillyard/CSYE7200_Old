@@ -44,7 +44,7 @@ class TreeSpec extends FlatSpec with Matchers {
 
   behavior of "get"
   it should "work" in {
-    implicit val builder = new TreeMaker {
+    implicit val builder: TreeMaker = new TreeMaker {
       def tree[A](node: Node[A]): TreeLike[A] = UnsortedTree(node.get.get).asInstanceOf[TreeLike[A]]
     }
     val tree = UnsortedTree(1,Seq(Leaf(2),Leaf(3)))
@@ -57,7 +57,7 @@ class TreeSpec extends FlatSpec with Matchers {
 
   behavior of "depth"
   it should "work for UnsortedTree" in {
-    implicit val builder = new TreeMaker {
+    implicit val builder: TreeMaker = new TreeMaker {
       def tree[A](node: Node[A]): TreeLike[A] = UnsortedTree(node.get.get).asInstanceOf[TreeLike[A]]
     }
     val tree = UnsortedTree(1,Seq(Leaf(2),Leaf(3)))
@@ -72,7 +72,7 @@ class TreeSpec extends FlatSpec with Matchers {
 
   behavior of "size"
   it should "work for UnsortedTree" in {
-    implicit val builder = new TreeMaker {
+    implicit val builder: TreeMaker = new TreeMaker {
       def tree[A](node: Node[A]): TreeLike[A] = UnsortedTree(node.get.get).asInstanceOf[TreeLike[A]]
     }
     val tree = UnsortedTree(1,Seq(Leaf(2),Leaf(3)))
@@ -87,7 +87,7 @@ class TreeSpec extends FlatSpec with Matchers {
 
   behavior of "includes"
   it should "work for UnsortedTree" in {
-    implicit val builder = new TreeMaker {
+    implicit val builder: TreeMaker = new TreeMaker {
       def tree[A](node: Node[A]): TreeLike[A] = UnsortedTree(node.get.get).asInstanceOf[TreeLike[A]]
     }
     val tree = UnsortedTree(1,Seq(Leaf(2),Leaf(3)))

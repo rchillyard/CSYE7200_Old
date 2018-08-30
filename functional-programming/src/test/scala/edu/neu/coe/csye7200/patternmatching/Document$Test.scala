@@ -5,13 +5,14 @@ import org.scalatest.FunSuite
 /**
   * Created by scalaprof on 9/10/16.
   */
+//noinspection NameBooleanParameters
 class Document$Test extends FunSuite {
 
   test("singleton Document") {
     val t1: Document[String,Int] = SingletonDocument(42)
     assert (t1.size==1)
-    assert (t1.get(List())==Some(42))
-    assert (t1.get(List("a"))==None)
+    assert(t1.get(List()).contains(42))
+    assert(t1.get(List("a")).isEmpty)
     assert (t1.toString=="42")
     assert (t1.asInstanceOf[SingletonDocument[String,Int]].convertToMapDocument(null.asInstanceOf[String])==MapDocument(Map(null.asInstanceOf[String]->t1)))
   }
@@ -21,8 +22,8 @@ class Document$Test extends FunSuite {
     val m1: Document[String,Int] = MapDocument(Map("x"->t1))
     assert (t1.size==1)
     assert (m1.size==1)
-    assert (m1.get(List())==None)
-    assert (m1.get(List("x"))==Some(42))
+    assert(m1.get(List()).isEmpty)
+    assert(m1.get(List("x")).contains(42))
     assert (m1.toString=="Map(x -> 42)")
   }
 

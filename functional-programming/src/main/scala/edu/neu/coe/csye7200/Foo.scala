@@ -12,6 +12,7 @@ case class Bar(a: String,b: Option[Int]) extends Foo{
   def create(a: String) = Bar(a,None)
 }
 
-case class Buzz(a: String,b: Boolean) extends Foo{
+//noinspection NameBooleanParameters
+case class Buzz(a: String, b: Boolean) extends Foo {
   def create(a: String) = Buzz(a,false)
 }

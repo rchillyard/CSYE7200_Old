@@ -7,11 +7,11 @@ class Junk2 {
 
 }
 
-import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Success, Try}
+import scala.concurrent._
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.util.{Failure, Success}
 
 object ConcurrencyExample2 extends App {
 
@@ -21,16 +21,16 @@ object ConcurrencyExample2 extends App {
   val time = System.currentTimeMillis()
 
   //use recursion to process each Future in the list
-  def segregate(l:List[Future[Int]]):Future[Tuple2[pass,fail]] = {
-    def go(l:List[Future[Int]],t:Tuple2[pass,fail]):Future[Tuple2[pass,fail]] = {
+  def segregate(l: List[Future[Int]]): Future[(pass, fail)] = {
+    def go(l: List[Future[Int]], t: (pass, fail)): Future[(pass, fail)] = {
       l match {
         case Nil => Future{t}
         //l is List of Future[Int]. flatMap each successful Future
         //recover each failed Future
-        case l::ls => {
-          l flatMap (x => go(ls, (t._1 + 1, t._2)))
-          l.recoverWith({ case e => go(ls, (t._1, t._2+1))}).asInstanceOf[Future[(pass,fail)]]
-        }
+        case _l :: ls =>
+          // This looks very suspicious!
+          _l flatMap (_ => go(ls, (t._1 + 1, t._2)))
+          _l.recoverWith({ case _ => go(ls, (t._1, t._2 + 1)) }).asInstanceOf[Future[(pass, fail)]]
       }
     }
     go(l,(0,0))
