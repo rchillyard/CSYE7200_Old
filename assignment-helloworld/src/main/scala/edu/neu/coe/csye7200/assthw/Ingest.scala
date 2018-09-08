@@ -10,7 +10,7 @@ package edu.neu.coe.csye7200.assthw
   * println(kiwiMovies.size)
   * Run this program with provided csv file,
   * and submit the screenshot of the result.
-  * It should be the number of Kiwi Movies.
+  * It should be the number of Kiwi (New Zealand) Movies.
   */
 
 import scala.io.Source
@@ -30,13 +30,11 @@ object Ingest extends App {
     def fromStrings(ws: Seq[String]): Movie = Movie.apply(ws)
   }
   implicit object IngestibleMovie extends IngestibleMovie
-
-  override def main(args: Array[String]): Unit = {
     val ingester = new Ingest[Movie]()
-    if (args.length>0) {
-      val source = Source.fromFile(args.head)
-      for (m <- ingester(source)) println(m.properties.mkString(", "))
-      source.close()
-    }
-  }
+  val source = Source.fromFile(args.toList match {
+    case Nil => "movie_metadata_5000.csv"
+    case h :: _ => h
+  })
+  for (m <- ingester(source)) println(m.properties.mkString(", "))
+  source.close()
 }
