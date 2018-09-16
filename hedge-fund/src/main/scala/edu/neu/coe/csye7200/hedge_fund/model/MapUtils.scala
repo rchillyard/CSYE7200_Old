@@ -7,5 +7,8 @@ object MapUtils {
   import scala.language.postfixOps
   def flatten[K, V](x: Map[K, Option[V]]): Map[K, V] =
     // TODO fix this warning!
-    x filter { case (k, v) => v match { case Some(x) => true; case _ => false } } map { case (k, Some(v)) => k -> v } toMap
+    x filter { case (k, v) => v match { case Some(x) => true; case _ => false } } map {
+      case (k, Some(v)) => k -> v
+      case z => throw new Exception(s"Unmatched: $z")
+    }
 }

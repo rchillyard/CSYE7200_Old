@@ -108,6 +108,7 @@ object Sorted {
       case (x :: xs1, y :: ys1) =>
         if (ordering.lt(x, y)) inner(r :+ x, xs1, ys)
         else inner(r :+ y, xs, ys1)
+      case (_, _) => throw new Exception(s"Unmatched: ($xs, $ys)")
     }
 
     inner(Nil, ts1, ts2)
