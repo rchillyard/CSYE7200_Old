@@ -2,7 +2,7 @@
  * Copyright (c) 2018. Phasmid Software
  */
 
-package edu.neu.coe.csye7200.laziness
+package edu.neu.coe.csye7200.asstll
 
 /**
   * Trait to define the behavior of a LazyList (aka Stream)
