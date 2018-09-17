@@ -157,7 +157,7 @@ object LazyList {
   def continually[X](x: X): LazyList[X] = Cons(x, () => continually(x))
 
   /**
-    * A lazy val definition of a strem of 1s.
+    * A lazy val definition of a stream of 1s.
     */
   lazy val ones: LazyList[Int] = Cons(1, () => ones)
 
@@ -170,7 +170,7 @@ object LazyList {
     * @return a <code>LazyList[X]</code> with an infinite number of element (whose values are <code>x</code>,
     *         <code>x+step</code>, etc.).
     */
-  def from(start: Int, step: Int): LazyList[Int] = ??? // TODO implement me
+  def from(start: Int, step: Int): LazyList[Int] = Cons(start, () => from(start + step, step))
 
   /**
     * Construct a stream of Integers starting with <code>start</code> and with successive elements being

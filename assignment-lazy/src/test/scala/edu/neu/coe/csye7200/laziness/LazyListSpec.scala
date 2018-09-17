@@ -20,7 +20,7 @@ class LazyListSpec  extends FlatSpec with Matchers {
     lazy val x: LazyList[String] = Cons("x", () => x)
     val y = x take 3
     y.size shouldBe 3
-    y.head shouldBe 1
+    y.head shouldBe "x"
     y shouldBe Seq("x","x","x")
   }
 
