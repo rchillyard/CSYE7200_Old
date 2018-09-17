@@ -157,7 +157,7 @@ object LazyList {
   def continually[X](x: X): LazyList[X] = Cons(x, () => continually(x))
 
   /**
-    * A lazy val definition of a strem of 1s.
+    * A lazy val definition of a stream of 1s.
     */
   lazy val ones: LazyList[Int] = Cons(1, () => ones)
 
