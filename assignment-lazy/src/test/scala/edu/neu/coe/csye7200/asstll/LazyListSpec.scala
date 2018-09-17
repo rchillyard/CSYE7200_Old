@@ -2,7 +2,7 @@
  * Copyright (c) 2018. Phasmid Software
  */
 
-package edu.neu.coe.csye7200.laziness
+package edu.neu.coe.csye7200.asstll
 
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -98,7 +98,7 @@ class LazyListSpec  extends FlatSpec with Matchers {
   }
 
   behavior of "filter"
-  it should "produce a stream of even numbers using from(1)" in {
+  ignore should "produce a stream of even numbers using from(1)" in {
     def even(x: Int): Boolean = x%2==0
     val y = LazyList.from(1) filter even
     assert(y.head==2)
@@ -106,7 +106,7 @@ class LazyListSpec  extends FlatSpec with Matchers {
     y take 4 shouldBe Seq(2,4,6,8)
   }
 
-  it should "produce a stream of even numbers using from(2,2)" in {
+  ignore should "produce a stream of even numbers using from(2,2)" in {
     def even(x: Int): Boolean = x%2==0
     val y = LazyList.from(2,2) filter even
     assert(y.head==2)
