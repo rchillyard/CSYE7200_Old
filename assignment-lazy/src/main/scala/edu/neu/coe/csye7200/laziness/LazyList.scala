@@ -157,6 +157,11 @@ object LazyList {
   def continually[X](x: X): LazyList[X] = Cons(x, () => continually(x))
 
   /**
+    * A lazy val definition of a strem of 1s.
+    */
+  lazy val ones: LazyList[Int] = Cons(1, () => ones)
+
+  /**
     * Construct a stream of Integers starting with <code>start</code> and with successive elements being
     * greater than their predecessors by <code>step</code>.
     *

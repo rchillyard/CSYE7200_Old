@@ -16,8 +16,17 @@ class LazyListSpec  extends FlatSpec with Matchers {
     x.tail shouldBe EmptyList
   }
 
+  it should "produce a stream of xs using Cons directly" in {
+    lazy val x: LazyList[String] = Cons("x", () => x)
+    val y = x take 3
+    y.size shouldBe 3
+    y.head shouldBe 1
+    y shouldBe Seq("x","x","x")
+  }
+
+  behavior of "ones"
   it should "produce a stream of 1s" in {
-    lazy val x: LazyList[Int] = Cons(1, () => x)
+    val x: LazyList[Int] = LazyList.ones
     val y = x take 3
     y.size shouldBe 3
     y.head shouldBe 1
