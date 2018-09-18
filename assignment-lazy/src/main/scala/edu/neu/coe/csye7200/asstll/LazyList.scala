@@ -61,11 +61,12 @@ sealed trait LazyList[+X] {
 
   /**
     * The "filter" function.
+    *
     * @param p a predicate which takes an <code>X<code> and yields a <code>Boolean<code>.
     * @return a <code>LazyList[X]<code> where every element satisfies the predicate <code>p<code>.
     */
   def filter(p: X => Boolean): LazyList[X] = this match {
-    case Cons(h, tailFunc) => val tail = tailFunc().filter(p); if (p(h)) Cons(h, () => tail) else tail
+    case Cons(h, g) => val tailFunc = () => g().filter(p); if (p(h)) Cons(h, tailFunc) else tailFunc()
     case _ => EmptyList
   }
 
