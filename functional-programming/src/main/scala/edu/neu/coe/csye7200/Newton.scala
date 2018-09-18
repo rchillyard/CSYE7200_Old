@@ -18,7 +18,8 @@ case class Newton(w: String, f: Double => Double, dfbydx: Double => Double) {
       (for (y <- yy) yield math.abs(y) < threshold) match {
         case Success(true) => ry
         case _ =>
-          if (n == 0) Failure(new Exception(s"failed to converge in $tries tries, starting from x=$initial and where threshold=$threshold"))
+          if (n == 0) Failure(new Exception(s"failed to converge in $tries tries, " +
+            s"starting from x=$initial and where threshold=$threshold"))
           else inner(step(ry, yy), n - 1)
       }
     }
