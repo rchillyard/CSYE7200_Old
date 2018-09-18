@@ -1,6 +1,5 @@
 package edu.neu.coe.csye7200
 
-import edu.neu.coe.csye7200.WordCount
 import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 

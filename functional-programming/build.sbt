@@ -2,7 +2,7 @@ name := "FunctionalProgramming"
 
 version := "1.0"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.6"
 
 lazy val scalaModules = "org.scala-lang.modules"
 
@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
   scalaModules %% "scala-xml" % scalaModulesVersion,
   "io.spray" %%  "spray-json" % "1.3.3",
   "joda-time" % "joda-time" % "2.9.9",
+  "junit" % "junit" % "4.12" % "test",
   scalaModules %% "scala-parser-combinators" % scalaModulesVersion
 
 )

@@ -8,6 +8,8 @@ lazy val assthw = (project in file("assignment-helloworld"))
 
 lazy val asstmd = (project in file("assignment-movie-database"))
 
+lazy val asstll = (project in file("assignment-lazy"))
+
 lazy val asstrs = (project in file("assignment-random-state"))
 
 lazy val asstfc = (project in file("assignment-functional-composition"))
