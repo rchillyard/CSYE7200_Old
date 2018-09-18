@@ -6,7 +6,6 @@ package edu.neu.coe.csye7200.asstll
 
 import org.scalatest.{FlatSpec, Matchers}
 
-
 class LazyListSpec extends FlatSpec with Matchers {
 
   behavior of "Cons"
@@ -157,7 +156,7 @@ class LazyListSpec extends FlatSpec with Matchers {
   }
 
   it should "support a for-comprehension with filter" in {
-    val zs = for (x <- LazyList.from(1); if x>1; y <- LazyList(Seq(1, 2, 3))) yield (x, y)
-    zs take 5 shouldBe Seq(1 -> 1, 1 -> 2, 1 -> 3, 2 -> 1, 2 -> 2)
+    val zs = for (x <- LazyList.from(1); if x>1; y <- LazyList(Seq(1, 2, 3)); if y==2) yield (x, y)
+    zs take 3 shouldBe Seq(2 -> 2, 3 -> 2, 4 -> 2)
   }
 }
