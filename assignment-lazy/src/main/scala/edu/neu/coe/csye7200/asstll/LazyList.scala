@@ -11,6 +11,8 @@ package edu.neu.coe.csye7200.asstll
   */
 sealed trait LazyList[+X] {
 
+  self =>
+
   /**
     * @return the (strict) head of this stream
     */
@@ -112,6 +114,21 @@ sealed trait LazyList[+X] {
     * @return a String which shows the head but leaves the tail as question marks.
     */
   override def toString = s"$head, ???"
+
+  /** Necessary to keep this from being implicitly converted to
+    *  <code>[[scala.collection.Iterable]]<code> in `for` comprehensions.
+    */
+  @inline final def withFilter(p: X => Boolean): WithFilter = new WithFilter(p)
+
+  /** We need a whole WithFilter class to honor the "doesn't create a new
+    *  collection" contract.
+    */
+  class WithFilter(p: X => Boolean) {
+    def map[B](f: X => B): LazyList[B] = self filter p map f
+    def flatMap[B](f: X => LazyList[B]): LazyList[B] = self filter p flatMap f
+//    def foreach[U](f: X => U): Unit = self filter p foreach f
+    def withFilter(q: X => Boolean): WithFilter = new WithFilter(x => p(x) && q(x))
+  }
 }
 
 /**

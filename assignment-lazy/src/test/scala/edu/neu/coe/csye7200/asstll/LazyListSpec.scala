@@ -155,4 +155,9 @@ class LazyListSpec extends FlatSpec with Matchers {
     val zs = for (x <- LazyList.from(1); y <- LazyList(Seq(1, 2, 3))) yield (x, y)
     zs take 5 shouldBe Seq(1 -> 1, 1 -> 2, 1 -> 3, 2 -> 1, 2 -> 2)
   }
+
+  it should "support a for-comprehension with filter" in {
+    val zs = for (x <- LazyList.from(1); if x>1; y <- LazyList(Seq(1, 2, 3))) yield (x, y)
+    zs take 5 shouldBe Seq(1 -> 1, 1 -> 2, 1 -> 3, 2 -> 1, 2 -> 2)
+  }
 }
