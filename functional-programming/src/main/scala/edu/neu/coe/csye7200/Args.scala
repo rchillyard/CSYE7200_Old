@@ -180,6 +180,6 @@ case class NotFoundException(command: String) extends ArgsException(s"Arg: comma
 
 case class AmbiguousNameException(name: String) extends ArgsException(s"$name ambiguous")
 
-case class ParseException(cause: String) extends ArgsException(cause)
+case class ParseArgsException(cause: String) extends ArgsException(cause)
 
 case class NoValueException(name: Option[String]) extends ArgsException(s"Arg: command ${name.getOrElse("anonymous")} has no value")

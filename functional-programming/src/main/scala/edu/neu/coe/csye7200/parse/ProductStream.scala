@@ -104,7 +104,7 @@ abstract class ProductStreamBase[X <: Product] extends ProductStream[X] {
 abstract class TupleStreamBase[X <: Product](parser: CsvParser, input: Stream[String]) extends ProductStreamBase[X] {
   /**
     * @return the header for this object
-    * @throws exception which is wrapped in a Failure from wsy (below)
+    * @throws Exception which is wrapped in a Failure from wsy (below)
     */
   def header: Seq[String] = wsy.get
 
@@ -112,7 +112,7 @@ abstract class TupleStreamBase[X <: Product](parser: CsvParser, input: Stream[St
     * @param f the function which will be applied to a String to yield an Any (an element of a Tuple)
     * @param s the (row/line) String to be parsed
     * @return a Tuple
-    * @throws an exception if any of the underlying code generated a Failure
+    * @throws Exception if any of the underlying code generated a Failure
     */
   def stringToTuple(f: String => Try[Any])(s: String): X = stringToTryTuple(f)(s).get
 

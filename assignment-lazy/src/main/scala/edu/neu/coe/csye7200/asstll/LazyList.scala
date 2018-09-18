@@ -73,7 +73,7 @@ sealed trait LazyList[+X] {
   }
 
   /**
-    * Method to "zip" to LazyList objects together
+    * Method to "zip" two LazyList objects together
     *
     * @param ys the stream of Ys
     * @tparam Y the underlying type of <code>ys</code>
@@ -126,7 +126,6 @@ sealed trait LazyList[+X] {
   class WithFilter(p: X => Boolean) {
     def map[B](f: X => B): LazyList[B] = self filter p map f
     def flatMap[B](f: X => LazyList[B]): LazyList[B] = self filter p flatMap f
-//    def foreach[U](f: X => U): Unit = self filter p foreach f
     def withFilter(q: X => Boolean): WithFilter = new WithFilter(x => p(x) && q(x))
   }
 }

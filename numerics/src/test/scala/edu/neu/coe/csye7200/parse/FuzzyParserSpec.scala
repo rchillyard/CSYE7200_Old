@@ -127,7 +127,9 @@ class FuzzyParserSpec extends FlatSpec with Matchers {
     val r = parser.parseAll(parser.fuzzy, "6.67408(31)E-11")
     r should matchPattern { case parser.Success(_, _) => }
     r.get match {
-      case Gaussian(m,s) => assert(math.abs(m-6.67408E-11) < 1E-5); assert(math.abs(s-3.1E-14) < (1E-10))
+      case Gaussian(m,s) =>
+        m shouldBe 6.67408E-11 +- 1E-5
+        s shouldBe 3.1E-14 +- 1E-10
       case _ => fail("should be Gaussian")
     }
   }
@@ -136,7 +138,10 @@ class FuzzyParserSpec extends FlatSpec with Matchers {
     val r = parser.parseAll(parser.fuzzy, "3.1415927(01)")
     r should matchPattern { case parser.Success(_, _) => }
     r.get match {
-      case Gaussian(m,s) => assert(math.abs(m-3.1415927) < 1E-5); assert(math.abs(s-0.000001) < (1E-10))
+      case Gaussian(m,s) =>
+        m shouldBe 3.1415927 +- 1E-5
+        s shouldBe 0.000001 +- 1E-10
+//        assert(math.abs(m-3.1415927) < 1E-5); assert(math.abs(s-0.000001) < (1E-10))
       case f @ _ => fail(s"should be Gaussian but is $f")
     }
   }
