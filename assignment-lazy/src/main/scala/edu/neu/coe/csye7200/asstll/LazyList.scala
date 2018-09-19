@@ -35,7 +35,8 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     *         by concatenating all streams together.
     */
   def flatMap[Y](f: X => Monadic[Y]): ListLike[Y] = {
-    val y = f(x).asInstanceOf[ListLike[Y]]; Cons(y.head, () => y.tail ++ lazyTail().flatMap(f))
+    val y = f(x).asInstanceOf[ListLike[Y]];
+    Cons(y.head, () => y.tail ++ lazyTail().flatMap(f))
   }
 
   /**
@@ -61,7 +62,8 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     * @return a <code>Monadic[X]<code> where every element satisfies the predicate <code>p<code>.
     */
   def filter(p: X => Boolean): ListLike[X] = {
-    val tailFunc = () => lazyTail().filter(p); if (p(x)) Cons(x, tailFunc) else tailFunc()
+    val tailFunc = () => lazyTail().filter(p);
+    if (p(x)) Cons(x, tailFunc) else tailFunc()
   }
 
   /**
@@ -119,11 +121,12 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     *
     * @return a <code>Seq[X]</code>
     */
-  def toSeq: Seq[X] =   {
+  def toSeq: Seq[X] = {
     def inner(rs: Seq[X], xs: ListLike[X]): Seq[X] = xs match {
-          case Cons(h, f) => inner(rs :+ h, f())
-          case _ => rs
-        }
+      case Cons(h, f) => inner(rs :+ h, f())
+      case _ => rs
+    }
+
     inner(Nil, this)
   }
 
