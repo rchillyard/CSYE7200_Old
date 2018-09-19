@@ -18,25 +18,24 @@ class ParseCSVwithHTMLSpec extends FlatSpec with Matchers {
     wy should matchPattern { case Success(_) => }
     wy.get shouldBe
       s"""<html><head><title>$title</title></head>
-        |<body><table><tr><th>Name</th>
-        |<th>Notes</th>
-        |</tr>
-        |<tr><td>Robin</td>
-        |<td><p>This is Robin</p></td>
-        |</tr>
-        |<tr><td>Nik</td>
-        |<td><p><dir>This is Nik</dir></p></td>
-        |</tr>
-        |<tr><td>Dino</td>
-        |<td><table><tr><th>day</th><th>food</th><tr><th>Sunday</th><th>Mousakka</th></table></td>
-        |</tr>
-        |<tr><td>Kal</td>
-        |<td><ol><li>INFO</li><li>CSYE</li></ol></td>
-        |</tr>
-        |<tr><td></td>
-        |</tr>
-        |</table></body></html>
-        |""".stripMargin
+         |<body><table><tr><th>Name</th>
+         |<th>Notes</th>
+         |</tr>
+         |<tr><td>Robin</td>
+         |<td><p>This is Robin</p></td>
+         |</tr>
+         |<tr><td>Nik</td>
+         |<td><p><dir>This is Nik</dir></p></td>
+         |</tr>
+         |<tr><td>Dino</td>
+         |<td><table><tr><th>day</th><th>food</th><tr><td>Sunday</td><td>Mousakka</td></table></td>
+         |</tr>
+         |<tr><td>Kal</td>
+         |<td><ol><li>INFO</li><li>CSYE</li></ol></td>
+         |</tr>
+         |<tr></tr>
+         |</table></body></html>
+         |""".stripMargin
   }
 
   private def parseResource(parser: ParseCSVwithHTML, resource: String, title: String) = Option(getClass.getResource(resource)) match {
