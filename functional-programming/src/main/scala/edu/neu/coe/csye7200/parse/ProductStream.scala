@@ -222,7 +222,11 @@ object TupleStream {
 object CSV {
   def apply[X <: Product](input: Stream[String]): CSV[X] = apply(CsvParser(), input)
 
-  def apply[X <: Product](parser: CsvParser, input: InputStream): CSV[X] = apply(parser, Source.fromInputStream(input).getLines.toStream)
+  def apply[X <: Product](parser: CsvParser, source: Source): CSV[X] = apply(parser, source.getLines.toStream)
+
+  def apply[X <: Product](source: Source): CSV[X] = apply(CsvParser(), source.getLines.toStream)
+
+  def apply[X <: Product](parser: CsvParser, input: InputStream): CSV[X] = apply(parser, Source.fromInputStream(input))
 
   def apply[X <: Product](input: InputStream): CSV[X] = apply(CsvParser(), input)
 
@@ -250,14 +254,20 @@ case class CsvParser(
                       quoteChar: String = """"""", // quotation char to allow strings to include literal delimiter characters, decimal points, etc.
                       parseElem: String => Try[Any] = CsvParser.defaultParser
                     ) extends CsvParserBase(parseElem) {
+  override def skipWhitespace = false
   def row: Parser[List[String]] = // TODO Assignment6 3: row ::= term { delimiter term }
     repsep(term, delimiter)
 
   def term: Parser[String] = // TODO Assignment6 7: term ::= quoteChar text quoteChar | text
-    quoteChar ~> s"[^$quoteChar]*".r <~ quoteChar | s"[^$delimiter]*".r
+    quotedString | nonDelimiters | failure("term failure")
+
+  def nonDelimiters: Parser[String] = s"""[^$delimiter]+""".r
+
+  def quotedString: Parser[String] = quoteChar ~> s"""[^$quoteChar]*""".r <~ quoteChar
 
   def parseRow(s: String): Try[List[String]] = this.parseAll(this.row, s) match {
-    case this.Success(r, _) => scala.util.Success(r)
+    case this.Success(r, _) =>
+      scala.util.Success(r)
     case f@(this.Failure(_, _) | this.Error(_, _)) => scala.util.Failure(new Exception(s"cannot parse $s: $f"))
   }
 }
