@@ -176,12 +176,23 @@ class ProductStreamSpec extends FlatSpec with Matchers {
 
 class CsvParserSpec extends FlatSpec with Matchers {
   val defaultParser = CsvParser()
+  behavior of "containingEscapedQuotes"
+  it should """parse "x""y"  """ in {
+    val result = defaultParser.parseAll(defaultParser.containingEscapedQuotes, """x""y""")
+    result should matchPattern { case defaultParser.Success(_, _) => }
+    result.get shouldBe """x"y"""
+  }
   behavior of "quotedString"
   it should """parse "x"  """ in {
-    defaultParser.parseAll(defaultParser.quotedString, """"x"""") should matchPattern { case defaultParser.Success(_, _) => }
+    defaultParser.parseAll(defaultParser.stringInQuotes, """"x"""") should matchPattern { case defaultParser.Success(_, _) => }
   }
   it should """parse "x,y"  """ in {
-    defaultParser.parseAll(defaultParser.quotedString, """"x,y"""") should matchPattern { case defaultParser.Success(_, _) => }
+    defaultParser.parseAll(defaultParser.stringInQuotes, """"x,y"""") should matchPattern { case defaultParser.Success(_, _) => }
+  }
+  it should """parse "x""y"  """ in {
+    val result = defaultParser.parseAll(defaultParser.stringInQuotes, """"x""y"""")
+    result should matchPattern { case defaultParser.Success(_, _) => }
+    result.get shouldBe """x"y"""
   }
   behavior of "nonDelimiters"
   it should """parse x""" in {

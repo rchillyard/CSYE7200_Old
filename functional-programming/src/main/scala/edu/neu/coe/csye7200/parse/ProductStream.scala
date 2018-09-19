@@ -259,11 +259,17 @@ case class CsvParser(
     repsep(term, delimiter)
 
   def term: Parser[String] = // TODO Assignment6 7: term ::= quoteChar text quoteChar | text
-    quotedString | nonDelimiters | failure("term failure")
+    stringInQuotes | nonDelimiters | failure("term failure")
 
   def nonDelimiters: Parser[String] = s"""[^$delimiter]+""".r
 
-  def quotedString: Parser[String] = quoteChar ~> s"""[^$quoteChar]*""".r <~ quoteChar
+  def stringInQuotes: Parser[String] = quoteChar ~> quotedString <~ quoteChar
+
+  def quotedString =  containingEscapedQuotes | nonQuotes
+
+  def nonQuotes = s"""[^$quoteChar]*""".r
+
+  def containingEscapedQuotes = repsep(nonQuotes, s"""$quoteChar$quoteChar""") ^^ { case xs: Seq[String] => xs.reduceLeft(_+s"""$quoteChar"""+_)}
 
   def parseRow(s: String): Try[List[String]] = this.parseAll(this.row, s) match {
     case this.Success(r, _) =>
