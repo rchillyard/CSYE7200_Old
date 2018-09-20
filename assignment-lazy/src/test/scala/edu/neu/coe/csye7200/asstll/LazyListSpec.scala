@@ -132,6 +132,25 @@ class LazyListSpec extends FlatSpec with Matchers {
     (y take 4).toSeq shouldBe Seq(2, 4, 6, 8)
   }
 
+  behavior of "filterNot"
+  it should "produce a stream of even numbers using from(1)" in {
+    def odd(x: Int): Boolean = x % 2 != 0
+
+    val y = LazyList.from(1) filterNot odd
+    assert(y.head == 2)
+    assert(y.tail.head == 4)
+    (y take 4).toSeq shouldBe Seq(2, 4, 6, 8)
+  }
+
+  it should "produce a stream of even numbers using from(2,2)" in {
+    def odd(x: Int): Boolean = x % 2 != 0
+
+    val y = LazyList.from(2, 2) filterNot odd
+    assert(y.head == 2)
+    assert(y.tail.head == 4)
+    (y take 4).toSeq shouldBe Seq(2, 4, 6, 8)
+  }
+
   behavior of "zip"
   it should "zip together two empty streams" in {
     EmptyList.zip(EmptyList) shouldBe EmptyList

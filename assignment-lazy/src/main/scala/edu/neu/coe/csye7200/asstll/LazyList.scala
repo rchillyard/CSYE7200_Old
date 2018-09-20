@@ -35,7 +35,7 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     *         by concatenating all streams together.
     */
   def flatMap[Y](f: X => Monadic[Y]): ListLike[Y] = {
-    val y = f(x).asInstanceOf[ListLike[Y]];
+    val y = f(x).asInstanceOf[ListLike[Y]]
     Cons(y.head, () => y.tail ++ lazyTail().flatMap(f))
   }
 
@@ -62,7 +62,7 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     * @return a <code>Monadic[X]<code> where every element satisfies the predicate <code>p<code>.
     */
   def filter(p: X => Boolean): ListLike[X] = {
-    val tailFunc = () => lazyTail().filter(p);
+    val tailFunc = () => lazyTail().filter(p)
     if (p(x)) Cons(x, tailFunc) else tailFunc()
   }
 
@@ -130,12 +130,44 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     inner(Nil, this)
   }
 
+  /**
+    * Method to yield the size of this list-like object.
+    *
+    * @return Some(n) where n is size if it's definite; if size is not known (lazy) then return None
+    */
+  def size(): Option[Int] = None
+
+  /**
+    * The "filterNot" function.
+    * Overrides the definition form Monadic by making the result type more specific.
+    *
+    * @param p a predicate which takes an <code>X</code> and yields a <code>Boolean</code>.
+    * @return a <code>ListLike[X]</code> where every element satisfies the predicate <code>p</code>.
+    */
+  def filterNot(p: X => Boolean): ListLike[X] = filter(FunctionalUtility.invert(p))
+
+  /**
+    * Construct a <code>ListLike[X]</code> with the elements of <code>ys</code>.
+    *
+    * Note that this is an instance method.
+    *
+    * @param ys the sequence of elements with which to construct the list-like object.
+    * @tparam Y the underlying type of <code>ys</code> and the underlying type of the resulting ListLike object
+    * @return a <code>ListLike[Y]</code> with exactly one element (whose value is <code>y</code>).
+    */
+  def build[Y](ys: Seq[Y]): ListLike[Y] = ys match {
+    case h #:: t => LazyList(h, t)
+    case _ => LazyList(ys)
+  }
+
 }
 
 /**
   * Case object representing an empty ListLike.
   */
 case object EmptyList extends LazyListLike[Nothing] {
+
+
   def head = throw LazyListException("empty")
 
   def tail: ListLike[Nothing] = EmptyList
@@ -221,6 +253,36 @@ case object EmptyList extends LazyListLike[Nothing] {
     * @return a <code>Seq[X]</code>
     */
   def toSeq: Seq[Nothing] = Nil
+
+  /**
+    * Method to yield the size of this list-like object.
+    *
+    * @return Some(n) where n is size if it's definite; if size is not known (lazy) then return None
+    */
+  def size(): Option[Int] = Some(0)
+
+  /**
+    * The "filterNot" function.
+    * Overrides the definition form Monadic by making the result type more specific.
+    *
+    * @param p a predicate which takes an <code>X</code> and yields a <code>Boolean</code>.
+    * @return a <code>ListLike[X]</code> where every element satisfies the predicate <code>p</code>.
+    */
+  def filterNot(p: Nothing => Boolean): ListLike[Nothing] = EmptyList
+
+  /**
+    * Construct a <code>ListLike[X]</code> with the elements of <code>ys</code>.
+    *
+    * Note that this is an instance method.
+    *
+    * @param ys the sequence of elements with which to construct the list-like object.
+    * @tparam Y the underlying type of <code>ys</code> and the underlying type of the resulting ListLike object
+    * @return a <code>ListLike[Y]</code> with exactly one element (whose value is <code>y</code>).
+    */
+  def build[Y](ys: Seq[Y]): ListLike[Y] = ys match {
+    case h #:: t => LazyList(h, t)
+    case _ => LazyList(ys)
+  }
 }
 
 abstract class LazyListLike[+X] extends ListLike[X] {
@@ -255,6 +317,10 @@ abstract class LazyListLike[+X] extends ListLike[X] {
 
 }
 
+object FunctionalUtility {
+  def invert[X](p: X => Boolean): X => Boolean = !p(_)
+}
+
 object LazyList {
 
   /**
@@ -277,6 +343,16 @@ object LazyList {
     case Nil => EmptyList
     case h :: t => Cons(h, () => apply(t))
   }
+
+  /**
+    * Construct a LazyList from a head element and a tail of a Stream
+    *
+    * @param x  the head of the new list-like object
+    * @param xs the sequence.
+    * @tparam X the underlying type of the result.
+    * @return a <code>ListLike[X]</code> with the same number of elements as <code>xs</code>.
+    */
+  def apply[X](x: X, xs: Stream[X]): ListLike[X] = Cons(x, () => apply(xs))
 
   /**
     * Construct a stream of xs.
