@@ -5,6 +5,7 @@
 package edu.neu.coe.csye7200.asstll
 
 case class MappedList[W, +X](ws: Seq[W], f: W => X) extends ListLike[X] {
+
   /**
     * Convert this <code>ListLike[X]</code> into a <code>Seq[X]</code>, element for element.
     *
@@ -90,7 +91,10 @@ case class MappedList[W, +X](ws: Seq[W], f: W => X) extends ListLike[X] {
   /**
     * @return the tail of this list
     */
-  def tail: ListLike[X] = MappedList(ws.tail, f)
+  def tail: ListLike[X] = ws match {
+    case _::t => MappedList(t, f)
+    case Nil => MappedList.empty
+  }
 
   /**
     * Method to form a new list-like object by pre-pending y
@@ -147,5 +151,46 @@ case class MappedList[W, +X](ws: Seq[W], f: W => X) extends ListLike[X] {
     * @tparam Y the underlying type of <code>ys</code> and the underlying type of the resulting ListLike object
     * @return a <code>ListLike[Y]</code> with exactly one element (whose value is <code>y</code>).
     */
-  def build[Y](ys: Seq[Y]): ListLike[Y] = MappedList(ys, identity[Y])
+  def build[Y](ys: Seq[Y]): ListLike[Y] = MappedList.create(ys)
+
+  override def hashCode(): Int = ws match {
+    case Nil => 0
+    case _ => ws.hashCode() + 31*f.hashCode()
+  }
+
+  /**
+    * Equals method.
+    * NOTE: I'm not sure why we have to provide explicit return statements.
+    * But we do.
+    * @param obj the other object to be compared with this.
+    * @return true if this is equal to obj.
+    */
+  override def equals(obj: scala.Any): Boolean = {
+    val identical = obj match {
+      case r: AnyRef => r eq this
+      case _ => false
+    }
+    if (identical) return true
+    if (getClass==obj.getClass) {
+      val other = obj.asInstanceOf[MappedList[W,X]]
+      ws match {
+        case Nil =>
+          return other.ws==Nil
+        case _ =>
+          return ws==other.ws && f==other.f
+      }
+    }
+    return false
+  }
+
+}
+
+object MappedList {
+
+  def create[X](xs: Seq[X]): MappedList[X,X] = new MappedList(xs, identity)
+  def apply[X](x: X): MappedList[X,X] = create(Seq(x))
+  def apply[X](xs: X*): MappedList[X,X] = create(xs)
+
+  val empty = MappedList[Nothing,Nothing](Nil, identity)
+
 }

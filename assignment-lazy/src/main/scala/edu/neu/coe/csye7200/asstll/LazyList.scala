@@ -4,6 +4,8 @@
 
 package edu.neu.coe.csye7200.asstll
 
+import scala.annotation.tailrec
+
 /**
   * Case class representing a non-empty ListLike.
   *
@@ -11,7 +13,7 @@ package edu.neu.coe.csye7200.asstll
   * @param lazyTail a function which, when invoked, yields the tail of this stream.
   * @tparam X the underlying type of the stream, and of the value <code>x</code>.
   */
-case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
+case class LazyList[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
   /**
     * Concatenate this ListLike with ys.
     *
@@ -19,7 +21,7 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     * @tparam Y the underlying type of ys and the result.
     * @return a <code>ListLike[Y]<code> which contains all the elements of this followed by all the elements of ys.
     */
-  def ++[Y >: X](ys: ListLike[Y]): ListLike[Y] = Cons[Y](x, () => lazyTail() ++ ys)
+  def ++[Y >: X](ys: ListLike[Y]): ListLike[Y] = LazyList[Y](x, () => lazyTail() ++ ys)
 
   def head: X = x
 
@@ -36,7 +38,7 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     */
   def flatMap[Y](f: X => Monadic[Y]): ListLike[Y] = {
     val y = f(x).asInstanceOf[ListLike[Y]]
-    Cons(y.head, () => y.tail ++ lazyTail().flatMap(f))
+    LazyList(y.head, () => y.tail ++ lazyTail().flatMap(f))
   }
 
   /**
@@ -53,7 +55,7 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     * @tparam Y the type of y
     * @return a new <code>ListLike[Y]<code> object with y as its head and this as its tail
     */
-  def +:[Y >: X](y: Y): ListLike[Y] = Cons(y, () => this)
+  def +:[Y >: X](y: Y): ListLike[Y] = LazyList(y, () => this)
 
   /**
     * The "filter" function.
@@ -63,7 +65,7 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     */
   def filter(p: X => Boolean): ListLike[X] = {
     val tailFunc = () => lazyTail().filter(p)
-    if (p(x)) Cons(x, tailFunc) else tailFunc()
+    if (p(x)) LazyList(x, tailFunc) else tailFunc()
   }
 
   /**
@@ -75,7 +77,7 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     *         and ys respectively.
     */
   def zip[Y](ys: ListLike[Y]): ListLike[(X, Y)] = ys match {
-    case Cons(y, g) => Cons((x, y), () => lazyTail() zip g())
+    case LazyList(y, g) => LazyList((x, y), () => lazyTail() zip g())
     case _ => EmptyList
   }
 
@@ -91,7 +93,7 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     case _ =>
       if (n > 0)
         this match {
-          case Cons(h, f) => h +: f().take(n - 1)
+          case LazyList(h, f) => h +: f().take(n - 1)
           case _ => EmptyList
         }
       else
@@ -109,7 +111,7 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     case _ =>
       if (n > 0)
         this match {
-          case Cons(_, f) => f().drop(n - 1)
+          case LazyList(_, f) => f().drop(n - 1)
           case _ => EmptyList
         }
       else
@@ -122,8 +124,9 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     * @return a <code>Seq[X]</code>
     */
   def toSeq: Seq[X] = {
+    @tailrec
     def inner(rs: Seq[X], xs: ListLike[X]): Seq[X] = xs match {
-      case Cons(h, f) => inner(rs :+ h, f())
+      case LazyList(h, f) => inner(rs :+ h, f())
       case _ => rs
     }
 
@@ -330,7 +333,7 @@ object LazyList {
     * @tparam X the underlying type of the result.
     * @return a <code>ListLike[X]</code> with exactly one element (whose value is <code>x</code>).
     */
-  def apply[X](x: X): ListLike[X] = Cons(x, () => EmptyList)
+  def apply[X](x: X): ListLike[X] = LazyList(x, () => EmptyList)
 
   /**
     * Construct a (finite) <code>ListLike[X]</code> corresponding to a sequence.
@@ -341,7 +344,7 @@ object LazyList {
     */
   def apply[X](xs: Seq[X]): ListLike[X] = xs match {
     case Nil => EmptyList
-    case h :: t => Cons(h, () => apply(t))
+    case h :: t => LazyList(h, () => apply(t))
   }
 
   /**
@@ -352,7 +355,7 @@ object LazyList {
     * @tparam X the underlying type of the result.
     * @return a <code>ListLike[X]</code> with the same number of elements as <code>xs</code>.
     */
-  def apply[X](x: X, xs: Stream[X]): ListLike[X] = Cons(x, () => apply(xs))
+  def apply[X](x: X, xs: Stream[X]): ListLike[X] = LazyList(x, () => apply(xs))
 
   /**
     * Construct a stream of xs.
@@ -361,12 +364,12 @@ object LazyList {
     * @tparam X the type of X
     * @return a <code>ListLike[X]</code> with an infinite number of element (whose values are <code>x</code>).
     */
-  def continually[X](x: X): ListLike[X] = Cons(x, () => continually(x))
+  def continually[X](x: X): ListLike[X] = LazyList(x, () => continually(x))
 
   /**
     * A lazy val definition of a stream of 1s.
     */
-  lazy val ones: ListLike[Int] = Cons(1, () => ones)
+  lazy val ones: ListLike[Int] = LazyList(1, () => ones)
 
   /**
     * Construct a stream of Integers starting with <code>start</code> and with successive elements being
@@ -377,7 +380,7 @@ object LazyList {
     * @return a <code>ListLike[X]</code> with an infinite number of element (whose values are <code>x</code>,
     *         <code>x+step</code>, etc.).
     */
-  def from(start: Int, step: Int): ListLike[Int] = Cons(start, () => from(start + step, step))
+  def from(start: Int, step: Int): ListLike[Int] = LazyList(start, () => from(start + step, step))
 
   /**
     * Construct a stream of Integers starting with <code>start</code> and with successive elements being
