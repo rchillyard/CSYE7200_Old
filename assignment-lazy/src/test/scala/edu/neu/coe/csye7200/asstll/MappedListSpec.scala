@@ -10,13 +10,13 @@ class MappedListSpec extends FlatSpec with Matchers {
 
   behavior of "MappedList constructor"
   it should "produce a single 1" in {
-    val x: ListLike[Int] = new MappedList[Int,Int](Seq(1), identity)
+    val x: ListLike[Int] = new MappedList[Int, Int](Seq(1), identity)
     x.head shouldBe 1
     x.tail shouldBe MappedList.empty
   }
 
   it should """produce a single "1"""" in {
-    val x: ListLike[String] = new MappedList[Int,String](Seq(1), _.toString)
+    val x: ListLike[String] = new MappedList[Int, String](Seq(1), _.toString)
     x.head shouldBe "1"
     x.tail shouldBe MappedList.empty
   }
@@ -28,13 +28,13 @@ class MappedListSpec extends FlatSpec with Matchers {
     x.toSeq shouldBe Seq(1)
   }
   it should "produce a sequence of 1, 2" in {
-    val x = MappedList[Int](1,2)
-    x.toSeq shouldBe Seq(1,2)
+    val x = MappedList[Int](1, 2)
+    x.toSeq shouldBe Seq(1, 2)
   }
 
   behavior of "take"
   it should "take zero" in {
-    MappedList[Int](1,2).take(0).toSeq shouldBe Nil
+    MappedList[Int](1, 2).take(0).toSeq shouldBe Nil
   }
 
   behavior of "drop"
@@ -170,7 +170,7 @@ class MappedListSpec extends FlatSpec with Matchers {
   }
 
   it should "support a for-comprehension with filter" in {
-    val zs = for (x <- LazyList.from(1); if x>1; y <- LazyList(Seq(1, 2, 3)); if y==2) yield (x, y)
+    val zs = for (x <- LazyList.from(1); if x > 1; y <- LazyList(Seq(1, 2, 3)); if y == 2) yield (x, y)
     (zs take 3).toSeq shouldBe Seq(2 -> 2, 3 -> 2, 4 -> 2)
   }
 }

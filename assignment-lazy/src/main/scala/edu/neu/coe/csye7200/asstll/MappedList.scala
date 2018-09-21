@@ -92,7 +92,7 @@ case class MappedList[W, +X](ws: Seq[W], f: W => X) extends ListLike[X] {
     * @return the tail of this list
     */
   def tail: ListLike[X] = ws match {
-    case _::t => MappedList(t, f)
+    case _ :: t => MappedList(t, f)
     case Nil => MappedList.empty
   }
 
@@ -155,13 +155,14 @@ case class MappedList[W, +X](ws: Seq[W], f: W => X) extends ListLike[X] {
 
   override def hashCode(): Int = ws match {
     case Nil => 0
-    case _ => ws.hashCode() + 31*f.hashCode()
+    case _ => ws.hashCode() + 31 * f.hashCode()
   }
 
   /**
     * Equals method.
     * NOTE: I'm not sure why we have to provide explicit return statements.
     * But we do.
+    *
     * @param obj the other object to be compared with this.
     * @return true if this is equal to obj.
     */
@@ -171,26 +172,28 @@ case class MappedList[W, +X](ws: Seq[W], f: W => X) extends ListLike[X] {
       case _ => false
     }
     if (identical) return true
-    if (getClass==obj.getClass) {
-      val other = obj.asInstanceOf[MappedList[W,X]]
+    if (getClass == obj.getClass) {
+      val other = obj.asInstanceOf[MappedList[W, X]]
       ws match {
         case Nil =>
-          return other.ws==Nil
+          return other.ws == Nil
         case _ =>
-          return ws==other.ws && f==other.f
+          return ws == other.ws && f == other.f
       }
     }
-    return false
+    false
   }
 
 }
 
 object MappedList {
 
-  def create[X](xs: Seq[X]): MappedList[X,X] = new MappedList(xs, identity)
-  def apply[X](x: X): MappedList[X,X] = create(Seq(x))
-  def apply[X](xs: X*): MappedList[X,X] = create(xs)
+  def create[X](xs: Seq[X]): MappedList[X, X] = new MappedList(xs, identity)
 
-  val empty = MappedList[Nothing,Nothing](Nil, identity)
+  def apply[X](x: X): MappedList[X, X] = create(Seq(x))
+
+  def apply[X](xs: X*): MappedList[X, X] = create(xs)
+
+  val empty: MappedList[Nothing, Nothing] = MappedList[Nothing, Nothing](Nil, identity)
 
 }

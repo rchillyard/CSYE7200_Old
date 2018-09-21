@@ -30,7 +30,7 @@ class LazyListSpec extends FlatSpec with Matchers {
   }
   it should "produce a sequence of 1, 2" in {
     val x = LazyList(1, () => LazyList(2, () => EmptyList))
-    x.toSeq shouldBe Seq(1,2)
+    x.toSeq shouldBe Seq(1, 2)
   }
 
   behavior of "ones"
@@ -192,7 +192,7 @@ class LazyListSpec extends FlatSpec with Matchers {
   }
 
   it should "support a for-comprehension with filter" in {
-    val zs = for (x <- LazyList.from(1); if x>1; y <- LazyList(Seq(1, 2, 3)); if y==2) yield (x, y)
+    val zs = for (x <- LazyList.from(1); if x > 1; y <- LazyList(Seq(1, 2, 3)); if y == 2) yield (x, y)
     (zs take 3).toSeq shouldBe Seq(2 -> 2, 3 -> 2, 4 -> 2)
   }
 }
