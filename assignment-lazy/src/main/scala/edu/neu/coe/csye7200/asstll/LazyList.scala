@@ -86,17 +86,17 @@ case class Cons[X](x: X, lazyTail: () => ListLike[X]) extends LazyListLike[X] {
     * @param n the number of elements to take (must not be negative).
     * @return a sequence of length n.
     */
-  def take(n: Int): ListLike[X] = n match {
-    case 0 => EmptyList
-    case _ =>
-      if (n > 0)
-        this match {
-          case Cons(h, f) => h +: f().take(n - 1)
-          case _ => EmptyList
-        }
-      else
-        throw LazyListException("cannot take negative number of elements")
-  }
+  def take(n: Int): ListLike[X] =
+    if (n == 0)
+      EmptyList
+    else if (n > 0)
+      this match {
+        case Cons(h, f) => Cons(h, () => f() take n - 1)
+        case _ => EmptyList
+      }
+    else
+      throw LazyListException("cannot take negative number of elements")
+
 
   /**
     * Drop the first n elements of this ListLike object and return the remainder as a ListLike object.
@@ -357,11 +357,13 @@ object LazyList {
   /**
     * Construct a stream of xs.
     *
-    * @param x the value to be repeated
+    * CONSIDER should we use call-by-value here instead of call-by-name?
+    *
+    * @param x the call-by-name value to be repeated
     * @tparam X the type of X
     * @return a <code>ListLike[X]</code> with an infinite number of element (whose values are <code>x</code>).
     */
-  def continually[X](x: X): ListLike[X] = Cons(x, () => continually(x))
+  def continually[X](x: => X): ListLike[X] = Cons(x, () => continually(x))
 
   /**
     * A lazy val definition of a stream of 1s.
