@@ -78,15 +78,15 @@ object MonadOps {
 
   def zip[A, B](ao: Option[A], bo: Option[B]): Option[(A, B)] = for (a <- ao; b <- bo) yield (a, b)
 
-  def optionToTry[X](xo: Option[X], t: => Throwable): Try[X] = Try(xo.get).recoverWith{case _: java.util.NoSuchElementException => Failure[X](t)}
+  def optionToTry[X](xo: Option[X], t: => Throwable): Try[X] = Try(xo.get).recoverWith { case _: java.util.NoSuchElementException => Failure[X](t) }
 
   def optionToTry[X](xo: Option[X]): Try[X] = Try(xo.get)
 
   def map2[T, U](ty1: Try[T], ty2: Try[T])(f: (T, T) => U): Try[U] = for {t1 <- ty1; t2 <- ty2} yield f(t1, t2)
 
-  def liftTry[T, U](f: T => U): Try[T]=>Try[U] = _ map f
+  def liftTry[T, U](f: T => U): Try[T] => Try[U] = _ map f
 
-  def liftOption[T, U](f: T => U): Option[T]=>Option[U] = _ map f
+  def liftOption[T, U](f: T => U): Option[T] => Option[U] = _ map f
 
-  def liftFuture[T, U](f: T => U)(implicit executor: ExecutionContext): Future[T]=>Future[U] = _ map f
+  def liftFuture[T, U](f: T => U)(implicit executor: ExecutionContext): Future[T] => Future[U] = _ map f
 }

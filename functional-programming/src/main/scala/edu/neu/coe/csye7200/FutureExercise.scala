@@ -1,6 +1,7 @@
 package edu.neu.coe.csye7200
 
 import scala.concurrent._
+import scala.language.postfixOps
 
 /**
   * This case class is basically a Future-logger such that when the function has finished executing,
@@ -10,18 +11,18 @@ import scala.concurrent._
   * * the apply method which converts Seq[X] to Future[X] and
   * * the sequence method which converts Seq[Future[X] into Future[X]
   *
-  * @param f the function to apply to apply's input parameter
-  *          @param name the name of the function
+  * @param f    the function to apply to apply's input parameter
+  * @param name the name of the function
   * @tparam X the underlying type
   */
-case class Async[X](f: Seq[X] => X, name: String)(implicit executor: ExecutionContext) extends (Seq[X]=>Future[X]) {
+case class Async[X](f: Seq[X] => X, name: String)(implicit executor: ExecutionContext) extends (Seq[X] => Future[X]) {
   def apply(xs: Seq[X]): Future[X] = Future {
     val x = f(xs)
     System.err.println(s"sequence starting ${xs.head} has $name $x")
     x
   }
 
-  def sequence(xfs: Seq[Future[X]]) : Future[X] = for (xs <- Future.sequence(xfs)) yield {
+  def sequence(xfs: Seq[Future[X]]): Future[X] = for (xs <- Future.sequence(xfs)) yield {
     val x = f(xs)
     System.err.println(s"sequence of futures has $name $x")
     x

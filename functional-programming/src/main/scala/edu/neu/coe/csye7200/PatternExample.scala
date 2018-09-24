@@ -5,9 +5,9 @@
 package edu.neu.coe.csye7200
 
 object PatternExample extends App {
-  decode(List(1,2,-1))
+  decode(List(1, 2, -1))
 
-  val m = Map (1 -> "uno", 2 -> "dos")
+  val m = Map(1 -> "uno", 2 -> "dos")
   for (kv <- m) decode(kv)
 
   def decode(xs: List[Int]): Unit =
@@ -16,9 +16,9 @@ object PatternExample extends App {
       case h :: t => println(h); decode(t)
     }
 
-  def decode(xs: (Int,String)): Unit =
+  def decode(xs: (Int, String)): Unit =
     xs match {
-      case (k,v) => println(s"$k: $v")
+      case (k, v) => println(s"$k: $v")
     }
 
 }

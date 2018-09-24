@@ -73,7 +73,7 @@ class HTML() {
   val tagStack: mutable.Stack[String] = mutable.Stack[String]()
 
   def tag(w: String): StringBuilder = {
-    tagStack.push(w);
+    tagStack.push(w)
     content.append(s"<$w>")
   }
 

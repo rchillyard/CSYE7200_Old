@@ -40,7 +40,9 @@ object ConcurrencyExample extends App {
 //noinspection NotImplementedCode
 object MoreJunk {
   def getUser(id: Int): Future[Option[String]] = ???
+
   def someFunction1(s: String): Int = ???
+
   val r: Future[Option[Int]] = for {
     maybeUser <- getUser(1)
   } yield {

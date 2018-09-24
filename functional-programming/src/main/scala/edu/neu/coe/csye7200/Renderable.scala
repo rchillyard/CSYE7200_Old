@@ -28,6 +28,7 @@ case class RenderableTraversable(xs: Traversable[_]) extends Renderable {
 
       b
     }
+
     addString(new StringBuilder, "(\n", ",\n", "\n" + ")").toString()
   }
 }

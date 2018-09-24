@@ -8,6 +8,7 @@ trait MyList[+A] {
       case MyNil => r
       case MyCons(hd, tl) => tos(tl, r.append((if (r.length > 1) ", " else "") + s""""$hd""""))
     }
+
     tos(this, new StringBuffer("(")) + ")"
   }
 
@@ -21,6 +22,7 @@ trait MyList[+A] {
       case MyNil => x
       case MyCons(_, tl) => len(tl, x + 1)
     }
+
     len(this, 0)
   }
 
@@ -29,17 +31,20 @@ trait MyList[+A] {
     case _ => false
   }
 
-  def x0: Boolean = this match {case MyNil => true; case _ => false }
+  def x0: Boolean = this match {
+    case MyNil => true;
+    case _ => false
+  }
 
   def x1: Int = this match {
     case MyNil => 0
     case MyCons(_, tl) => 1 + tl.x1
   }
 
-//  def x2: A = this match {
-//    case INil$ => unit(0)
-//    case MyCons(hd, tl) => hd + tl.x2
-//  }
+  //  def x2: A = this match {
+  //    case INil$ => unit(0)
+  //    case MyCons(hd, tl) => hd + tl.x2
+  //  }
 
   def x2a: A = this match {
     case MyNil => throw new Exception("logic error");
@@ -61,6 +66,7 @@ trait MyList[+A] {
       case MyNil => None
       case MyCons(hd, tl) => if (x == 0) Some(hd) else inner(tl, x - 1)
     }
+
     if (x < 0) None else inner(this, x)
   }
 
@@ -70,6 +76,7 @@ trait MyList[+A] {
       case MyNil => throw new IndexOutOfBoundsException(s"index out of bounds: $idx")
       case MyCons(hd, tl) => if (x == 0) hd else internal(tl, x - 1)
     }
+
     if (idx >= 0) internal(this, idx) else throw new IndexOutOfBoundsException(s"index out of bounds: $idx")
   }
 
