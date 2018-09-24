@@ -41,7 +41,7 @@ object MyFutureApp extends App {
     if (is.size <= 1)
       is.headOption getOrElse 0
     else {
-      val (l,r) = is.splitAt(is.length/2)
+      val (l, r) = is.splitAt(is.length / 2)
       sum(l) + sum(r)
     }
 }

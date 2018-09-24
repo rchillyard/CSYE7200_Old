@@ -6,11 +6,13 @@ package edu.neu.coe.csye7200
 
 trait Fuzzy[X] extends Shape {
   def estimate: X
+
   def fuzz: X
 }
 
 trait Value[X] {
   def toDouble: Double
+
   def fromDouble(x: Double): X
 }
 

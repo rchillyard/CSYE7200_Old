@@ -350,6 +350,7 @@ object CsvParser {
       case Nil => result
       case h :: t => loop(t, result orElse Try(h.parseDateTime(s)))
     }
+
     loop(dfs map {
       DateTimeFormat.forPattern
     }, Failure(new Exception(s""""$s" cannot be parsed as date""")))

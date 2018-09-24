@@ -4,8 +4,6 @@
 
 package edu.neu.coe.csye7200.greedy
 
-import java.util.function.{BiFunction, Function}
-
 import scala.annotation.tailrec
 
 case class Greedy[T, R](fGreedy: T => T, fAdjust: (T, T) => T, fResult: (T, R) => R, fDone: T => Boolean) extends ((T, R) => R) {

@@ -11,7 +11,7 @@ class BadParser extends JavaTokenParsers {
 
 object BadParser extends App {
   val p = new BadParser
-  val r = p.parseAll(p.name,"Martin Scala Odersky")
+  val r = p.parseAll(p.name, "Martin Scala Odersky")
   val first = r match {
     case p.Success((f, _, _), _) => f
     case _ => throw new RuntimeException("problem")

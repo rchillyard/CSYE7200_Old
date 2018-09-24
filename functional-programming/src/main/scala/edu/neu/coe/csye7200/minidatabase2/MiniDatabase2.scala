@@ -40,7 +40,7 @@ object MiniDatabase2 extends App {
 case class Entry(name: Name, height: Height)
 
 case class Height(feet: Int, in: Int) {
-  def inches = feet * 12 + in
+  def inches: Int = feet * 12 + in
 }
 
 object Entry {
@@ -54,7 +54,7 @@ object Entry {
 }
 
 object Height {
-  val rHeightFtIn = """^\s*(\d+)\s*(?:ft|\')(\s*(\d+)\s*(?:in|\"))?\s*$""".r
+  private val rHeightFtIn = """^\s*(\d+)\s*(?:ft|\')(\s*(\d+)\s*(?:in|\"))?\s*$""".r
 
   def parse(ft: String, in: String): Try[Height] = {
     val tryFt = Try(ft.toInt)
@@ -77,7 +77,7 @@ object Name {
     case None => f
   }
 
-  val rName ="""^(\w+)\s+((.*)\s+)?(\w+)$""".r
+  private val rName ="""^(\w+)\s+((.*)\s+)?(\w+)$""".r
 
   def parse(name: String): Try[Name] = name match {
     case rName(first, _, middle, last) => sequence(MiniDatabase2.map3(Some(first), Some(middle), Some(last)) { case (f, m, l) => Name(f, Option(m), l) }, Failure(new IllegalArgumentException(name)))

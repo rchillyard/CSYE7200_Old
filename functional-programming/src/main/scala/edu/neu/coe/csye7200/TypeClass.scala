@@ -20,5 +20,5 @@ object Parseable {
 }
 
 object TestParseable {
-  def parse[T : Parseable](s: String): Try[T] = implicitly[Parseable[T]].parse(s)
+  def parse[T: Parseable](s: String): Try[T] = implicitly[Parseable[T]].parse(s)
 }

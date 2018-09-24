@@ -8,7 +8,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success}
 
-class ArgsSpec extends FlatSpec with Matchers{
+class ArgsSpec extends FlatSpec with Matchers {
 
   private val argFilename = "argFilename"
   private val nameF = "f"
@@ -107,7 +107,7 @@ class ArgsSpec extends FlatSpec with Matchers{
   it should "not implement getArg with ambiguous name" in {
     val x = Arg(sX, s1)
     val target = Args.create(x, x)
-    a [AmbiguousNameException] shouldBe thrownBy(target.getArg(sX))
+    a[AmbiguousNameException] shouldBe thrownBy(target.getArg(sX))
   }
 
   it should "implement extract" in {
@@ -147,27 +147,27 @@ class ArgsSpec extends FlatSpec with Matchers{
   val p = new SimpleArgParser
 
   it should "parse command " + cmdF in {
-    p.parseAll(p.command,cmdF) should matchPattern { case p.Success(p.Command(`nameF`), _) => }
+    p.parseAll(p.command, cmdF) should matchPattern { case p.Success(p.Command(`nameF`), _) => }
   }
 
   it should "not parse command -X" in {
-    p.parseAll(p.command,"-X") should matchPattern { case p.Failure(_, _) => }
+    p.parseAll(p.command, "-X") should matchPattern { case p.Failure(_, _) => }
   }
 
   it should "parse argument " + argFilename in {
-    p.parseAll(p.argument,argFilename) should matchPattern { case p.Success(p.Argument(`argFilename`), _) => }
+    p.parseAll(p.argument, argFilename) should matchPattern { case p.Success(p.Argument(`argFilename`), _) => }
   }
 
   it should "not parse argument -x" in {
-    p.parseAll(p.argument,"-x") should matchPattern { case p.Failure(_, _) => }
+    p.parseAll(p.argument, "-x") should matchPattern { case p.Failure(_, _) => }
   }
 
   it should "parse token " + cmdF in {
-    p.parseAll(p.token,cmdF) should matchPattern { case p.Success(p.Command(`nameF`), _) => }
+    p.parseAll(p.token, cmdF) should matchPattern { case p.Success(p.Command(`nameF`), _) => }
   }
 
   it should "parse token " + argFilename in {
-    p.parseAll(p.token,argFilename) should matchPattern { case p.Success(p.Argument(`argFilename`), _) => }
+    p.parseAll(p.token, argFilename) should matchPattern { case p.Success(p.Argument(`argFilename`), _) => }
   }
 
   it should "parse " + cmdF in {
