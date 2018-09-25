@@ -50,6 +50,7 @@ object ConcordanceParser {
 
   def parseLine(line: String): Seq[(Int, String)] = {
     def tidy(s: String) = s.replaceAll("""[.,;-?!]""", "")
+
     val p = new ConcordanceParser
     val r = p.parseAll(p.sentence, line) match {
       case p.Success(ws, _) => ws

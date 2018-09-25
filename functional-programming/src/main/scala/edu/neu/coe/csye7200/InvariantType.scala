@@ -5,6 +5,6 @@ package edu.neu.coe.csye7200
   */
 case class InvariantType[+A](x: A) {
 
-  def compare[B>:A](y: B): Boolean = x==y
+  def compare[B >: A](y: B): Boolean = x == y
 
 }

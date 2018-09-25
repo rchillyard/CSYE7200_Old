@@ -66,7 +66,9 @@ class DocumentSpec extends FlatSpec with Matchers {
     val one = Document(1)
     val doc1 = Document(Map(2 -> 1))
     val doc2 = Clade(Map(1 -> doc1))
+
     def toInt(x: String): Int = x.toInt
+
     implicit val conv = toInt _
     doc2.get("1.2") should matchPattern { case Some(1) => }
   }

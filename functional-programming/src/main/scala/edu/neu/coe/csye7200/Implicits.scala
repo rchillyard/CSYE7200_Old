@@ -15,7 +15,9 @@ object Implicits extends App {
   println(myAdd("1", "2"))
 
   val u = U(10)
+
   import T._
+
   println(u.double)
 
   implicit class V(v: Int) {
@@ -27,7 +29,7 @@ object Implicits extends App {
 }
 
 case class T(t: Int) {
-  def double: Int = 2*t
+  def double: Int = 2 * t
 }
 
 import scala.language.implicitConversions

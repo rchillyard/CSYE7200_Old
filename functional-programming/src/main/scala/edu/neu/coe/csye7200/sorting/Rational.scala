@@ -83,6 +83,7 @@ case class Rational(n: Long, d: Long) extends Fractional[Rational] {
 
   def power(x: Int): Rational = {
     @tailrec def inner(r: Rational, x: Int): Rational = if (x == 0) r else inner(r * this, x - 1)
+
     inner(Rational.one, x)
   }
 

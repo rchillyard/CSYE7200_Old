@@ -9,14 +9,14 @@ object FunctionalProgramming extends App {
 
   def multiply_by_10_over_3(x: Double) = x / 3 * 10
 
-    val x = evaluate_3_tenths
-    val y = multiply_by_10_over_3(x)
-    println(y + " != 1")
+  val x = evaluate_3_tenths
+  val y = multiply_by_10_over_3(x)
+  println(y + " != 1")
 
-//  val t = Try[String](throw new RuntimeException("my"))
+  //  val t = Try[String](throw new RuntimeException("my"))
 
   val t = Try("hello")
-  val u = t.recoverWith{
+  val u = t.recoverWith {
     case e => Success(s"ignoring exception ${e.getLocalizedMessage}")
   }
 

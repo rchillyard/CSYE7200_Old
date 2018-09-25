@@ -59,6 +59,32 @@ class LazyListSpec extends FlatSpec with Matchers {
     (LazyList.continually(1) take 3).toSeq shouldBe Seq(1, 1, 1)
   }
 
+  it should "take 3 from an infinite stream of 1s that counts" in {
+    var count = 0
+    def incrementCountAndProvideValue: Int = {
+      count = count + 1
+      1
+    }
+    val lazyList = LazyList.continually(incrementCountAndProvideValue) take 3
+    count shouldBe 1
+    lazyList.toSeq shouldBe Seq(1, 1, 1)
+    // TODO why isn't this 3? It seems like the LazyList is not memoizing the elements that have been evaluated already.
+    count shouldBe 4
+  }
+
+  it should "take 3 from an infinite incrementing stream that counts" in {
+    var count = 0
+    def incrementCountAndProvideValue: Int = {
+      count = count + 1
+      count
+    }
+    val lazyList = LazyList.continually(incrementCountAndProvideValue) take 3
+    count shouldBe 1
+    lazyList.toSeq shouldBe Seq(1, 2, 3)
+    // TODO why isn't this 3? It seems like the LazyList is not memoizing the elements that have been evaluated already.
+    count shouldBe 4
+  }
+
   behavior of "drop"
   it should "work correctly" in {
     val x = LazyList.from(1)
