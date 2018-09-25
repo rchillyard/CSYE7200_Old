@@ -63,7 +63,6 @@ object Arg {
 }
 
 case class Args[X](xas: Seq[Arg[X]]) extends Traversable[Arg[X]] {
-  def map[Y](f: X => Y): Args[Y] = ??? // TODO implement me
 
   def validate(so: Option[Synopsis]): Args[X] = so match {
     case Some(s) => if (validate(s)) this else throw ValidationException(this, s)
@@ -91,7 +90,7 @@ case class Args[X](xas: Seq[Arg[X]]) extends Traversable[Arg[X]] {
     * @tparam Y the result type of the function f
     * @return an Args[Y] object
     */
-  def map[Y](f: X => Y): Args[Y] = Args(for (xa <- xas) yield xa.map(f))
+  def map[Y](f: X => Y): Args[Y] = ??? // TODO implement me
 
   /**
     * Get the options (i.e. args with names) as map of names to (optional) values
