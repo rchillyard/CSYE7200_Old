@@ -22,7 +22,7 @@ class WebCrawlerSpec extends FlatSpec with Matchers with Futures with ScalaFutur
 
   "getURLContent" should s"succeed for $goodURL" taggedAs(Slow) in {
     val wf = WebCrawler.getURLContent(new URL(goodURL))
-    whenReady(wf, timeout(Span(6, Seconds))) { w => w.length shouldBe 4827 }
+    whenReady(wf, timeout(Span(6, Seconds))) { w => w.length/100 shouldBe 48 }
   }
 
   "wget(URL)" should s"succeed for $goodURL" taggedAs(Slow) in {
