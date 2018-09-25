@@ -6,83 +6,35 @@ package edu.neu.coe.csye7200.asstll
 
 import org.scalatest.{FlatSpec, Matchers}
 
-class LazyListSpec extends FlatSpec with Matchers {
+class MappedListSpec extends FlatSpec with Matchers {
 
-  behavior of "Cons"
-  it should "produce a single of 1" in {
-    val x: ListLike[Int] = LazyList(1, () => EmptyList)
+  behavior of "MappedList constructor"
+  it should "produce a single 1" in {
+    val x: ListLike[Int] = new MappedList[Int, Int](Seq(1), identity)
     x.head shouldBe 1
-    x.tail shouldBe EmptyList
+    x.tail shouldBe MappedList.empty
   }
 
-  it should "produce a stream of xs using Cons directly" in {
-    lazy val x: ListLike[String] = LazyList("x", () => x)
-    val y = x.take(3).toSeq
-    y.size shouldBe 3
-    y.head shouldBe "x"
-    y shouldBe Seq("x", "x", "x")
+  it should """produce a single "1"""" in {
+    val x: ListLike[String] = new MappedList[Int, String](Seq(1), _.toString)
+    x.head shouldBe "1"
+    x.tail shouldBe MappedList.empty
   }
+
 
   behavior of "toSeq"
   it should "produce a single 1" in {
-    val x: ListLike[Int] = LazyList(1, () => EmptyList)
+    val x: ListLike[Int] = MappedList[Int](1)
     x.toSeq shouldBe Seq(1)
   }
   it should "produce a sequence of 1, 2" in {
-    val x = LazyList(1, () => LazyList(2, () => EmptyList))
+    val x = MappedList[Int](1, 2)
     x.toSeq shouldBe Seq(1, 2)
   }
 
-  behavior of "ones"
-  it should "produce a stream of 1s" in {
-    val x: ListLike[Int] = LazyList.ones
-    val y = x.take(3).toSeq
-    y.size shouldBe 3
-    y.head shouldBe 1
-    y shouldBe Seq(1, 1, 1)
-  }
-
   behavior of "take"
-  it should "take zero from a finite stream" in {
-    LazyList(1).take(0).toSeq shouldBe Nil
-  }
-
-  it should "take zero from an infinite stream" in {
-    LazyList.continually(1).take(0).toSeq shouldBe Nil
-  }
-
-  it should "take 3 from a finite stream of actual length 1" in {
-    (LazyList(1) take 3).toSeq shouldBe Seq(1)
-  }
-
-  it should "take 3 from an infinite stream" in {
-    (LazyList.continually(1) take 3).toSeq shouldBe Seq(1, 1, 1)
-  }
-
-  it should "take 3 from an infinite stream of 1s that counts" in {
-    var count = 0
-    def incrementCountAndProvideValue: Int = {
-      count = count + 1
-      1
-    }
-    val lazyList = LazyList.continually(incrementCountAndProvideValue) take 3
-    count shouldBe 1
-    lazyList.toSeq shouldBe Seq(1, 1, 1)
-    // TODO why isn't this 3? It seems like the LazyList is not memoizing the elements that have been evaluated already.
-    count shouldBe 4
-  }
-
-  it should "take 3 from an infinite incrementing stream that counts" in {
-    var count = 0
-    def incrementCountAndProvideValue: Int = {
-      count = count + 1
-      count
-    }
-    val lazyList = LazyList.continually(incrementCountAndProvideValue) take 3
-    count shouldBe 1
-    lazyList.toSeq shouldBe Seq(1, 2, 3)
-    // TODO why isn't this 3? It seems like the LazyList is not memoizing the elements that have been evaluated already.
-    count shouldBe 4
+  it should "take zero" in {
+    MappedList[Int](1, 2).take(0).toSeq shouldBe Nil
   }
 
   behavior of "drop"

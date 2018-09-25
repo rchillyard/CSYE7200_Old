@@ -1,14 +1,14 @@
 package edu.neu.coe.csye7200.patternmatching
 
-sealed trait Document[K,T] {
+sealed trait Document[K, T] {
 
   def get(ks: List[K]): Option[T]
 
-  def :+ (x: (List[K], Document[K,T]))(implicit k: K = null.asInstanceOf[K]): Document[K,T]
+  def :+(x: (List[K], Document[K, T]))(implicit k: K = null.asInstanceOf[K]): Document[K, T]
 
-  def +: (x: (List[K], Document[K,T]))(implicit k: K = null.asInstanceOf[K]): Document[K,T]
+  def +:(x: (List[K], Document[K, T]))(implicit k: K = null.asInstanceOf[K]): Document[K, T]
 
-  def ++ (d: Document[K,T])(implicit k: K = null.asInstanceOf[K]): Document[K,T]
+  def ++(d: Document[K, T])(implicit k: K = null.asInstanceOf[K]): Document[K, T]
 
   def size: Int
 }

@@ -7,23 +7,23 @@ trait Concept extends Ordered[Concept] {
   val name: String
   val priority: Int
 
-  override def toString = name
+  override def toString: String = name
 
-  def compare(that: Concept) = priority - that.priority
+  def compare(that: Concept): Int = priority - that.priority
 
   def initial: String = name.substring(0, 1)
 }
 
 sealed trait Rank extends Concept {
-  def isHonor = priority > 7
+  def isHonor: Boolean = priority > 7
 
-  def isSpot = !isHonor
+  def isSpot: Boolean = !isHonor
 }
 
 sealed trait Suit extends Concept {
-  def isRed = !isBlack
+  def isRed: Boolean = !isBlack
 
-  def isBlack = this match {
+  def isBlack: Boolean = this match {
     case Spades | Clubs => true
     case _ => false
   }
@@ -145,9 +145,12 @@ case class Card(suit: Suit, rank: Rank) extends Ordered[Card] {
   // as opposed to poker-style
   private def nameTuple = (suit.initial, rank.initial)
 
-  override def toString = if (bridgeStyle) nameTuple.toString else nameTuple.swap.toString
+  override def toString: String = if (bridgeStyle) nameTuple.toString else nameTuple.swap.toString
 
-  def compare(that: Card): Int = implicitly[Ordering[(Suit, Rank)]].compare(Card.unapply(this).get, Card.unapply(that).get)
+  def compare(that: Card): Int = suit.compareTo(that.suit) match {
+    case 0 => rank.compareTo(that.rank)
+    case x => x
+  }
 }
 
 object Card {
