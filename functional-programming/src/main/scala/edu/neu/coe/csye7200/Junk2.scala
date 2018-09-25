@@ -33,7 +33,8 @@ object ConcurrencyExample2 extends App {
           _l.recoverWith({ case _ => go(ls, (t._1, t._2 + 1)) }).asInstanceOf[Future[(pass, fail)]]
       }
     }
-    go(l,(0,0))
+
+    go(l, (0, 0))
   }
 
   //hardcoded future
@@ -52,5 +53,5 @@ object ConcurrencyExample2 extends App {
     case Failure(v) => println("fp:" + v)
   }
 
-  Await.result(result,1000 millis)
+  Await.result(result, 1000 millis)
 }

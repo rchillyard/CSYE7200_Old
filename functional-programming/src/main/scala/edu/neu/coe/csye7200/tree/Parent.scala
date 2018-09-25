@@ -30,10 +30,10 @@ object Parent {
     * @param r  the current value of the result, i.e. the "accumulator".
     * @tparam T a type which extends Parent, and thus has children of type T -- this "context bound" is implemented via a compiler-generated implicit parameter of type Parent[T].
     * @tparam R the result type.
-    * @return   a value of R.
+    * @return a value of R.
     */
   @tailrec
-  final def traverse[T : Parent, R](f: T => R, g: (R, R) => R, q: R => Boolean, z: (List[T], T) => List[T])(ts: List[T], r: R): R =
+  final def traverse[T: Parent, R](f: T => R, g: (R, R) => R, q: R => Boolean, z: (List[T], T) => List[T])(ts: List[T], r: R): R =
     if (q(r))
       r
     else

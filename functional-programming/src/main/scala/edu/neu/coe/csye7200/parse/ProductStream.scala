@@ -104,7 +104,7 @@ abstract class ProductStreamBase[X <: Product] extends ProductStream[X] {
 abstract class TupleStreamBase[X <: Product](parser: CsvParser, input: Stream[String]) extends ProductStreamBase[X] {
   /**
     * @return the header for this object
-    * @throws exception which is wrapped in a Failure from wsy (below)
+    * @throws Exception which is wrapped in a Failure from wsy (below)
     */
   def header: Seq[String] = wsy.get
 
@@ -112,7 +112,7 @@ abstract class TupleStreamBase[X <: Product](parser: CsvParser, input: Stream[St
     * @param f the function which will be applied to a String to yield an Any (an element of a Tuple)
     * @param s the (row/line) String to be parsed
     * @return a Tuple
-    * @throws an exception if any of the underlying code generated a Failure
+    * @throws Exception if any of the underlying code generated a Failure
     */
   def stringToTuple(f: String => Try[Any])(s: String): X = stringToTryTuple(f)(s).get
 
@@ -222,7 +222,11 @@ object TupleStream {
 object CSV {
   def apply[X <: Product](input: Stream[String]): CSV[X] = apply(CsvParser(), input)
 
-  def apply[X <: Product](parser: CsvParser, input: InputStream): CSV[X] = apply(parser, Source.fromInputStream(input).getLines.toStream)
+  def apply[X <: Product](parser: CsvParser, source: Source): CSV[X] = apply(parser, source.getLines.toStream)
+
+  def apply[X <: Product](source: Source): CSV[X] = apply(CsvParser(), source.getLines.toStream)
+
+  def apply[X <: Product](parser: CsvParser, input: InputStream): CSV[X] = apply(parser, Source.fromInputStream(input))
 
   def apply[X <: Product](input: InputStream): CSV[X] = apply(CsvParser(), input)
 
@@ -250,16 +254,80 @@ case class CsvParser(
                       quoteChar: String = """"""", // quotation char to allow strings to include literal delimiter characters, decimal points, etc.
                       parseElem: String => Try[Any] = CsvParser.defaultParser
                     ) extends CsvParserBase(parseElem) {
+  override def skipWhitespace = false
+
+  /**
+    * The chief method of this CsvParser (probably the other parser methods should be private).
+    *
+    * @param s a String to be parsed as a row of a CSV file.
+    * @return a Try of a List of String
+    */
+  def parseRow(s: String): Try[List[String]] = this.parseAll(this.row, s) match {
+    case this.Success(r, _) =>
+      scala.util.Success(r)
+    case f@(this.Failure(_, _) | this.Error(_, _)) => scala.util.Failure(new Exception(s"cannot parse $s: $f"))
+  }
+
+  /**
+    * Internal parser method to parse a row.
+    * It succeeds on a sequence of terms, separated by the delimiter.
+    *
+    * @return a Parser of List of String
+    */
   def row: Parser[List[String]] = // TODO Assignment6 3: row ::= term { delimiter term }
     repsep(term, delimiter)
 
+  /**
+    * Internal parser method to parse a term.
+    * It succeeds on EITHER a string contained by a pair of quote characters OR a string which does not contain
+    * any delimiter.
+    *
+    * @return a Parser of String
+    */
   def term: Parser[String] = // TODO Assignment6 7: term ::= quoteChar text quoteChar | text
-    quoteChar ~> s"[^$quoteChar]*".r <~ quoteChar | s"[^$delimiter]*".r
+    stringInQuotes | nonDelimiters | failure("term failure")
 
-  def parseRow(s: String): Try[List[String]] = this.parseAll(this.row, s) match {
-    case this.Success(r, _) => scala.util.Success(r)
-    case f@(this.Failure(_, _) | this.Error(_, _)) => scala.util.Failure(new Exception(s"cannot parse $s: $f"))
-  }
+  /**
+    * Internal parser method to parse a string within quotes.
+    * It succeeds on a quotedString contained by a pair of quote characters.
+    *
+    * @return a Parser of String
+    */
+  def stringInQuotes: Parser[String] = quoteChar ~> quotedString <~ quoteChar
+
+  /**
+    * Internal parser method to parse a quoted string.
+    * It succeeds EITHER:
+    * a sequence of characters which may contain pairs of quotes (which are replaced by one a quote)
+    * OR: a String which does not include any quote characters at all.
+    *
+    * @return a Parser of String
+    */
+  def quotedString: Parser[String] = containingEscapedQuotes | nonQuotes
+
+  /**
+    * This parser succeeds on a sequence of strings, each made up of non-quote characters, and delimited
+    * by double-quote-characters, i.e. two quote characters one after the other.
+    *
+    * @return a parser of String where the input has had the quote character pairs replaced by a single quote character.
+    */
+  def containingEscapedQuotes: Parser[String] = repsep(nonQuotes, quoteChar + quoteChar) ^^ { xs: Seq[String] => xs.reduceLeft(_ + quoteChar + _) }
+
+  /**
+    * This parser succeeds on a sequence of characters which do not include the quote character
+    *
+    * @return a Parser of String
+    */
+  def nonQuotes: Parser[String] =
+    s"""[^$quoteChar]*""".r
+
+  /**
+    * This parser succeeds on a sequence of characters which do not include the delimiter character
+    *
+    * @return a Parser of String
+    */
+  def nonDelimiters: Parser[String] =
+    s"""[^$delimiter]+""".r
 }
 
 object CsvParser {
@@ -282,6 +350,7 @@ object CsvParser {
       case Nil => result
       case h :: t => loop(t, result orElse Try(h.parseDateTime(s)))
     }
+
     loop(dfs map {
       DateTimeFormat.forPattern
     }, Failure(new Exception(s""""$s" cannot be parsed as date""")))

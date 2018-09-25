@@ -9,7 +9,7 @@ object ListAppendTest extends App {
 
   val propertyData = List(""""spark.shuffle.memoryFraction"="0.5"""", """"spark.yarn.executor.memoryOverhead"="712" """)
 
-  val propertyList = new ListBuffer[(String,String)]()
+  val propertyList = new ListBuffer[(String, String)]()
 
   propertyData.foreach { line =>
     val c = line.split("=")

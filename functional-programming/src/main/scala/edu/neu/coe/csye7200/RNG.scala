@@ -71,7 +71,7 @@ case class GaussianRNG(n: Long) extends RNG_Java[(Double, Double)](n) {
 
   // ???
   val r1 = UniformDoubleRNG(n)
-  val r2 = r1.next
+  private val r2 = r1.next
 
   def value: (Double, Double) = {
     val u = r1.value.x

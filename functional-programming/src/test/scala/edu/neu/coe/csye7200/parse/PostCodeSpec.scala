@@ -35,51 +35,51 @@ class PostCodeSpec extends FlatSpec with Matchers {
   }
   behavior of "district"
   it should "parse 1A" in {
-    parser.parseAll(parser.district, "1A") should matchPattern { case parser.Success(parser.District(parser.Digit(1),None,Some('A')), _) => }
+    parser.parseAll(parser.district, "1A") should matchPattern { case parser.Success(parser.District(parser.Digit(1), None, Some('A')), _) => }
   }
   behavior of "inwardCode"
   it should "parse 7JX" in {
-    parser.parseAll(parser.inwardCode, "7JX") should matchPattern { case parser.Success(parser.InwardCode(parser.Digit(7),"JX"), _) => }
+    parser.parseAll(parser.inwardCode, "7JX") should matchPattern { case parser.Success(parser.InwardCode(parser.Digit(7), "JX"), _) => }
   }
   it should "parse 1BB" in {
-    parser.parseAll(parser.inwardCode, "1BB") should matchPattern { case parser.Success(parser.InwardCode(parser.Digit(1),"BB"), _) => }
+    parser.parseAll(parser.inwardCode, "1BB") should matchPattern { case parser.Success(parser.InwardCode(parser.Digit(1), "BB"), _) => }
   }
   behavior of "outwardCode"
   it should "parse EC1A" in {
-    parser.parseAll(parser.outwardCode, "EC1A") should matchPattern { case parser.Success(parser.OutwardCode("EC",parser.District(parser.Digit(1),None,Some('A'))), _) => }
+    parser.parseAll(parser.outwardCode, "EC1A") should matchPattern { case parser.Success(parser.OutwardCode("EC", parser.District(parser.Digit(1), None, Some('A'))), _) => }
   }
   behavior of "postCode"
-  it should "parse "+code1 in {
+  it should "parse " + code1 in {
     val expected = parser.PostCode(parser.OutwardCode("EC", parser.District(parser.Digit(1), None, Some('A'))), parser.InwardCode(parser.Digit(1), "BB"))
     val r = parser.parseAll(parser.postCode, code1)
     r should matchPattern { case parser.Success(`expected`, _) => }
     r.get.toString shouldBe code1
   }
-  it should "parse "+code2 in {
+  it should "parse " + code2 in {
     val expected = parser.PostCode(parser.OutwardCode("W", parser.District(parser.Digit(1), None, Some('A'))), parser.InwardCode(parser.Digit(0), "AX"))
     val r = parser.parseAll(parser.postCode, code2)
     r should matchPattern { case parser.Success(`expected`, _) => }
     r.get.toString shouldBe code2
   }
-  it should "parse "+code3 in {
+  it should "parse " + code3 in {
     val expected = parser.PostCode(parser.OutwardCode("M", parser.District(parser.Digit(1), None, None)), parser.InwardCode(parser.Digit(1), "AE"))
     val r = parser.parseAll(parser.postCode, code3)
     r should matchPattern { case parser.Success(`expected`, _) => }
     r.get.toString shouldBe code3
   }
-  it should "parse "+code4 in {
+  it should "parse " + code4 in {
     val expected = parser.PostCode(parser.OutwardCode("B", parser.District(parser.Digit(3), Some(parser.Digit(3)), None)), parser.InwardCode(parser.Digit(8), "TH"))
     val r = parser.parseAll(parser.postCode, code4)
     r should matchPattern { case parser.Success(`expected`, _) => }
     r.get.toString shouldBe code4
   }
-  it should "parse "+code5 in {
+  it should "parse " + code5 in {
     val expected = parser.PostCode(parser.OutwardCode("CR", parser.District(parser.Digit(2), None, None)), parser.InwardCode(parser.Digit(6), "XH"))
     val r = parser.parseAll(parser.postCode, code5)
     r should matchPattern { case parser.Success(`expected`, _) => }
     r.get.toString shouldBe code5
   }
-  it should "parse "+code6 in {
+  it should "parse " + code6 in {
     val expected = parser.PostCode(parser.OutwardCode("DN", parser.District(parser.Digit(5), Some(parser.Digit(5)), None)), parser.InwardCode(parser.Digit(1), "PT"))
     val r = parser.parseAll(parser.postCode, code6)
     r should matchPattern { case parser.Success(`expected`, _) => }

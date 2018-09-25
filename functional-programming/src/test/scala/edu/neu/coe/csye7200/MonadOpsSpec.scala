@@ -52,7 +52,7 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   }
 
   it should "succeed for empty list" in {
-    val uys = for { w <- List[String](); uy = Try(new URL(w))} yield uy
+    val uys = for {w <- List[String](); uy = Try(new URL(w))} yield uy
     sequence(uys) match {
       case Success(us) => Assertions.assert(us.isEmpty)
       case _ => Failed
@@ -70,8 +70,8 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   }
 
   "flatten" should "succeed" in {
-    val ifs: Seq[Future[Seq[Int]]] = Seq(Future(Seq(1,2)))
-    whenReady(flatten(ifs)) {x => println(x); x should matchPattern { case Seq(1,2) => }}
+    val ifs: Seq[Future[Seq[Int]]] = Seq(Future(Seq(1, 2)))
+    whenReady(flatten(ifs)) { x => println(x); x should matchPattern { case Seq(1, 2) => } }
   }
 
   it should "succeed for http://www.google.com, etc." in {
@@ -83,13 +83,13 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
 
   it should "succeed for empty list" in {
     val ws = List[String]()
-    val urls = for { w <- ws; uf = Future(new URL(w))} yield uf
+    val urls = for {w <- ws; uf = Future(new URL(w))} yield uf
     val usfs = List(Future.sequence(urls))
     whenReady(flatten(usfs)) { us => Assertions.assert(us.isEmpty) }
   }
   it should "succeed for option map" in {
-    val map: Map[String,Option[String]] = Map("a"->Some("A"), "b"->None)
-    val flat: Map[String,String] = flatten(map)
+    val map: Map[String, Option[String]] = Map("a" -> Some("A"), "b" -> None)
+    val flat: Map[String, String] = flatten(map)
     flat.size shouldBe 1
   }
   "sequence" should "succeed for http://www.google.com, www.microsoft.com" in {
@@ -117,17 +117,17 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
 
   "zip(Option,Option)" should "succeed" in {
     val (one, two, none) = (Some(1), Some(2), None)
-    zip(one,two) should matchPattern { case Some((1,2)) => }
-    zip(none,two) should matchPattern { case None => }
-    zip(one,none) should matchPattern { case None => }
+    zip(one, two) should matchPattern { case Some((1, 2)) => }
+    zip(none, two) should matchPattern { case None => }
+    zip(one, none) should matchPattern { case None => }
   }
   "optionToTry" should "succeed for Map" in {
-    val map = Map("a"->"A", "b"->"B")
+    val map = Map("a" -> "A", "b" -> "B")
     optionToTry(map.get("a")) should matchPattern { case Success("A") => }
     optionToTry(map.get("x")) should matchPattern { case Failure(_) => }
   }
   "lift" should "succeed" in {
-    def double(x: Int) = 2*x
+    def double(x: Int) = 2 * x
 
     Success(1) map double should matchPattern { case Success(2) => }
     Failure(new Exception("bad")) map double should matchPattern { case Failure(_) => }
@@ -136,14 +136,15 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   "map2" should "succeed" in {
     val one = Success(1)
     val two = Success(2)
-    def sum(x: Int,y: Int) = x+y
+
+    def sum(x: Int, y: Int) = x + y
 
     map2(one, two)(sum) should matchPattern { case Success(3) => }
     map2(one, Failure(new Exception("bad")))(sum) should matchPattern { case Failure(_) => }
   }
 
   "asFuture" should "succeed" in {
-    whenReady(asFuture(Success(1))) { x => x should matchPattern { case 1 => }}
+    whenReady(asFuture(Success(1))) { x => x should matchPattern { case 1 => } }
     //    whenReady(toFuture(Failure[Int](new Exception("bad")))) { x => p shouldBe new Exception("bad")}
   }
 

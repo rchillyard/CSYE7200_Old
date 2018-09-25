@@ -35,6 +35,7 @@ trait IList {
       case INil => None
       case Cons(hd, tl) => if (x == 0) Some(hd) else inner(tl, x - 1)
     }
+
     if (x < 0) None else inner(this, x)
   }
 

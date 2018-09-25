@@ -17,6 +17,7 @@ object Fibonacci {
 
   /**
     * Method to yield that largest Fibonacci number which is less than or equal to x
+    *
     * @param x the given value
     * @return the largest Fibonacci number less than or equal to x
     */

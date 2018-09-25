@@ -27,7 +27,7 @@ object Sum extends App {
   val xsf = Future.sequence(xfs)
   val xf: Future[BigInt] = for (ls <- xsf) yield sum(ls.toStream)
   xf foreach println
-  private val expected: Future[BigInt] = xf filter (_ == BigInt(chunk*10 * (chunk*10 + 1L) / 2))
+  private val expected: Future[BigInt] = xf filter (_ == BigInt(chunk * 10 * (chunk * 10 + 1L) / 2))
   expected foreach { _ => println("OK") }
 
   Await.ready(expected, 10000 milli)
