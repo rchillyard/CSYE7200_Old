@@ -19,7 +19,11 @@ case class Arg[X](name: Option[String], value: Option[X]) extends Ordered[Arg[X]
     case _ => None
   }
 
-  def map[Y](f: X => Y): Arg[Y] = Arg(name, value map f)
+  def map[Y](f: X => Y): Arg[Y] = ??? // TODO implement me
+
+  def asMaybeTuple: Option[(String, Option[X])] = name match {
+    case Some(w) => Some(w, value)
+  def map[Y](f: X => Y): Arg[Y] = ??? // TODO implement me
 
   def asMaybeTuple: Option[(String, Option[X])] = name match {
     case Some(w) => Some(w, value)
@@ -46,14 +50,6 @@ case class Arg[X](name: Option[String], value: Option[X]) extends Ordered[Arg[X]
   }
 
   override def toString: String = s"Arg: command ${name.getOrElse("anonymous")} with value: ${value.getOrElse("none")}"
-
-  def compare(that: Arg[X]): Int = name match {
-    case Some(x) => that.name match {
-      case Some(y) => x compare y
-      case None => throw CompareException(s"$this vs $that")
-    }
-    case None => throw CompareException(s"$this vs $that")
-  }
 }
 
 object Arg {
@@ -63,8 +59,7 @@ object Arg {
 }
 
 case class Args[X](xas: Seq[Arg[X]]) extends Traversable[Arg[X]] {
-
-  def validate(w: String): Args[X] = validate(new PosixSynopsisParser().parseSynopsis(Some(w)))
+  def map[Y](f: X => Y): Args[Y] = ??? // TODO implement me
 
   def validate(so: Option[Synopsis]): Args[X] = so match {
     case Some(s) => if (validate(s)) this else throw ValidationException(this, s)
@@ -126,7 +121,7 @@ case class Args[X](xas: Seq[Arg[X]]) extends Traversable[Arg[X]] {
 
   def process(fm: Map[String, Option[X] => Unit]): Try[Seq[X]] =
     MonadOps.sequence(for (xa <- xas) yield for (x <- xa.process(fm)) yield x) match {
-      case Success(xos) => Success(xos.flatten)
+      case Success(xos) => ??? // TODO implement me
       case Failure(x) => Failure(x)
     }
 
@@ -211,9 +206,9 @@ class SimpleArgParser extends RegexParsers {
 
   def token: Parser[Token] = command | argument
 
-  def command: Parser[Command] = "-" ~> cmdR ^^ (s => Command(s))
+  def command: Parser[Command] = "-" ~> cmdR ^^ ??? // TODO implement me
 
-  def argument: Parser[Argument] = argR ^^ (s => Argument(s))
+  def argument: Parser[Argument] = argR ^^ ??? // TODO implement me
 
   private val cmdR = """[a-z]+""".r
   private val argR = """\w+""".r

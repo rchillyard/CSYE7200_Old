@@ -1,6 +1,6 @@
 package edu.neu.coe.csye7200.patternmatching
 
-trait Document[K, T] {
+sealed trait Document[K, T] {
 
   def get(ks: List[K]): Option[T]
 
