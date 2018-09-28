@@ -185,10 +185,7 @@ object Name {
   val rName = """^([\p{L}\-\']+\.?)\s*(([\p{L}\-]+\.)\s)?([\p{L}\-\']+\.?)(\s([\p{L}\-]+\.?))?$""".r
 
   def apply(name: String): Name = name match {
-    case rName(first, _, null, last, _, null) => apply(first, None, last, None)
-    case rName(first, _, middle, last, _, null) => apply(first, Some(middle), last, None)
-    case rName(first, _, null, last, _, suffix) => apply(first, None, last, Some(suffix))
-    case rName(first, _, middle, last, _, suffix) => apply(first, Some(middle), last, Some(suffix))
+    case rName(first, _, middle, last, _, suffix) => apply(first, Option(middle), last, Option(suffix))
     case _ => throw new Exception(s"parse error in Name: $name")
   }
 }
