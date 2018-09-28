@@ -2,7 +2,7 @@ name := "LabParser"
 
 version := "1.0"
 
-scalaVersion := "2.12.6"
+scalaVersion := "2.11.9"
 
 val spark = "org.apache.spark"
 val sparkVersion = "1.6.1"
