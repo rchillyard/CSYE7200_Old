@@ -111,6 +111,12 @@ trait Functor[F[_]] {
   def lift[A, B](f: A => B): F[A] => F[B] = map(_)(f)
 }
 
+trait Functor[F[_]] {
+  def map[A, B](m: F[A])(f: A => B): F[B]
+
+  def lift[A, B](f: A => B): List[A] => List[B] = _ map f
+}
+
 object Functor {
 
   implicit object ListFunctor extends Functor[List] {
@@ -118,11 +124,11 @@ object Functor {
   }
 
   implicit object OptionFunctor extends Functor[Option] {
-    def map[A, B](ao: Option[A])(f: A => B): Option[B] = ao map f
+    def map[A, B](as: Option[A])(f: A => B): Option[B] = as map f
   }
 
   implicit object TryFunctor extends Functor[Try] {
-    def map[A, B](ay: Try[A])(f: A => B): Try[B] = ay map f
+    def map[A, B](as: Try[A])(f: A => B): Try[B] = as map f
   }
 
 }
