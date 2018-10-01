@@ -2,7 +2,7 @@ name := "SparkWordCount"
 
 version := "0.1"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.9"
 
 val scalaTestVersion = "2.2.4"
 
