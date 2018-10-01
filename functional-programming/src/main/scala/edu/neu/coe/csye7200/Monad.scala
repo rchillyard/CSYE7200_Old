@@ -99,6 +99,16 @@ trait Functor[F[_]] {
     * @return an instance of M[B] based on am and f.
     */
   def map[A, B](af: F[A])(f: A => B): F[B]
+  /**
+    * The "map" method which takes an M[A] and a function A => B and yields a M[B].
+    *
+    * @param af an instance of F[A]
+    * @param f  a function A => B
+    * @tparam A the underlying type of M[A]
+    * @tparam B the underlying type of the result
+    * @return an instance of M[B] based on am and f.
+    */
+  def map[A, B](af: F[A])(f: A => B): F[B]
 
   /**
     * The "lift" method which takes a function A => B and yields a function of M[A] => M[B].
@@ -111,6 +121,15 @@ trait Functor[F[_]] {
   def lift[A, B](f: A => B): F[A] => F[B] = map(_)(f)
 }
 
+  /**
+    * The "lift" method which takes a function A => B and yields a function of M[A] => M[B].
+    *
+    * @param f a function A => B
+    * @tparam A the underlying type of the parameter of the resulting function
+    * @tparam B the underlying type of the result of the resulting function
+    * @return an instance of M[A] => M[B] based on f.
+    */
+  def lift[A, B](f: A => B): F[A] => F[B] = map(_)(f)
 trait Functor[F[_]] {
   /**
     * The "map" method which takes an M[A] and a function A => B and yields a M[B].
