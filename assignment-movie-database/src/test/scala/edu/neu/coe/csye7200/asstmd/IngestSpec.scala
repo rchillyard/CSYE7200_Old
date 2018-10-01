@@ -2,7 +2,7 @@ package edu.neu.coe.csye7200.asstmd
 
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.io.Source
+import scala.io.{Codec, Source}
 import scala.util._
 
 /**
@@ -25,6 +25,7 @@ class IngestSpec extends FlatSpec with Matchers {
   }
 
   it should "work for movie database" in {
+    implicit val codec: Codec = Codec("UTF-8")
     // NOTE that you expect to see a number of exceptions thrown. That's OK. We expect that some lines will not parse correctly.
     Try(Source.fromResource("movie_metadata.csv")) match {
       case Success(source) =>
