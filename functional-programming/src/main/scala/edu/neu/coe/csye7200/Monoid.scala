@@ -8,18 +8,6 @@ trait Monoid[A] {
   def zero: A
 }
 
-trait Functor[F[_]] {
-  def map[A, B](f: A => B): F[B]
-
-  def lift[A, B](f: A => B): List[A] => List[B] = _ map f
-}
-
-object Functor {
-  def listFunctor = new Functor[List] {
-    def map[A, B](f: A => B): List[B] = this map f
-  }
-}
-
 trait Foldable[F[_]] extends Functor[F] {
   def foldLeft[A, B](z: B)(f: (B, A) => B): B
 
@@ -46,7 +34,6 @@ object Monoid {
   }
 
   def foldableList = new Foldable[List] {
-    def map[A, B](f: A => B): List[B] = ???
 
     def foldLeft[A, B](z: B)(f: (B, A) => B): B = ???
 
@@ -55,6 +42,8 @@ object Monoid {
 
     //  NOT tail recursive
     def reduce[A](f: (A, A) => A): A = ???
+
+    def map[A, B](m: List[A])(f: A => B): List[B] = ???
   }
 }
 
