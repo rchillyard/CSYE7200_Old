@@ -107,4 +107,37 @@ class MonadSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
     Monad.sequence(xos) should matchPattern { case Success(_) => }
   }
 
+  behavior of "lift (1)"
+
+  def timesTwo(x: Int): Int = 2 * x
+
+  it should "double its value (List)" in {
+    val f = ListFunctor.lift(timesTwo)
+    f(List(1, 2, 3)) shouldBe List(2, 4, 6)
+  }
+  it should "double its value (Option)" in {
+    val f = OptionFunctor.lift(timesTwo)
+    f(Some(1)) shouldBe Some(2)
+  }
+  it should "double its value (Try)" in {
+    val f = TryFunctor.lift(timesTwo)
+    f(Success(1)) shouldBe Success(2)
+  }
+
+  behavior of "lift (2)"
+
+  def add(x: Int, y: Int): Int = x + y
+
+  it should "add its parameters (List)" in {
+    val f = ListMonad.lift(add _)
+    f(List(1, 2), List(2, 4)) shouldBe List(3, 5, 4, 6)
+  }
+  it should "add its parameters (Option)" in {
+    val f = OptionMonad.lift(add _)
+    f(Some(1), Some(2)) shouldBe Some(3)
+  }
+  it should "add its parameters (Try)" in {
+    val f = TryMonad.lift(add _)
+    f(Success(1), Success(2)) shouldBe Success(3)
+  }
 }
