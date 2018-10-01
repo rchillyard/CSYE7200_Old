@@ -112,9 +112,26 @@ trait Functor[F[_]] {
 }
 
 trait Functor[F[_]] {
-  def map[A, B](m: F[A])(f: A => B): F[B]
+  /**
+    * The "map" method which takes an M[A] and a function A => B and yields a M[B].
+    *
+    * @param af an instance of F[A]
+    * @param f  a function A => B
+    * @tparam A the underlying type of M[A]
+    * @tparam B the underlying type of the result
+    * @return an instance of M[B] based on am and f.
+    */
+  def map[A, B](af: F[A])(f: A => B): F[B]
 
-  def lift[A, B](f: A => B): List[A] => List[B] = _ map f
+  /**
+    * The "lift" method which takes a function A => B and yields a function of M[A] => M[B].
+    *
+    * @param f a function A => B
+    * @tparam A the underlying type of the parameter of the resulting function
+    * @tparam B the underlying type of the result of the resulting function
+    * @return an instance of M[A] => M[B] based on f.
+    */
+  def lift[A, B](f: A => B): F[A] => F[B] = map(_)(f)
 }
 
 object Functor {
@@ -124,11 +141,11 @@ object Functor {
   }
 
   implicit object OptionFunctor extends Functor[Option] {
-    def map[A, B](as: Option[A])(f: A => B): Option[B] = as map f
+    def map[A, B](ao: Option[A])(f: A => B): Option[B] = ao map f
   }
 
   implicit object TryFunctor extends Functor[Try] {
-    def map[A, B](as: Try[A])(f: A => B): Try[B] = as map f
+    def map[A, B](ay: Try[A])(f: A => B): Try[B] = ay map f
   }
 
 }
