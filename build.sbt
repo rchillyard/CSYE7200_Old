@@ -2,7 +2,7 @@ name := "CSYE7200-Solutions"
 
 version := "1.0"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.11.9"
 
 lazy val assthw = (project in file("assignment-helloworld"))
 

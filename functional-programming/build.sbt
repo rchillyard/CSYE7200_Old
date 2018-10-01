@@ -15,5 +15,4 @@ libraryDependencies ++= Seq(
   "joda-time" % "joda-time" % "2.9.9",
   "junit" % "junit" % "4.12" % "test",
   scalaModules %% "scala-parser-combinators" % scalaModulesVersion
-
 )
