@@ -56,8 +56,7 @@ case class JavaRandomState[T](n: Long, g: Long=>T) extends RandomState[T] {
   //Hint: Think of the input and output.
   def get: T = g(n) // TODO 5 points
   //Hint: This one need function composition.
-  def map[U](f: (T) => U): RandomState[U] = JavaRandomState[U](n, g andThen f) // TODO 13 points
-//  def map[U](f: (T) => U): RandomState[U] = JavaRandomState[U](n,{e => f(g(e))}) // TODO 13 points
+  def map[U](f: (T) => U): RandomState[U] = JavaRandomState[U](n, g andThen f) // TODO 13 points (alternatives exist)
 }
 
 case class DoubleRandomState(n: Long) extends RandomState[Double] {
@@ -90,9 +89,18 @@ object BetterRandomState {
   * This is essentially a wrapper of Double where (implicitly) 0 <= x <= 1.
   * Note that we would like to specify it as a Value type but require statements are not legal in Value types
   */
-case class UniformDouble(x: Double) {
-  require(x>=0.0 && x<=1.0)
-  def +(y: Double) = x + y
+case class UniformDouble(x: Double) extends AnyVal {
+//  if(x<0.0 || x>1.0) throw new RuntimeException(s"UniformDouble may not be outside range 0->1: $x")
+  def +(y: Double): UniformDouble = {
+    val z = x + y
+    if (z>=0.0 && z<=1.0)
+    UniformDouble(z)
+    else throw new RuntimeException(s"UniformDouble may not be outside range 0->1: $z")
+  }
+}
+
+object UniformDouble {
+  def apply(x: Double): UniformDouble = UniformDouble(x)+0
 }
 
 object UniformDoubleRandomState

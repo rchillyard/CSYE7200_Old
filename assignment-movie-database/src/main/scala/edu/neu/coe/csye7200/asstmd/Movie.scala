@@ -117,7 +117,9 @@ object Movie extends App {
   val ingester = new Ingest[Movie]()
   if (args.length > 0) {
     val source = Source.fromFile(args.head)
-    val kiwiMovies: Iterator[Try[Movie]] = for (my <- ingester(source)) yield for (m <- my; if m.production.isKiwi) yield m
+    val kiwiMovies: Iterator[Try[Movie]] =
+      for (my <- ingester(source)) yield
+        for (m <- my; if m.production.isKiwi) yield m
     kiwiMovies foreach { _ foreach { println(_) } }
     source.close()
   }
@@ -215,7 +217,7 @@ object Rating {
   //Hint: This should similar to apply method in Object Name. The parameter of apply in case match should be same as case class Rating
   def apply(s: String): Rating = // TODO 13 points
     s match {
-//    case rRating(code, _, null) => apply(code, None)
+    case rRating(code, _, null) => apply(code, None)
     case rRating(code, _, age) => apply(code, Try(age.toInt).toOption)
     case _ => throw new Exception(s"parse error in Rating: $s")
   }
