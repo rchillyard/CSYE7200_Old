@@ -1,12 +1,10 @@
-package edu.neu.coe.csye7200.lbsort
+/*
+ * Copyright (c) 2018. Phasmid Software
+ */
 
-import scala.language.implicitConversions
-/**
-  * Declaration of implicit class Rep within Benchmark.
-  *
-  * Created by scalaprof on 8/17/16.
-  */
-object Benchmark extends App {
+package edu.neu.coe.csye7200
+
+package object benchmark {
   implicit class Rep(n: Int) {
     /**
       * Method which can be invoked, provided that Benchmark._ has been imported.
@@ -24,6 +22,4 @@ object Benchmark extends App {
       (System.nanoTime() - start) / n.toDouble
     }
   }
-  println(s"ave time for 40! is ${10000.times(Factorial.factorial(40))} nanosecs")
 }
-
