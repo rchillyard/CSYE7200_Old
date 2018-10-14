@@ -24,7 +24,7 @@ object Substring {
       * @param s the super-sequence to be tested (part of the original "string").
       * @return as follows:
       *         (1) <code>p</code> longer than <code>s</code> => false;
-      *         (2) <code>p</code> elements match the corresponding <code>s</code elements (starting at the start of <code>s</code>) => true
+      *         (2) <code>p</code> elements match the corresponding <code>s</code> elements (starting at the start of <code>s</code>) => true
       *         (3) recursively invoke substring on <code>p</code> and the tail of <code>s</code>.
       */
     @tailrec def substring(s: Seq[Char]): Boolean = p.length <= s.length && (
