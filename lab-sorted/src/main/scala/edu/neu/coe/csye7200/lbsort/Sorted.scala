@@ -51,7 +51,11 @@ trait Comparison extends (() => Option[Boolean]) {
 
   def orElse(c: => Comparison): Comparison = Comparison(apply.orElse(c()))
 
-  def flip: Comparison = Comparison(for (v <- apply) yield !v)
+  /**
+    * Method to flip this comparison.
+    * @return true if this Comparison is Some(true),
+    */
+  def flip: Comparison = Comparison(apply map (!_))
 }
 
 case class Different(less: Boolean) extends Comparison {
