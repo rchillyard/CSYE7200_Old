@@ -9,49 +9,34 @@ import scala.annotation.tailrec
 object Substring {
 
   /**
-    * Method to determine if s is a substring of t
+    * Method to determine if <code>sub</code> is a substring of <code>string</code>.
     *
-    * @param sub    the candidate substring
-    * @param string the full string
-    * @return true if sub is a substring of string
+    * @param sub    the candidate substring.
+    * @param string the full string.
+    * @return true if <code>sub</code> is a substring of <code>string</code>.
     */
   def substring(sub: String, string: String): Boolean = {
+    val p = sub.toList
 
     /**
-      * Tail-recursive method to determine if p is a substring of s
+      * Tail-recursive method to determine if <code>p</code> is a subsequence of <code>s</code>
       *
-      * @param s the sequence to be tested (part of the original "string")
-      * @return true if p is a substring of s
+      * @param s the super-sequence to be tested (part of the original "string").
+      * @return as follows:
+      *         (1) <code>p</code> longer than <code>s</code> => false;
+      *         (2) <code>p</code> elements match the corresponding <code>s</code elements (starting at the start of <code>s</code>) => true
+      *         (3) recursively invoke substring on <code>p</code> and the tail of <code>s</code>.
       */
-    @tailrec def substring(p: Seq[Char], s: Seq[Char]): Boolean = {
-      /**
-        * Tail-recursive method to determine if q is a prefix of t
-        *
-        * @param r the current value of the result
-        * @param q the candidate prefix
-        * @param t the candidate string
-        * @return as follows:
-        *         (1) if q is empty then true;
-        *         (2) if t is empty then r;
-        *         (3) if q matches h1::z1 and t matches h2::z2 then prefix(r && h1==h2, z1, z2)
-        */
-      @tailrec def prefix(r: Boolean, q: Seq[Char], t: Seq[Char]): Boolean = (q, t) match {
-        case (Nil, _) => true
-        case (_, Nil) => r
-        case (h1 :: z1, h2 :: z2) => prefix(r && h1 == h2, z1, z2)
-        case _ => throw new Exception(s"prefix: logic error: $r, $q")
-      }
+    @tailrec def substring(s: Seq[Char]): Boolean = p.length <= s.length && (
+      s.startsWith(p) || (
+        s match {
+          case Nil => false
+          case _ :: z => substring(z)
+        }
+        )
+      )
 
-      if (p.isEmpty) true
-      else if (s.isEmpty) false
-      else if (prefix(true, p, s)) true
-      else s match {
-        case Nil => false
-        case _ :: z => substring(p, z)
-      }
-    }
-
-    substring(sub.toList, string.toList)
+    p.isEmpty || substring(string.toList)
   }
 
 }
