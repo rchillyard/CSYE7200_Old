@@ -12,7 +12,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
     def compare(x: T, y: T): Int = self(x, y).toInt // TODO implement
   }
 
-  def >(tt: (T, T)): Boolean = self(tt.swap)().getOrElse(false)  // TODO implement
+  def >(tt: (T, T)): Boolean = self(tt).flip().getOrElse(false) // TODO implement
 
   def <(tt: (T, T)): Boolean = self(tt)().getOrElse(false)
 
@@ -34,7 +34,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
 object Comparer {
 
   implicit val intComparer: Comparer[Int] = Ordering[Int]
-  // TODO what should follow this comment? [Yuan: remove strComparer from public]
+  // TODO what should follow this comment?
   implicit val strComparer: Comparer[String] = Ordering[String]
 
   implicit def convert[T](x: Ordering[T]): Comparer[T] = (tt: (T, T)) => Comparison(x.compare(tt._1, tt._2))
@@ -51,7 +51,11 @@ trait Comparison extends (() => Option[Boolean]) {
 
   def orElse(c: => Comparison): Comparison = Comparison(apply.orElse(c()))
 
-  def flip: Comparison = Comparison(for (v <- apply) yield !v)
+  /**
+    * Method to flip this comparison.
+    * @return true if this Comparison is Some(true),
+    */
+  def flip: Comparison = Comparison(apply map (!_))
 }
 
 case class Different(less: Boolean) extends Comparison {
