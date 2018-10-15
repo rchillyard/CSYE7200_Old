@@ -4,10 +4,12 @@ import java.net.URL
 
 import edu.neu.coe.csye7200.MonadOps._
 import org.scalatest.concurrent._
+import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FlatSpec, Matchers, _}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
+import scala.io.Source
 import scala.util._
 
 /**
@@ -33,7 +35,8 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     whenReady(Future.sequence(ufs)) { us => Assertions.assert(us.length == 2) }
   }
 
-  "sequence(Seq[Try[T]])" should "succeed for http://www.google.com, etc." in {
+  behavior of "sequence(Seq[Try[T]])"
+  it should "succeed for http://www.google.com, etc." in {
     val ws = List("http://www.google.com", "http://www.microsoft.com")
     val uys = for {w <- ws; url = Try(new URL(w))} yield url
     MonadOps.sequence(uys) match {
@@ -41,7 +44,6 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
       case _ => Failed
     }
   }
-
   it should "fail for www.google.com, etc." in {
     val ws = List("www.google.com", "http://www.microsoft.com")
     val uys = for {w <- ws; uy = Try(new URL(w))} yield uy
@@ -50,7 +52,6 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
       case _ => Failed
     }
   }
-
   it should "succeed for empty list" in {
     val uys = for {w <- List[String](); uy = Try(new URL(w))} yield uy
     sequence(uys) match {
@@ -69,18 +70,17 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     }
   }
 
-  "flatten" should "succeed" in {
+  behavior of "flatten"
+  it should "succeed" in {
     val ifs: Seq[Future[Seq[Int]]] = Seq(Future(Seq(1, 2)))
     whenReady(flatten(ifs)) { x => println(x); x should matchPattern { case Seq(1, 2) => } }
   }
-
   it should "succeed for http://www.google.com, etc." in {
     val ws = List("http://www.google.com", "http://www.microsoft.com")
     val ufs = for {w <- ws; uf = Future(new URL(w))} yield uf
     val usfs = List(Future.sequence(ufs))
     whenReady(MonadOps.flatten(usfs)) { us => Assertions.assert(us.length == 2) }
   }
-
   it should "succeed for empty list" in {
     val ws = List[String]()
     val urls = for {w <- ws; uf = Future(new URL(w))} yield uf
@@ -92,6 +92,7 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val flat: Map[String, String] = flatten(map)
     flat.size shouldBe 1
   }
+
   "sequence" should "succeed for http://www.google.com, www.microsoft.com" in {
     val ws = Seq("http://www.google.com", "http://www.microsoft.com", "www.microsoft.com")
     val ufs = for {w <- ws; uf = Future(new URL(w))} yield uf
@@ -121,11 +122,13 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     zip(none, two) should matchPattern { case None => }
     zip(one, none) should matchPattern { case None => }
   }
+
   "optionToTry" should "succeed for Map" in {
     val map = Map("a" -> "A", "b" -> "B")
     optionToTry(map.get("a")) should matchPattern { case Success("A") => }
     optionToTry(map.get("x")) should matchPattern { case Failure(_) => }
   }
+
   "lift" should "succeed" in {
     def double(x: Int) = 2 * x
 
@@ -147,5 +150,16 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     whenReady(asFuture(Success(1))) { x => x should matchPattern { case 1 => } }
     //    whenReady(toFuture(Failure[Int](new Exception("bad")))) { x => p shouldBe new Exception("bad")}
   }
+
+  "flattenRecover" should "succeed for http://www.htmldog.com/examples/, www.microsoft.com" in {
+    val sb = new StringBuffer("caught exception: ")
+    val ws: Seq[String] = Seq("http://www.htmldog.com/examples/", "www.microsoft.com")
+    val wsfs: Seq[Future[Seq[String]]] = for (w <- ws; uf = Future(new URL(w))) yield for (u <- uf; s <- Future(Source.fromURL(u))) yield s.mkString.split("\n").toSeq
+    val wsXefs: Seq[Future[Either[Throwable, Seq[String]]]] = for (wsf <- wsfs) yield MonadOps.sequence(wsf)
+    val wsf: Future[Seq[String]] = flattenRecover(Future.sequence(wsXefs), e => sb.append(e.toString))
+    whenReady(wsf, timeout(Span(6, Seconds))) { ws => assert(ws.size > 320) }
+    sb.toString shouldBe "caught exception: java.net.MalformedURLException: no protocol: www.microsoft.com"
+  }
+
 
 }
