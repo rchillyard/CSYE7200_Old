@@ -2,7 +2,7 @@ name := "CSYE7200-Solutions"
 
 version := "1.0"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.11.9"
 
 lazy val assthw = project in file("assignment-helloworld")
 
@@ -32,12 +32,16 @@ lazy val hedgefund = project in file("hedge-fund")
 
 lazy val sparkexp = project in file("spark-example")
 
+lazy val labactors = project in file("lab-actors")
+
 lazy val labsort = project in file("lab-sorted")
 
 lazy val labparser = project in file("lab-parser")
 
 lazy val labawscld = project in file("lab-awscloudformation")
 
-lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp, labsort, labparser, labawscld)
+lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp, labactors, labsort, labparser, labawscld)
 
 parallelExecution in Test := false
+
+javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled")
