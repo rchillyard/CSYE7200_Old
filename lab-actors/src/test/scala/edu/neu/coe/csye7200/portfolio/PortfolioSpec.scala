@@ -14,6 +14,8 @@ import edu.neu.coe.csye7200.actors._
 import edu.neu.coe.csye7200.model.GoogleOptionModel
 import org.scalatest.tagobjects.Slow
 
+import scala.util.Success
+
 /**
  * This specification really tests much of the HedgeFund app but because it particularly deals with
  * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
@@ -30,7 +32,8 @@ class PortfolioSpec(_system: ActorSystem) extends TestKit(_system) with Implicit
   "read portfolio" taggedAs Slow in {
     val config = ConfigFactory.load
     val portfolio = HedgeFund.getPortfolio(config)
-    portfolio.name shouldEqual "Test Portfolio"
+    portfolio should matchPattern { case Success(_) => }
+    portfolio.get.name shouldEqual "Test Portfolio"
     println(s"portfolio: $portfolio")
   }
 

@@ -24,11 +24,11 @@ abstract class Reader extends Actor {
 
 class AtomReader extends Reader {
 
-  val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH);
+  val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ENGLISH)
 
   private def parseAtomDate(date: String, formatter: SimpleDateFormat): Date = {
     val newDate = date.reverse.replaceFirst(":", "").reverse
-    return formatter.parse(newDate)
+    formatter.parse(newDate)
   }
 
   private def getHtmlLink(node: NodeSeq) = {
@@ -58,7 +58,7 @@ class AtomReader extends Reader {
   def receive(): PartialFunction[Any, Unit] = {
     case xml: Elem =>
       extract(xml) match {
-        case head :: tail => print(head)
+        case head :: _ => print(head)
         case Nil =>
       }
   }
@@ -66,7 +66,7 @@ class AtomReader extends Reader {
 
 class XmlReader extends Reader {
 
-  val dateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
+  val dateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH)
 
   def extract(xml: Elem): Seq[RssFeed] = {
 
@@ -91,7 +91,7 @@ class XmlReader extends Reader {
   def receive(): PartialFunction[Any, Unit] = {
     case xml: Elem =>
       extract(xml) match {
-        case head :: tail => print(head)
+        case head :: _ => print(head)
         case Nil =>
       }
   }
@@ -107,13 +107,12 @@ class RssReader extends Actor {
 
   def read(url: URL): Unit = {
     Try(url.openConnection.getInputStream) match {
-      case Success(u) => {
+      case Success(u) =>
         val xml = XML.load(u)
         implicit val timeout: Timeout = Timeout(30.seconds)
         val actor = if ((xml \\ "channel").length == 0) context.actorOf(Props[AtomReader])
         else context.actorOf(Props[XmlReader])
         actor ! xml
-      }
       case Failure(_) =>
     }
   }
@@ -134,9 +133,8 @@ class SubscriptionReader extends Actor {
   }
 
   def receive(): PartialFunction[Any, Unit] = {
-    case filename: String => {
+    case filename: String =>
       sender ! read(open(filename))
-    }
   }
 }
 

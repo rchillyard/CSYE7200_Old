@@ -3,12 +3,11 @@ package edu.neu.coe.csye7200.actors
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.testkit._
 import edu.neu.coe.csye7200.model.Model
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest._
 
 import scala.io.Source
 import scala.concurrent.duration._
 import spray.http._
-import org.scalatest.Inside
 
 import scala.language.postfixOps
 import spray.http.ContentType.apply
@@ -41,6 +40,7 @@ class JsonYQLParserSpec(_system: ActorSystem) extends TestKit(_system) with Impl
       case Left(x) =>
         fail("decoding error: " + x)
     }
+    ok shouldBe Succeeded
   }
 
   "send back" in {
@@ -54,7 +54,7 @@ class JsonYQLParserSpec(_system: ActorSystem) extends TestKit(_system) with Impl
       case QueryResponse("MSFT", _) =>
     }
     inside(msg) {
-      case QueryResponse(symbol, attributes) => attributes.get("Ask") should matchPattern { case Some("46.17") => }
+      case QueryResponse(_, attributes) => attributes.get("Ask") should matchPattern { case Some("46.17") => }
     }
   }
 
