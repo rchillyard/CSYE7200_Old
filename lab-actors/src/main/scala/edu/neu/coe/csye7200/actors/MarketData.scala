@@ -24,7 +24,8 @@ class MarketData(blackboard: ActorRef) extends BlackboardActor(blackboard) {
     // CONSIDER allowing key to be null in which case all attributes returned
     // Or allow key to be a list and always return a map of values
     case SymbolQuery(identifier, keys) =>
-      log.debug("symbol query received re: identifier: {} and key {}", identifier, keys)
+      println(s"symbol query received re: identifier: $identifier and keys $keys")
+      log.debug("symbol query received re: identifier: {} and keys {}", identifier, keys)
       val attributes: List[Option[(String, String)]] = instruments.get(identifier) match {
         case Some(a) => keys map { k =>
           a.get(k) match {
