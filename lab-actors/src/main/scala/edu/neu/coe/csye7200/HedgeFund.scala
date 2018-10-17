@@ -1,11 +1,13 @@
 package edu.neu.coe.csye7200
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import com.typesafe.config.{Config, ConfigFactory}
 import edu.neu.coe.csye7200.actors.{ExternalLookup, HedgeFundBlackboard, PortfolioUpdate}
 import edu.neu.coe.csye7200.model.{GoogleOptionQuery, GoogleQuery, Query, YQLQuery}
 import edu.neu.coe.csye7200.portfolio.{Portfolio, PortfolioParser}
 
+import scala.concurrent.Await
+import scala.concurrent.duration.FiniteDuration
 import scala.io.Source
 import scala.language.implicitConversions
 import scala.util._
@@ -19,8 +21,14 @@ object HedgeFund {
 
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.load()
-    implicit val system: ActorSystem = ActorSystem("HedgeFund")
     println(s"""${config.getString("name")}, ${config.getString("appVersion")}""")
+    implicit val system: ActorSystem = ActorSystem("HedgeFund")
+    startup(config)
+    Thread.sleep(10000)
+    Await.ready(system.terminate(), FiniteDuration(1, "second"))
+  }
+
+  def startup(config: Config)(implicit system: ActorSystem): Try[ActorRef] = {
     val engine: Option[Query] = config.getString("engine") match {
       case "YQL" => Some(YQLQuery(config.getString("format"), diagnostics = false))
       case "Google" => Some(GoogleQuery("NASDAQ"))
@@ -38,11 +46,12 @@ object HedgeFund {
               s => blackboard ! ExternalLookup(optionEngine.getProtocol, optionEngine.createQuery(List(s)))
             }
             blackboard ! PortfolioUpdate(portfolio)
+            Success(blackboard)
 
-          case Failure(z) => System.err.println(z.getLocalizedMessage)
+          case Failure(z) => Failure(z)
         }
 
-      case _ => System.err.println("initialization engine not defined")
+      case _ => Failure(new Exception("initialization engine not defined"))
     }
   }
 
@@ -58,7 +67,7 @@ object HedgeFund {
     // NOTE: we try to different ways of getting the file:
     // (1) where file is a pure filename relative to the filing system;
     // (2) where file is the name of a resource relative to the current class.
-    val sy = Try(Source.fromFile(file)) orElse(Try(Source.fromURL(getClass.getResource(file))))
+    val sy = Try(Source.fromFile(file)) orElse Try(Source.fromURL(getClass.getResource(file)))
     val json = for (s <- sy) yield s.mkString
     json map PortfolioParser.decode
   }
