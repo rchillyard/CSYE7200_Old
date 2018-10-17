@@ -1,12 +1,12 @@
 package edu.neu.coe.csye7200.http
 
-import org.scalatest.{BeforeAndAfterAll, Inside, Matchers, WordSpecLike}
 import edu.neu.coe.csye7200.model.{GoogleQuery, YQLQuery}
+import org.scalatest.{Inside, Matchers, WordSpecLike}
 
 /**
- * This specification really tests much of the HedgeFund app but because it particularly deals with
- * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
- */
+  * This specification really tests much of the HedgeFund app but because it particularly deals with
+  * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
+  */
 class QuerySpec extends WordSpecLike with Matchers with Inside {
 
   "YQL tech query" in {

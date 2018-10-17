@@ -6,8 +6,8 @@ import spray.http.Uri.{Authority, NamedHost, Path}
 import scala.language.postfixOps
 
 /**
- * @author robinhillyard
- */
+  * @author robinhillyard
+  */
 class UriGet {
   def get(host: String, path: String, queryParams: Map[String, String], scheme: String = "https"): Uri =
     Uri(scheme, Authority(NamedHost(host)), Path(path)) withQuery queryParams

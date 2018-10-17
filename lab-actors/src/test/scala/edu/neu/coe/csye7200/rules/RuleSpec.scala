@@ -3,9 +3,9 @@ package edu.neu.coe.csye7200.rules
 import org.scalatest.{Inside, Matchers, WordSpecLike}
 
 /**
- * This specification really tests much of the HedgeFund app but because it particularly deals with
- * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
- */
+  * This specification really tests much of the HedgeFund app but because it particularly deals with
+  * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
+  */
 class RuleSpec extends WordSpecLike with Matchers with Inside {
 
   "Simple Predicate and Candidate" in {
@@ -46,10 +46,10 @@ class RuleSpec extends WordSpecLike with Matchers with Inside {
     val predicate = Rule("(x < 3) & ((y > 1) | (z = 0))")
     predicate should matchPattern {
       case And(
-        NumberPredicate("x", LessThan(), 3),
-        Or(
-          NumberPredicate("y", GreaterThan(), 1),
-          NumberPredicate("z", Equals(), 0))) =>
+      NumberPredicate("x", LessThan(), 3),
+      Or(
+      NumberPredicate("y", GreaterThan(), 1),
+      NumberPredicate("z", Equals(), 0))) =>
     }
   }
 }

@@ -4,15 +4,15 @@ import akka.actor.{ActorRef, Props}
 import spray.http._
 
 /**
- * @author robinhillyard
- */
+  * @author robinhillyard
+  */
 class HttpReader(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   val entityParser: ActorRef = context.actorOf(Props.create(classOf[EntityParser], blackboard), "EntityParser")
 
   /**
-   * @return
-   */
+    * @return
+    */
   override def receive: PartialFunction[Any, Unit] = {
     case HttpResult(queryProtocol, request, HttpResponse(status, entity, headers, protocol)) =>
       log.info("request sent: {}; protocol: {}; response status: {}", request, protocol, status)
@@ -25,7 +25,7 @@ class HttpReader(blackboard: ActorRef) extends BlackboardActor(blackboard) {
   }
 
   def processResponse(entity: HttpEntity, headers: List[HttpHeader], protocol: String): Unit = {
-    log.debug("response headers: {}; entity: {}",headers,entity)
+    log.debug("response headers: {}; entity: {}", headers, entity)
     entityParser ! EntityMessage(protocol, entity)
   }
 }

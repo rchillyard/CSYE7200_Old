@@ -1,34 +1,30 @@
 package edu.neu.coe.csye7200.portfolio
 
-import org.scalatest.tagobjects.Slow
-import org.scalatest.{BeforeAndAfterAll, Inside, Matchers, WordSpecLike}
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props, actorRef2Scala}
 import akka.testkit._
-
-import scala.concurrent.duration._
-import org.scalatest.Inside
-import akka.actor.actorRef2Scala
 import com.typesafe.config.ConfigFactory
 import edu.neu.coe.csye7200.HedgeFund
 import edu.neu.coe.csye7200.actors._
 import edu.neu.coe.csye7200.model.GoogleOptionModel
 import org.scalatest.tagobjects.Slow
+import org.scalatest.{BeforeAndAfterAll, Inside, Matchers, WordSpecLike}
 
+import scala.concurrent.duration._
 import scala.util.Success
 
 /**
- * This specification really tests much of the HedgeFund app but because it particularly deals with
- * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
- */
+  * This specification really tests much of the HedgeFund app but because it particularly deals with
+  * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
+  */
 class PortfolioSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
-    with WordSpecLike with Matchers with Inside with BeforeAndAfterAll {
+  with WordSpecLike with Matchers with Inside with BeforeAndAfterAll {
 
   def this() = this(ActorSystem("MockPortfolioBlackboard"))
 
   override def afterAll {
     TestKit.shutdownActorSystem(system)
   }
-  
+
   "read portfolio" taggedAs Slow in {
     val config = ConfigFactory.load
     val portfolio = HedgeFund.getPortfolio(config)
@@ -66,12 +62,11 @@ class PortfolioSpec(_system: ActorSystem) extends TestKit(_system) with Implicit
 class MockPortfolioBlackboard(testActor: ActorRef) extends Blackboard(Map(classOf[KnowledgeUpdate] -> "marketData", classOf[SymbolQuery] -> "marketData", classOf[OptionQuery] -> "marketData", classOf[CandidateOption] -> "optionAnalyzer", classOf[PortfolioUpdate] -> "updateLogger", classOf[Confirmation] -> "updateLogger"),
   Map("marketData" -> classOf[MarketData], "optionAnalyzer" -> classOf[OptionAnalyzer], "updateLogger" -> classOf[UpdateLogger])) {
 
-  override def receive: PartialFunction[Any, Unit] =
-    {
-      case msg: Confirmation => testActor forward msg
-      case msg: QueryResponse => testActor forward msg
-//      case msg: CandidateOption => testActor forward msg
-      case msg => super.receive(msg)
-    }
+  override def receive: PartialFunction[Any, Unit] = {
+    case msg: Confirmation => testActor forward msg
+    case msg: QueryResponse => testActor forward msg
+    //      case msg: CandidateOption => testActor forward msg
+    case msg => super.receive(msg)
+  }
 }
 

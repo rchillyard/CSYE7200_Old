@@ -1,16 +1,16 @@
 package edu.neu.coe.csye7200.actors
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.ActorRef
+import edu.neu.coe.csye7200.model.{GoogleModel, Model}
 import spray.http._
 
 import scala.util._
-import edu.neu.coe.csye7200.model.{GoogleModel, Model}
 
 /**
- * TODO create a super-type for this kind of actor
- *
- * @author robinhillyard
- */
+  * TODO create a super-type for this kind of actor
+  *
+  * @author robinhillyard
+  */
 class JsonGoogleParser(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   val model: Model = new GoogleModel
@@ -40,11 +40,10 @@ class JsonGoogleParser(blackboard: ActorRef) extends BlackboardActor(blackboard)
 }
 
 object JsonGoogleParser {
-  import spray.json.DefaultJsonProtocol
-  import spray.httpx.unmarshalling._
-  import spray.httpx.marshalling._
+
   import spray.httpx.SprayJsonSupport._
-  import spray.json._
+  import spray.httpx.unmarshalling._
+  import spray.json.{DefaultJsonProtocol, _}
 
   type Results = Seq[Map[String, Option[String]]]
 
@@ -54,12 +53,13 @@ object JsonGoogleParser {
   import MyJsonProtocol._
 
   /**
-   * This version of decode is a little more complex than usual because the Google
-   * interface deliberately prefixes "//" to the start of the Json in order
-   * that we should not be able to invoke the service without some effort.
+    * This version of decode is a little more complex than usual because the Google
+    * interface deliberately prefixes "//" to the start of the Json in order
+    * that we should not be able to invoke the service without some effort.
+    *
     * @param entity the entity extracted from the Http Response
     * @return the deserialized version
-   */
+    */
   def decode(entity: HttpEntity): Deserialized[Results] = {
     import spray.httpx.unmarshalling._
     val mediaTypeTextHtml = MediaTypes.`text/html`
