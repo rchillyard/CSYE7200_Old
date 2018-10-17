@@ -28,6 +28,7 @@ libraryDependencies ++= Seq(
   akkaGroup %% "akka-slf4j" % akkaVersion,
   "com.typesafe" % "config" % "1.3.2",
   "com.github.nscala-time" %% "nscala-time" % "2.18.0",
-  "ch.qos.logback" % "logback-classic" % "1.0.0" % "runtime",
+  "ch.qos.logback" % "logback-core" % "1.2.3",
+  "ch.qos.logback" % "logback-classic" % "1.2.3" % "runtime",
   "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
 )
