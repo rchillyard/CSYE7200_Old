@@ -29,7 +29,7 @@ class JsonGoogleOptionParserSpec(_system: ActorSystem) extends TestKit(_system) 
   }
 
   import scala.language.postfixOps
-  val json = Source.fromFile(getClass.getResource("/googleOptionExample.json").getPath) mkString
+  val json: String = Source.fromFile(getClass.getResource("/googleOptionExample.json").getPath) mkString
 
   "json read" in {
     import spray.json._
@@ -43,14 +43,14 @@ class JsonGoogleOptionParserSpec(_system: ActorSystem) extends TestKit(_system) 
       case Right(x) =>
         x.puts.length should equal(20)
         val puts = x.puts
-        puts(0).get("s") should matchPattern { case Some("MSFT150731P00042500") => }
+        puts.head.get("s") should matchPattern { case Some("MSFT150731P00042500") => }
 
       case Left(x) =>
         fail("decoding error: " + x)
     }
   }
 
-  "send back" taggedAs(Slow) in {
+  "send back" taggedAs Slow in {
     val blackboard = system.actorOf(Props.create(classOf[MockGoogleOptionBlackboard], testActor), "blackboard")
     val entityParser = _system.actorOf(Props.create(classOf[EntityParser], blackboard))
     val contentType = ContentType(MediaTypes.`application/json`, HttpCharsets.`UTF-8`)
@@ -71,8 +71,8 @@ import scala.concurrent.Await
 
 
 class MockGoogleOptionUpdateLogger(blackboard: ActorRef) extends UpdateLogger(blackboard) {
-  override def processOption(identifier: String, model: Model, attributes: Map[String, Any]) = {
-    val keys = model mapKeys (List("underlying", "strikePrice", "expiry"))
+  override def processOption(identifier: String, model: Model, attributes: Map[String, Any]): Unit = {
+    val keys = model mapKeys List("underlying", "strikePrice", "expiry")
     println(s"$keys")
     val future = blackboard ? OptionQuery(identifier, keys)
     val result = Await.result(future, timeout.duration).asInstanceOf[QueryResponse]
@@ -83,7 +83,7 @@ class MockGoogleOptionUpdateLogger(blackboard: ActorRef) extends UpdateLogger(bl
 class MockGoogleOptionBlackboard(testActor: ActorRef) extends Blackboard(Map(classOf[KnowledgeUpdate] -> "marketData", classOf[SymbolQuery] -> "marketData", classOf[OptionQuery] -> "marketData", classOf[CandidateOption] -> "optionAnalyzer", classOf[Confirmation] -> "updateLogger"),
   Map("marketData" -> classOf[MarketData], "optionAnalyzer" -> classOf[OptionAnalyzer], "updateLogger" -> classOf[MockGoogleOptionUpdateLogger])) {
 
-  override def receive =
+  override def receive: PartialFunction[Any, Unit] =
     {
       case msg: Confirmation => msg match {
         // Cut down on the volume of messages

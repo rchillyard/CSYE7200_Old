@@ -11,14 +11,13 @@ class EntityParser(blackboard: ActorRef) extends BlackboardActor(blackboard) {
     "json:GF" -> context.actorOf(Props.create(classOf[JsonGoogleParser], blackboard), "JsonGoogleParser"),
     "json:GO" -> context.actorOf(Props.create(classOf[JsonGoogleOptionParser], blackboard), "JsonGoogleOptionParser"))
 
-  override def receive = {
-    case EntityMessage(protocol, entity) => {
+  override def receive: PartialFunction[Any, Unit] = {
+    case EntityMessage(protocol, entity) =>
       log.debug("EntityMessage received: protocol: {}", protocol)
       parsers.get(protocol) match {
         case Some(actorRef) => actorRef ! ContentMessage(entity)
         case None => log.warning("no parser for: {}", protocol)
       }
-    }
     case m => super.receive(m)
   }
 }

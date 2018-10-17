@@ -15,24 +15,23 @@ class JsonGoogleOptionParser(blackboard: ActorRef) extends BlackboardActor(black
 
   val model: Model = new GoogleOptionModel
 
-  override def receive = {
-    case ContentMessage(entity) => {
+  override def receive: PartialFunction[Any, Unit] = {
+    case ContentMessage(entity) =>
       log.debug("JsonGoogleOptionParser received ContentMessage")
       JsonGoogleOptionParser.decode(entity) match {
         case Right(optionChain) => processOptionChain(optionChain)
         case Left(message) => log.warning("Decoding error: " + message)
       }
-    }
     case m => super.receive(m)
   }
 
-  def processOptionChain(optionChain: OptionChain) = {
+  def processOptionChain(optionChain: OptionChain): Seq[Unit] = {
     val chainMap = Map("expiry" -> optionChain.expiry, "expirations" -> optionChain.expirations, "underlying_id" -> optionChain.underlying_id, "underlying_price" -> optionChain.underlying_price)
-    optionChain.puts map { processPut(_, chainMap)(true) }
-    optionChain.puts map { processPut(_, chainMap)(false) }
+    optionChain.puts foreach { processPut(_, chainMap)(put = true) }
+    optionChain.puts map { processPut(_, chainMap)(put = false) }
   }
 
-  def processPut(optionDetails: Map[String, String], chainDetails: Map[String, Any])(put: Boolean) = model.getKey("identifier") match {
+  def processPut(optionDetails: Map[String, String], chainDetails: Map[String, Any])(put: Boolean): Unit = model.getKey("identifier") match {
     case Some(s) =>
       optionDetails.get(s) match {
         case Some(x) =>
@@ -46,7 +45,7 @@ class JsonGoogleOptionParser(blackboard: ActorRef) extends BlackboardActor(black
 case class YMD(y: Int, m: Int, d: Int) {
     import com.github.nscala_time.time.Imports._
     def asDate(ymd: YMD): DateTime = ymd match {
-      case YMD(y,m,d) => new DateTime(y,m,d)
+      case YMD(a,b,c) => new DateTime(a,b,c)
     }
 }
 
@@ -60,8 +59,8 @@ object JsonGoogleOptionParser {
   import spray.json._
 
   object MyJsonProtocol extends DefaultJsonProtocol with NullOptions {
-    implicit val ymdFormat = jsonFormat3(YMD)
-    implicit val optionChainFormat = jsonFormat6(OptionChain)
+    implicit val ymdFormat: RootJsonFormat[YMD] = jsonFormat3(YMD)
+    implicit val optionChainFormat: RootJsonFormat[OptionChain] = jsonFormat6(OptionChain)
   }
 
   import MyJsonProtocol._

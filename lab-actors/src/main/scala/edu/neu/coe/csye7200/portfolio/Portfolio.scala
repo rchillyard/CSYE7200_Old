@@ -16,9 +16,9 @@ object PortfolioParser {
   import spray.json._
 
   object MyJsonProtocol extends DefaultJsonProtocol with NullOptions {
-    implicit val contractFormat = jsonFormat1(Contract)
-    implicit val positionFormat = jsonFormat3(Position)
-    implicit val portfolioFormat = jsonFormat2(Portfolio)
+    implicit val contractFormat: RootJsonFormat[Contract] = jsonFormat1(Contract)
+    implicit val positionFormat: RootJsonFormat[Position] = jsonFormat3(Position)
+    implicit val portfolioFormat: RootJsonFormat[Portfolio] = jsonFormat2(Portfolio)
   }
 
   import MyJsonProtocol._

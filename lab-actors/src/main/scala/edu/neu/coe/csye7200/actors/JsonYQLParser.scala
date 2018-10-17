@@ -15,20 +15,19 @@ class JsonYQLParser(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   val model: Model = new YQLModel
 
-  override def receive = {
-    case ContentMessage(entity) => {
+  override def receive: PartialFunction[Any, Unit] = {
+    case ContentMessage(entity) =>
       log.debug("JsonYQLParser received ContentMessage")
       JsonYQLParser.decode(entity) match {
         case Right(response) => processQuote(response.query.results.quote)
         case Left(message) => log.warning(message.toString())
       }
-    }
     case m => super.receive(m)
   }
 
-  def processQuote(quotes: Seq[Map[String, Option[String]]]) = quotes foreach { q => processInstrument(q) }
+  def processQuote(quotes: Seq[Map[String, Option[String]]]): Unit = quotes foreach { q => processInstrument(q) }
 
-  def processInstrument(quote: Map[String, Option[String]]) = model.getKey("symbol") match {
+  def processInstrument(quote: Map[String, Option[String]]): Unit = model.getKey("symbol") match {
     case Some(s) =>
       quote.get(s) match {
         case Some(Some(symbol)) => updateMarket(symbol, quote)
@@ -37,7 +36,7 @@ class JsonYQLParser(blackboard: ActorRef) extends BlackboardActor(blackboard) {
     case _ => log.warning("'symbol' is undefined in model")
   }
 
-  def updateMarket(symbol: String, quote: Map[String, Option[String]]) = blackboard ! KnowledgeUpdate(model, symbol, quote flatMap { case (k, Some(v)) => Option(k -> v); case _ => None })
+  def updateMarket(symbol: String, quote: Map[String, Option[String]]): Unit = blackboard ! KnowledgeUpdate(model, symbol, quote flatMap { case (k, Some(v)) => Option(k -> v); case _ => None })
 }
 
 object JsonYQLParser {
@@ -64,17 +63,17 @@ object JsonYQLParser {
   }
 
   object MyJsonProtocol extends DefaultJsonProtocol with NullOptions {
-    implicit val diagnosticsQueryFormat = jsonFormat5(DiagnosticsQuery)
-    implicit val diagnosticsCacheFormat = jsonFormat6(DiagnosticsCache)
-    implicit val diagnosticsJavascriptFormat = jsonFormat5(DiagnosticsJavascript)
-    implicit val diagnosticsFormat = jsonFormat8(Diagnostics)
-    implicit val resultsFormat = jsonFormat1(Results)
-    implicit val queryFormat = jsonFormat5(Query)
-    implicit val entityFormat = jsonFormat1(Response)
+    implicit val diagnosticsQueryFormat: RootJsonFormat[DiagnosticsQuery] = jsonFormat5(DiagnosticsQuery)
+    implicit val diagnosticsCacheFormat: RootJsonFormat[DiagnosticsCache] = jsonFormat6(DiagnosticsCache)
+    implicit val diagnosticsJavascriptFormat: RootJsonFormat[DiagnosticsJavascript] = jsonFormat5(DiagnosticsJavascript)
+    implicit val diagnosticsFormat: RootJsonFormat[Diagnostics] = jsonFormat8(Diagnostics)
+    implicit val resultsFormat: RootJsonFormat[Results] = jsonFormat1(Results)
+    implicit val queryFormat: RootJsonFormat[Query] = jsonFormat5(Query)
+    implicit val entityFormat: RootJsonFormat[Response] = jsonFormat1(Response)
   }
 
   import MyJsonProtocol._
 
-  def decode(entity: HttpEntity) = entity.as[Response]
+  def decode(entity: HttpEntity): Deserialized[Response] = entity.as[Response]
 
 }

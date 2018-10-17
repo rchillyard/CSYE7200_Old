@@ -24,7 +24,7 @@ class HedgeFundBlackboard extends Blackboard(
     "optionAnalyzer" -> classOf[OptionAnalyzer],
     "updateLogger" -> classOf[UpdateLogger])) {
 
-  override def receive = {
+  override def receive: PartialFunction[Any, Unit] = {
     case ExternalLookup(protocol, url) =>
       log.debug(s"External lookup with protocol: $protocol and url: $url")
       HttpTransaction(protocol, Get(url), self)

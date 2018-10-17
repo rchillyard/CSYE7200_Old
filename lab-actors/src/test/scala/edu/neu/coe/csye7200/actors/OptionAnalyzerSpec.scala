@@ -24,17 +24,17 @@ class OptionAnalyzerSpec(_system: ActorSystem) extends TestKit(_system) with Imp
     TestKit.shutdownActorSystem(system)
   }
 
-  "send back" taggedAs(Slow) in {
+  "send back" taggedAs Slow in {
     val model = new GoogleOptionModel()
     val blackboard = system.actorOf(Props.create(classOf[MockAnalyzerBlackboard], testActor), "blackboard")
-    blackboard ! CandidateOption(model, "XX375", true, Map("strike" -> "45.2"), Map("underlying_id" -> "1234", "Sharpe" -> 0.45))
+    blackboard ! CandidateOption(model, "XX375", put = true, Map("strike" -> "45.2"), Map("underlying_id" -> "1234", "Sharpe" -> 0.45))
     val confirmationMsg = expectMsgClass(3.seconds, classOf[Confirmation])
     println("confirmation msg received: " + confirmationMsg)
     inside(confirmationMsg) {
-      case Confirmation(id, model, details) =>
+      case Confirmation(id, m, details) =>
         println(s"confirmation1 details: $details")
         id shouldEqual "XX375"
-        blackboard ! KnowledgeUpdate(model, "XX", Map("id" -> "1234"))
+        blackboard ! KnowledgeUpdate(m, "XX", Map("id" -> "1234"))
         val confirmationMsg2 = expectMsgClass(3.seconds, classOf[Confirmation])
         println("confirmation msg2 received: " + confirmationMsg2)
         // Note that the key "id" is in the model for symbols, not options
@@ -53,7 +53,7 @@ class OptionAnalyzerSpec(_system: ActorSystem) extends TestKit(_system) with Imp
 class MockAnalyzerBlackboard(testActor: ActorRef) extends Blackboard(Map(classOf[KnowledgeUpdate] -> "marketData", classOf[SymbolQuery] -> "marketData", classOf[OptionQuery] -> "marketData", classOf[CandidateOption] -> "optionAnalyzer", classOf[Confirmation] -> "updateLogger"),
   Map("marketData" -> classOf[MarketData], "optionAnalyzer" -> classOf[OptionAnalyzer], "updateLogger" -> classOf[UpdateLogger])) {
 
-  override def receive =
+  override def receive: PartialFunction[Any, Unit] =
     {
       case msg: Confirmation => testActor forward msg
       case msg: QueryResponse => testActor forward msg

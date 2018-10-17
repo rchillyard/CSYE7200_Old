@@ -13,7 +13,7 @@ case class GoogleOptionQuery() extends Query {
 
   def createQuery(symbols: List[String]): Uri = {
     val symbolList = symbols mkString ","
-    val queryParams = Map("q" -> s"${symbolList}", "output" -> "json")
+    val queryParams = Map("q" -> s"$symbolList", "output" -> "json")
     uriGet.get(GoogleOptionQuery.server, GoogleOptionQuery.path, queryParams)
   }
 
@@ -28,7 +28,7 @@ object GoogleOptionQuery {
 
 class GoogleOptionModel extends Model {
   def isOption = true
-  def getKey(query: String) = query match {
+  def getKey(query: String): Option[String] = query match {
     case "name" => Some("GO")
     case "identifier" => Some("s")
     case "strikePrice" => Some("strike")

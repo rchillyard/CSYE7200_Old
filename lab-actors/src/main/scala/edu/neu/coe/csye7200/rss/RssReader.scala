@@ -9,6 +9,7 @@ import akka.event.Logging
 import akka.util.Timeout
 import akka.pattern.ask
 
+import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scala.xml.{Elem, NodeSeq, XML}
@@ -38,29 +39,28 @@ class AtomReader extends Reader {
 
   def extract(xml: Elem): Seq[RssFeed] = {
     for (feed <- xml \\ "feed") yield {
-      val items = for (item <- (feed \\ "entry")) yield {
+      val items = for (item <- feed \\ "entry") yield {
         RssItem(
           (item \\ "title").text,
-          getHtmlLink((item \\ "link")),
+          getHtmlLink(item \\ "link"),
           (item \\ "summary").text,
           parseAtomDate((item \\ "published").text, dateFormatter),
           (item \\ "id").text)
       }
       AtomRssFeed(
         (feed \ "title").text,
-        getHtmlLink((feed \ "link")),
+        getHtmlLink(feed \ "link"),
         (feed \ "subtitle ").text,
         items.take(8))
     }
   }
 
-  def receive() = {
-    case xml: Elem => {
+  def receive(): PartialFunction[Any, Unit] = {
+    case xml: Elem =>
       extract(xml) match {
         case head :: tail => print(head)
         case Nil =>
       }
-    }
   }
 }
 
@@ -71,7 +71,7 @@ class XmlReader extends Reader {
   def extract(xml: Elem): Seq[RssFeed] = {
 
     for (channel <- xml \\ "channel") yield {
-      val items = for (item <- (channel \\ "item")) yield {
+      val items = for (item <- channel \\ "item") yield {
         RssItem(
           (item \\ "title").text,
           (item \\ "link").text,
@@ -88,13 +88,12 @@ class XmlReader extends Reader {
     }
   }
 
-  def receive() = {
-    case xml: Elem => {
+  def receive(): PartialFunction[Any, Unit] = {
+    case xml: Elem =>
       extract(xml) match {
         case head :: tail => print(head)
         case Nil =>
       }
-    }
   }
 }
 
@@ -106,11 +105,11 @@ class RssReader extends Actor {
     try { op(p) } finally { p.close() }
   }
 
-  def read(url: URL) = {
+  def read(url: URL): Unit = {
     Try(url.openConnection.getInputStream) match {
       case Success(u) => {
         val xml = XML.load(u)
-        implicit val timeout = Timeout(30.seconds)
+        implicit val timeout: Timeout = Timeout(30.seconds)
         val actor = if ((xml \\ "channel").length == 0) context.actorOf(Props[AtomReader])
         else context.actorOf(Props[XmlReader])
         actor ! xml
@@ -119,22 +118,22 @@ class RssReader extends Actor {
     }
   }
 
-  def receive() = {
+  def receive(): PartialFunction[Any, Unit] = {
     case path: URL => read(path)
   }
 }
 
 class SubscriptionReader extends Actor {
 
-  def open(filename: String) = XML.loadFile(filename)
+  def open(filename: String): Elem = XML.loadFile(filename)
 
   def read(xml: Elem): Seq[URL] = {
     for {
-      node <- (xml \\ "@xmlUrl")
+      node <- xml \\ "@xmlUrl"
     } yield new URL(node.text)
   }
 
-  def receive() = {
+  def receive(): PartialFunction[Any, Unit] = {
     case filename: String => {
       sender ! read(open(filename))
     }
@@ -143,15 +142,15 @@ class SubscriptionReader extends Actor {
 
 object RssReader {
 
-  def getUrls(fileName: String) = getFileLines(fileName).map(url => RssUrl(new URL(url)))
+  def getUrls(fileName: String): Array[RssUrl] = getFileLines(fileName).map(url => RssUrl(new URL(url)))
   def getFileLines(fileName: String): Array[String] =
     scala.io.Source.fromFile(fileName).mkString.split("\n").filter(!_.startsWith("#"))
 
   def main(args: Array[String]): Unit = {
     val system = ActorSystem("RssReader")
-    implicit val timeout = Timeout(30.seconds)
+    implicit val timeout: Timeout = Timeout(30.seconds)
     val subReader = system.actorOf(Props[SubscriptionReader])
-    implicit val dispatcher = system.dispatcher
+    implicit val dispatcher: ExecutionContextExecutor = system.dispatcher
     for {
       urls <- (subReader ask "subscriptions.xml").mapTo[Seq[URL]]
       url <- urls

@@ -17,7 +17,7 @@ case class YQLQuery(format: String, diagnostics: Boolean) extends Query {
     uriGet.get(YQLQuery.server, YQLQuery.path, queryParams)
   }
 
-  def getProtocol = format + ":YQL"
+  def getProtocol: String = format + ":YQL"
 }
 
 object YQLQuery {
@@ -29,7 +29,7 @@ object YQLQuery {
 
 class YQLModel extends Model {
   def isOption = false
-  def getKey(query: String) = query match {
+  def getKey(query: String): Option[String] = query match {
     case "name" => Some("YQL")
     case "symbol" => Some("symbol")
     case "price" => Some("Ask")

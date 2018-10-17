@@ -11,7 +11,7 @@ class QuerySpec extends WordSpecLike with Matchers with Inside {
 
   "YQL tech query" in {
     val symbols = List("YHOO", "AAPL", "GOOG", "MSFT")
-    val uri = YQLQuery("json", true).createQuery(symbols)
+    val uri = YQLQuery("json", diagnostics = true).createQuery(symbols)
     println(uri.toString)
     uri.toString shouldEqual "https://query.yahooapis.com/v1/public/yql?format=json&callback=&q=select+*+from+yahoo.finance.quotes+where+symbol+in+(%22YHOO%22,%22AAPL%22,%22GOOG%22,%22MSFT%22)&diagnostics=true&env=http://datatables.org/alltables.env"
   }

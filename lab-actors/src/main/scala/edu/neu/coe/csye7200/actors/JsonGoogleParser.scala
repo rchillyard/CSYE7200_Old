@@ -15,20 +15,19 @@ class JsonGoogleParser(blackboard: ActorRef) extends BlackboardActor(blackboard)
 
   val model: Model = new GoogleModel
 
-  override def receive = {
-    case ContentMessage(entity) => {
+  override def receive: PartialFunction[Any, Unit] = {
+    case ContentMessage(entity) =>
       log.debug("JsonGoogleParser received ContentMessage")
       JsonGoogleParser.decode(entity) match {
         case Right(results) => processQuote(results)
         case Left(message) => log.warning("Decoding error: " + message)
       }
-    }
     case m => super.receive(m)
   }
 
-  def processQuote(quotes: Seq[Map[String, Option[String]]]) = quotes foreach { q => processInstrument(q) }
+  def processQuote(quotes: Seq[Map[String, Option[String]]]): Unit = quotes foreach { q => processInstrument(q) }
 
-  def processInstrument(quote: Map[String, Option[String]]) = model.getKey("symbol") match {
+  def processInstrument(quote: Map[String, Option[String]]): Unit = model.getKey("symbol") match {
     case Some(s) =>
       quote.get(s) match {
         case Some(Some(symbol)) => updateMarket(symbol, quote)
@@ -37,7 +36,7 @@ class JsonGoogleParser(blackboard: ActorRef) extends BlackboardActor(blackboard)
     case None => log.warning("'symbol' is not defined in model")
   }
 
-  def updateMarket(symbol: String, quote: Map[String, Option[String]]) = blackboard ! KnowledgeUpdate(model, symbol, quote flatMap { case (k, Some(v)) => Option(k -> v); case _ => None })
+  def updateMarket(symbol: String, quote: Map[String, Option[String]]): Unit = blackboard ! KnowledgeUpdate(model, symbol, quote flatMap { case (k, Some(v)) => Option(k -> v); case _ => None })
 }
 
 object JsonGoogleParser {
