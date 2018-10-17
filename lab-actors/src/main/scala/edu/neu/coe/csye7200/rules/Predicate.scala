@@ -3,7 +3,7 @@ package edu.neu.coe.csye7200.rules
 /**
  * @author robinhillyard
  */
-trait Predicate extends Function1[Candidate, Either[Throwable, Boolean]]
+trait Predicate extends ((Candidate) => Either[Throwable, Boolean])
 
 object Predicate {
   def apply(predicate: String): Predicate = {

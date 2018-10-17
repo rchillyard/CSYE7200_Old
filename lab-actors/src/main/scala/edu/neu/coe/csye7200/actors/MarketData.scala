@@ -38,14 +38,14 @@ class MarketData(blackboard: ActorRef) extends BlackboardActor(blackboard) {
         case None => List()
       }
       import scala.language.postfixOps
-      val x = attributes flatten;
+      val x = attributes flatten
       val y = x toMap;
       log.debug(s"creating QueryResponse: $identifier $y")
       sender ! QueryResponse(identifier, y)
 
     case OptionQuery(key, value) =>
       log.debug("option query received re: key: {} and value {}", key, value)
-      val optInstr = instruments find { case (k, v) => v.get(key) match { case Some(`value`) => true; case _ => false } }
+      val optInstr = instruments find { case (_, v) => v.get(key) match { case Some(`value`) => true; case _ => false } }
       optInstr match {
         case Some((x, m)) => sender ! QueryResponse(x, m)
         case _ => log.warning("no match found for key: {}, value: {}", key, value); sender ! QueryResponse(null, null)
@@ -59,9 +59,9 @@ class MarketData(blackboard: ActorRef) extends BlackboardActor(blackboard) {
    * In the case of stocks and similar instruments with a (ticker) symbol (or CUSIP),
    * then identifier is the symbol.
    * In the case of options, the identifier is option id.
-   * @param key
-   * @return
+//   * @param key the key (see above)
+//   * @return the instruments value corresponding to key
    */
-  private def get(key: String) = instruments.get(key)
+//  private def get(key: String) = instruments.get(key)
 }
 

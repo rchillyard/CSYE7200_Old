@@ -57,8 +57,8 @@ object JsonGoogleParser {
    * This version of decode is a little more complex than usual because the Google
    * interface deliberately prefixes "//" to the start of the Json in order
    * that we should not be able to invoke the service without some effort.
-   * @param entity
-   * @return
+    * @param entity the entity extracted from the Http Response
+    * @return the deserialized version
    */
   def decode(entity: HttpEntity): Deserialized[Results] = {
     import spray.httpx.unmarshalling._

@@ -20,7 +20,7 @@ class JsonYQLParser(blackboard: ActorRef) extends BlackboardActor(blackboard) {
       log.debug("JsonYQLParser received ContentMessage")
       JsonYQLParser.decode(entity) match {
         case Right(response) => processQuote(response.query.results.quote)
-        case Left(message) => log.warning(message.toString())
+        case Left(message) => log.warning(message.toString)
       }
     case m => super.receive(m)
   }
@@ -57,7 +57,7 @@ object JsonYQLParser {
     def get(index: Int, key: String): Option[String] = {
       Try { quote(index) } match {
         case Success(y) => y.get(key) match { case Some(x) => x; case None => None }
-        case Failure(y) => None
+        case Failure(_) => None
       }
     }
   }

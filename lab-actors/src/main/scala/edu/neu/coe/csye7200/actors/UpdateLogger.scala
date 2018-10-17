@@ -17,7 +17,7 @@ import edu.neu.coe.csye7200.portfolio.{Contract, Portfolio, Position}
  */
 class UpdateLogger(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
-  var portfolio = new Portfolio("", Nil)
+  var portfolio = Portfolio("", Nil)
 
   override def receive: PartialFunction[Any, Unit] =
     {
@@ -31,7 +31,7 @@ class UpdateLogger(blackboard: ActorRef) extends BlackboardActor(blackboard) {
       case PortfolioUpdate(p) =>
         log.debug(s"portfolio update for: ${p.name}")
         portfolio = p
-        showPortfolio
+        showPortfolio()
 
       case m => super.receive(m)
     }
@@ -62,14 +62,14 @@ class UpdateLogger(blackboard: ActorRef) extends BlackboardActor(blackboard) {
     }
   }
 
-  def showPortfolio {
+  def showPortfolio() {
     println(s"Portfolio for ${portfolio.name}")
-    portfolio.positions foreach { showPosition(_) }
+    portfolio.positions foreach showPosition
   }
 
   def showPosition(position: Position) {
     println(s"position for ${position.symbol}: quantity=${position.quantity}; options=")
-    position.contracts foreach { showContract(_) }
+    position.contracts foreach showContract
   }
 
   def showContract(contract: Contract) {

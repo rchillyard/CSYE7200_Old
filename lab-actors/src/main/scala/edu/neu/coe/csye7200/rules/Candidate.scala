@@ -3,7 +3,7 @@ package edu.neu.coe.csye7200.rules
 /**
  * @author robinhillyard
  */
-trait Candidate extends Function1[String, Option[Any]] {
+trait Candidate extends ((String) => Option[Any]) {
   def identifier: String
   def ++(m: Map[String, Any]): Candidate
 }

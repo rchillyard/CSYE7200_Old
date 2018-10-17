@@ -3,7 +3,7 @@ package edu.neu.coe.csye7200.rules
 /**
  * @author robinhillyard
  */
-sealed trait Operator[T] extends Function2[T, T, Boolean]
+sealed trait Operator[T] extends ((T, T) => Boolean)
 
 case class LessThan() extends Operator[Double] {
   def apply(x: Double, y: Double): Boolean = x < y
@@ -30,8 +30,8 @@ object Operator {
     case "<" => new LessThan
     case ">" => new GreaterThan
     // FIXME figure out what's wrong here!
-    case "<=" => new |(LessThan.asInstanceOf[Operator[Double]], Equals.asInstanceOf[Operator[Double]]).asInstanceOf[Operator[Double]]
-    case ">=" => new |(GreaterThan.asInstanceOf[Operator[Double]], Equals.asInstanceOf[Operator[Double]]).asInstanceOf[Operator[Double]]
+    case "<=" => |(LessThan.asInstanceOf[Operator[Double]], Equals.asInstanceOf[Operator[Double]]).asInstanceOf[Operator[Double]]
+    case ">=" => |(GreaterThan.asInstanceOf[Operator[Double]], Equals.asInstanceOf[Operator[Double]]).asInstanceOf[Operator[Double]]
   }
   def createText(s: String): Operator[String] = s match {
     case "==" => new Matches
