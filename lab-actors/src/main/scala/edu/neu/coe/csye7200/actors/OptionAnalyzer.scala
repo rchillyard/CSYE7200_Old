@@ -1,17 +1,16 @@
 package edu.neu.coe.csye7200.actors
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.ActorRef
 import akka.event.LoggingAdapter
-
-import scala.language.postfixOps
 import edu.neu.coe.csye7200.model.{MapUtils, Model}
 import edu.neu.coe.csye7200.rules.{Candidate, Predicate, Rule}
 
 import scala.io.Source
+import scala.language.postfixOps
 
 /**
- * @author robinhillyard
- */
+  * @author robinhillyard
+  */
 class OptionAnalyzer(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   // This is mutable state information.
@@ -46,12 +45,19 @@ class OptionAnalyzer(blackboard: ActorRef) extends BlackboardActor(blackboard) {
     }
 
   def getProperties(key: String, value: Any): Option[Map[String, Any]] =
-    properties find { p => p.get(key) match { case Some(`value`) => true; case _ => false } }
+    properties find { p => p.get(key) match {
+      case Some(`value`) => true;
+      case _ => false
+    }
+    }
 
   def applyRules(put: Boolean, candidate: Candidate): Boolean = {
     candidate("underlying") match {
       case Some(u) =>
-        val candidateWithProperties = candidate ++ (getProperties("Id", u) match { case Some(p) => p; case _ => Map() })
+        val candidateWithProperties = candidate ++ (getProperties("Id", u) match {
+          case Some(p) => p;
+          case _ => Map()
+        })
         val key = if (put) "put" else "call"
         rules.get(key) match {
           case Some(r) => r.apply(candidateWithProperties) match {
@@ -66,7 +72,9 @@ class OptionAnalyzer(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 }
 
 object OptionAnalyzer {
+
   import java.io.File
+
   import com.typesafe.config._
 
   def getRules(log: LoggingAdapter): Map[String, Predicate] = {
@@ -76,12 +84,11 @@ object OptionAnalyzer {
     val sSysRules = s"src/main/resources/$sRules"
     val userRules = new File(sUserRules)
     val config = if (userRules.exists) ConfigFactory.parseFile(userRules) else ConfigFactory.parseFile(new File(sSysRules))
-    List("put", "call") map { k =>
-      {
-        val r = config.getString(k)
-        log.info(s"rule: $k -> $r")
-        k -> Rule(r)
-      }
+    List("put", "call") map { k => {
+      val r = config.getString(k)
+      log.info(s"rule: $k -> $r")
+      k -> Rule(r)
+    }
     } toMap
   }
 
@@ -97,10 +104,10 @@ object OptionAnalyzer {
 }
 
 /**
- * @author robinhillyard
- *
- * CONSIDER combining optionDetails and chainDetails in the caller
- */
+  * @author robinhillyard
+  *
+  *         CONSIDER combining optionDetails and chainDetails in the caller
+  */
 case class OptionCandidate(put: Boolean, model: Model, id: String, optionDetails: Map[String, String], chainDetails: Map[String, Any]) extends Candidate {
 
   val details: Map[String, Any] = Map("put" -> put) ++ chainDetails ++ optionDetails

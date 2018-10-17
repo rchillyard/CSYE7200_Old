@@ -1,20 +1,17 @@
 package edu.neu.coe.csye7200.actors
 
-import akka.actor.{ActorRef, Props}
-import spray.http._
-import akka.actor.Identify
-import akka.actor.ActorIdentity
+import akka.actor.ActorRef
 
 import scala.collection.mutable
 
 /**
- * @author robinhillyard
- */
+  * @author robinhillyard
+  */
 class MarketData(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   /**
-   * see definition of get(String)
-   */
+    * see definition of get(String)
+    */
   val instruments: mutable.Map[String, Map[String, String]] = scala.collection.mutable.Map[String, Map[String, String]]()
 
   override def receive: PartialFunction[Any, Unit] = {
@@ -45,7 +42,11 @@ class MarketData(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
     case OptionQuery(key, value) =>
       log.debug("option query received re: key: {} and value {}", key, value)
-      val optInstr = instruments find { case (_, v) => v.get(key) match { case Some(`value`) => true; case _ => false } }
+      val optInstr = instruments find { case (_, v) => v.get(key) match {
+        case Some(`value`) => true;
+        case _ => false
+      }
+      }
       optInstr match {
         case Some((x, m)) => sender ! QueryResponse(x, m)
         case _ => log.warning("no match found for key: {}, value: {}", key, value); sender ! QueryResponse(null, null)
@@ -55,13 +56,13 @@ class MarketData(blackboard: ActorRef) extends BlackboardActor(blackboard) {
   }
 
   /**
-   * The key to the instruments collection is an "identifier".
-   * In the case of stocks and similar instruments with a (ticker) symbol (or CUSIP),
-   * then identifier is the symbol.
-   * In the case of options, the identifier is option id.
-//   * @param key the key (see above)
-//   * @return the instruments value corresponding to key
-   */
-//  private def get(key: String) = instruments.get(key)
+    * The key to the instruments collection is an "identifier".
+    * In the case of stocks and similar instruments with a (ticker) symbol (or CUSIP),
+    * then identifier is the symbol.
+    * In the case of options, the identifier is option id.
+    * //   * @param key the key (see above)
+    * //   * @return the instruments value corresponding to key
+    */
+  //  private def get(key: String) = instruments.get(key)
 }
 

@@ -3,9 +3,9 @@ package edu.neu.coe.csye7200.actors
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 
 /**
- * @author robinhillyard
- *
- */
+  * @author robinhillyard
+  *
+  */
 class Blackboard(forwardMap: Map[Class[_ <: Any], String], actors: Map[String, Class[_ <: BlackboardActor]]) extends Actor with ActorLogging {
 
   val actorMap: Map[String, ActorRef] = actors map {

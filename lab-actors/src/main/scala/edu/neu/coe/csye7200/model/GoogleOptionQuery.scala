@@ -5,8 +5,8 @@ import spray.http.Uri
 
 
 /**
- * @author robinhillyard
- */
+  * @author robinhillyard
+  */
 
 case class GoogleOptionQuery() extends Query {
   val uriGet = new UriGet()
@@ -28,6 +28,7 @@ object GoogleOptionQuery {
 
 class GoogleOptionModel extends Model {
   def isOption = true
+
   def getKey(query: String): Option[String] = query match {
     case "name" => Some("GO")
     case "identifier" => Some("s")

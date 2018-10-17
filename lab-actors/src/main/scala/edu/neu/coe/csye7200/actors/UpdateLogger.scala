@@ -1,40 +1,39 @@
 package edu.neu.coe.csye7200.actors
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
-
-import scala.concurrent.duration._
-import scala.concurrent.Await
-import scala.language.postfixOps
 import edu.neu.coe.csye7200.model.Model
 import edu.neu.coe.csye7200.portfolio.{Contract, Portfolio, Position}
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
+
 /**
- * CONSIDER renaming this as PortfolioManager
- *
- * @author robinhillyard
- */
+  * CONSIDER renaming this as PortfolioManager
+  *
+  * @author robinhillyard
+  */
 class UpdateLogger(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   var portfolio = Portfolio("", Nil)
 
-  override def receive: PartialFunction[Any, Unit] =
-    {
-      case Confirmation(id, model, attrs) =>
-        log.debug(s"update for identifier: $id")
-        if (model.isOption)
-          processOption(id, model, attrs)
-        else
-          processStock(id, model)
+  override def receive: PartialFunction[Any, Unit] = {
+    case Confirmation(id, model, attrs) =>
+      log.debug(s"update for identifier: $id")
+      if (model.isOption)
+        processOption(id, model, attrs)
+      else
+        processStock(id, model)
 
-      case PortfolioUpdate(p) =>
-        log.debug(s"portfolio update for: ${p.name}")
-        portfolio = p
-        showPortfolio()
+    case PortfolioUpdate(p) =>
+      log.debug(s"portfolio update for: ${p.name}")
+      portfolio = p
+      showPortfolio()
 
-      case m => super.receive(m)
-    }
+    case m => super.receive(m)
+  }
 
   implicit val timeout: Timeout = Timeout(5 seconds)
 

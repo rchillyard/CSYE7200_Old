@@ -3,12 +3,14 @@ package edu.neu.coe.csye7200.rules
 import scala.util.{Failure, Try, _}
 
 /**
- * @author robinhillyard
- */
+  * @author robinhillyard
+  */
 case class NumberPredicate(variable: String, operator: Operator[Double], value: Double) extends Predicate {
 
   def apply(candidate: Candidate): Either[Throwable, Boolean] = candidate(variable) match {
-    case Some(x) => Try { operate(x, operator, value) } match {
+    case Some(x) => Try {
+      operate(x, operator, value)
+    } match {
       case Success(v) => Right(v)
       case Failure(f) => Left(f)
     }
@@ -29,10 +31,13 @@ case class NumberPredicate(variable: String, operator: Operator[Double], value: 
 object NumberPredicate {
   def apply(variable: String, operator: String, value: Double): NumberPredicate =
     new NumberPredicate(variable, Operator.createNumeric(operator), value)
+
   def apply(variable: String, operator: Operator[Double], value: String): NumberPredicate =
     new NumberPredicate(variable, operator, value.toDouble)
+
   def apply(variable: String, operator: String, value: String): NumberPredicate =
     apply(variable, Operator.createNumeric(operator), value)
+
   def apply(predicate: String): NumberPredicate = {
     val rPredicate = """^\s*(\w+)\s*([=<>]{1,2})\s*(-?[0-9]+\.?[0-9]*)\s*$""".r
     predicate match {

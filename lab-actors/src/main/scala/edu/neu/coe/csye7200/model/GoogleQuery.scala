@@ -4,8 +4,8 @@ import edu.neu.coe.csye7200.http.UriGet
 import spray.http.Uri
 
 /**
- * @author robinhillyard
- */
+  * @author robinhillyard
+  */
 
 case class GoogleQuery(exchange: String) extends Query {
   val uriGet = new UriGet()
@@ -28,6 +28,7 @@ object GoogleQuery {
 
 class GoogleModel extends Model {
   def isOption = false
+
   def getKey(query: String): Option[String] = query match {
     case "name" => Some("GF")
     case "symbol" => Some("t")

@@ -1,21 +1,20 @@
 package edu.neu.coe.csye7200.http
 
-import spray.http._
+import akka.actor.{ActorRef, ActorSystem}
+import edu.neu.coe.csye7200.actors.HttpResult
 import spray.client.pipelining._
+import spray.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-
-
 import scala.concurrent._
 
-import edu.neu.coe.csye7200.actors.HttpResult
-
 /**
- * CONSIDER making this an Actor
- * @author robinhillyard
- */
+  * CONSIDER making this an Actor
+  *
+  * @author robinhillyard
+  */
 case class HttpTransaction(queryProtocol: String, request: HttpRequest, actor: ActorRef) {
+
   import akka.pattern.pipe
 
   implicit val system: ActorSystem = ActorSystem()

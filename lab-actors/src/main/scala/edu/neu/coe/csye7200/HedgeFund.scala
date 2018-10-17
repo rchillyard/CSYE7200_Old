@@ -1,7 +1,5 @@
 package edu.neu.coe.csye7200
 
-import java.net.URL
-
 import akka.actor.{ActorSystem, Props}
 import com.typesafe.config.{Config, ConfigFactory}
 import edu.neu.coe.csye7200.actors.{ExternalLookup, HedgeFundBlackboard, PortfolioUpdate}
@@ -56,19 +54,13 @@ object HedgeFund {
   }
 
   def getPortfolio(config: Config): Try[Portfolio] = {
-    val json = for (s <- Try(SmartSource.fromResource(config.getString("portfolio")))) yield s.mkString
-    val portfolio = json map PortfolioParser.decode
-    println(s"portfolio: $portfolio")
-    portfolio
+    val file = config.getString("portfolio")
+    // NOTE: we try to different ways of getting the file:
+    // (1) where file is a pure filename relative to the filing system;
+    // (2) where file is the name of a resource relative to the current class.
+    val sy = Try(Source.fromFile(file)) orElse(Try(Source.fromURL(getClass.getResource(file))))
+    val json = for (s <- sy) yield s.mkString
+    json map PortfolioParser.decode
   }
 
-}
-
-case class SmartSource(s: Source) {
-  def mkString: String = s.mkString
-}
-
-object SmartSource {
-  implicit def convert(ss: SmartSource): Source = ss.s
-  def fromResource(w: String): SmartSource = SmartSource(Source.fromURL(getClass.getResource(w)))
 }

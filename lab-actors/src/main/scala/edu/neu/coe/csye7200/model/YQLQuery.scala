@@ -4,14 +4,14 @@ import edu.neu.coe.csye7200.http.UriGet
 import spray.http.Uri
 
 /**
- * @author robinhillyard
- */
+  * @author robinhillyard
+  */
 
 case class YQLQuery(format: String, diagnostics: Boolean) extends Query {
   val uriGet = new UriGet()
 
   def createQuery(symbols: List[String]): Uri = {
-    val symbolList = symbols map { s => '"' + s + '"' } mkString ("(", ",", ")")
+    val symbolList = symbols map { s => '"' + s + '"' } mkString("(", ",", ")")
     val query = s"select * from ${YQLQuery.financeQuotesTable} where symbol in $symbolList"
     val queryParams = Map("q" -> query, "format" -> format, "diagnostics" -> diagnostics.toString, "env" -> YQLQuery.env, "callback" -> "")
     uriGet.get(YQLQuery.server, YQLQuery.path, queryParams)
@@ -29,6 +29,7 @@ object YQLQuery {
 
 class YQLModel extends Model {
   def isOption = false
+
   def getKey(query: String): Option[String] = query match {
     case "name" => Some("YQL")
     case "symbol" => Some("symbol")

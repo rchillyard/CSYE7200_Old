@@ -3,8 +3,8 @@ package edu.neu.coe.csye7200.actors
 import akka.actor.{ActorRef, Props}
 
 /**
- * @author robinhillyard
- */
+  * @author robinhillyard
+  */
 class EntityParser(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   val parsers = Map("json:YQL" -> context.actorOf(Props.create(classOf[JsonYQLParser], blackboard), "JsonParserYQL"),

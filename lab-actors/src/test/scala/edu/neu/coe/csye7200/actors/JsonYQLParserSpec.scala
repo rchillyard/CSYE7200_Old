@@ -1,23 +1,22 @@
 package edu.neu.coe.csye7200.actors
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.testkit._
 import edu.neu.coe.csye7200.model.Model
 import org.scalatest._
-
-import scala.io.Source
-import scala.concurrent.duration._
+import spray.http.ContentType.apply
 import spray.http._
 
+import scala.concurrent.duration._
+import scala.io.Source
 import scala.language.postfixOps
-import spray.http.ContentType.apply
 
 /**
- * This specification really tests much of the HedgeFund app but because it particularly deals with
- * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
- */
+  * This specification really tests much of the HedgeFund app but because it particularly deals with
+  * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
+  */
 class JsonYQLParserSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
-    with WordSpecLike with Matchers with Inside with BeforeAndAfterAll {
+  with WordSpecLike with Matchers with Inside with BeforeAndAfterAll {
 
   def this() = this(ActorSystem("JsonYQLParserSpec"))
 
@@ -26,6 +25,7 @@ class JsonYQLParserSpec(_system: ActorSystem) extends TestKit(_system) with Impl
   }
 
   import scala.language.postfixOps
+
   val json: String = Source.fromFile(getClass.getResource("/yqlExample.json").getPath) mkString
 
   "json conversion" in {
@@ -61,6 +61,7 @@ class JsonYQLParserSpec(_system: ActorSystem) extends TestKit(_system) with Impl
 }
 
 import akka.pattern.ask
+
 import scala.concurrent.Await
 
 class MockYQLUpdateLogger(blackboard: ActorRef) extends UpdateLogger(blackboard) {
@@ -83,16 +84,15 @@ class MockYQLUpdateLogger(blackboard: ActorRef) extends UpdateLogger(blackboard)
 class MockYQLBlackboard(testActor: ActorRef) extends Blackboard(Map(classOf[KnowledgeUpdate] -> "marketData", classOf[SymbolQuery] -> "marketData", classOf[OptionQuery] -> "marketData", classOf[CandidateOption] -> "optionAnalyzer", classOf[Confirmation] -> "updateLogger"),
   Map("marketData" -> classOf[MarketData], "optionAnalyzer" -> classOf[OptionAnalyzer], "updateLogger" -> classOf[MockYQLUpdateLogger])) {
 
-  override def receive: PartialFunction[Any, Unit] =
-    {
-      case msg: Confirmation => msg match {
-        // Cut down on the volume of messages
-        case Confirmation("MSFT", _, _) => super.receive(msg)
-        case _ =>
-      }
-      case msg: QueryResponse => testActor forward msg
-
-      case msg => super.receive(msg)
+  override def receive: PartialFunction[Any, Unit] = {
+    case msg: Confirmation => msg match {
+      // Cut down on the volume of messages
+      case Confirmation("MSFT", _, _) => super.receive(msg)
+      case _ =>
     }
+    case msg: QueryResponse => testActor forward msg
+
+    case msg => super.receive(msg)
+  }
 }
 

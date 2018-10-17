@@ -6,8 +6,8 @@ import java.util.{Date, Locale}
 
 import akka.actor.{Actor, ActorSystem, Props}
 import akka.event.Logging
-import akka.util.Timeout
 import akka.pattern.ask
+import akka.util.Timeout
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
@@ -102,7 +102,11 @@ class RssReader extends Actor {
 
   def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
     val p = new java.io.PrintWriter(f)
-    try { op(p) } finally { p.close() }
+    try {
+      op(p)
+    } finally {
+      p.close()
+    }
   }
 
   def read(url: URL): Unit = {
@@ -141,6 +145,7 @@ class SubscriptionReader extends Actor {
 object RssReader {
 
   def getUrls(fileName: String): Array[RssUrl] = getFileLines(fileName).map(url => RssUrl(new URL(url)))
+
   def getFileLines(fileName: String): Array[String] =
     scala.io.Source.fromFile(fileName).mkString.split("\n").filter(!_.startsWith("#"))
 

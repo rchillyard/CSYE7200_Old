@@ -3,9 +3,9 @@ package edu.neu.coe.csye7200.rules
 import org.scalatest.{Inside, Matchers, WordSpecLike}
 
 /**
- * This specification really tests much of the HedgeFund app but because it particularly deals with
- * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
- */
+  * This specification really tests much of the HedgeFund app but because it particularly deals with
+  * processing data from the YQL (Yahoo Query Language) using JSON, we call it by its given name.
+  */
 class PredicateSpec extends WordSpecLike with Matchers with Inside {
 
   "Simple Predicate and Candidate" in {

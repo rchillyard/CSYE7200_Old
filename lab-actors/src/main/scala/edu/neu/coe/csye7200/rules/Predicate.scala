@@ -1,8 +1,8 @@
 package edu.neu.coe.csye7200.rules
 
 /**
- * @author robinhillyard
- */
+  * @author robinhillyard
+  */
 trait Predicate extends ((Candidate) => Either[Throwable, Boolean])
 
 object Predicate {
@@ -22,6 +22,7 @@ object Predicate {
 case class Always() extends Predicate {
   def apply(candidate: Candidate) = Right(true)
 }
+
 case class Never() extends Predicate {
   def apply(candidate: Candidate) = Right(false)
 }

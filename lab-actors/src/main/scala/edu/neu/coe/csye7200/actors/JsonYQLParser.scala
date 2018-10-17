@@ -1,16 +1,16 @@
 package edu.neu.coe.csye7200.actors
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.ActorRef
+import edu.neu.coe.csye7200.model.{Model, YQLModel}
 import spray.http._
 
 import scala.util._
-import edu.neu.coe.csye7200.model.{Model, YQLModel}
 
 /**
- * TODO create a super-type for this kind of actor
- *
- * @author robinhillyard
- */
+  * TODO create a super-type for this kind of actor
+  *
+  * @author robinhillyard
+  */
 class JsonYQLParser(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   val model: Model = new YQLModel
@@ -40,23 +40,33 @@ class JsonYQLParser(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 }
 
 object JsonYQLParser {
-  import spray.json.DefaultJsonProtocol
-  import spray.httpx.unmarshalling._
-  import spray.httpx.marshalling._
+
   import spray.httpx.SprayJsonSupport._
-  import spray.json._
+  import spray.httpx.unmarshalling._
+  import spray.json.{DefaultJsonProtocol, _}
 
   case class Response(query: Query)
+
   case class Query(count: Int, created: String, lang: String, diagnostics: Option[Diagnostics], results: Results)
+
   case class Diagnostics(url: Seq[Map[String, String]], publiclyCallable: String, `user-time`: String, `service-time`: String, `build-version`: String, query: DiagnosticsQuery,
-    cache: DiagnosticsCache, javascript: DiagnosticsJavascript)
+                         cache: DiagnosticsCache, javascript: DiagnosticsJavascript)
+
   case class DiagnosticsQuery(`execution-start-time`: String, `execution-stop-time`: String, `execution-time`: String, params: String, content: String)
+
   case class DiagnosticsCache(`execution-start-time`: String, `execution-stop-time`: String, `execution-time`: String, method: String, `type`: String, content: String)
+
   case class DiagnosticsJavascript(`execution-start-time`: String, `execution-stop-time`: String, `execution-time`: String, `instructions-used`: String, `table-name`: String)
+
   case class Results(quote: Seq[Map[String, Option[String]]]) {
     def get(index: Int, key: String): Option[String] = {
-      Try { quote(index) } match {
-        case Success(y) => y.get(key) match { case Some(x) => x; case None => None }
+      Try {
+        quote(index)
+      } match {
+        case Success(y) => y.get(key) match {
+          case Some(x) => x;
+          case None => None
+        }
         case Failure(_) => None
       }
     }
