@@ -27,24 +27,24 @@ class PortfolioSpec(_system: ActorSystem) extends TestKit(_system) with Implicit
     TestKit.shutdownActorSystem(system)
   }
   
-  "read portfolio" taggedAs(Slow) in {
+  "read portfolio" taggedAs Slow in {
     val config = ConfigFactory.load
     val portfolio = HedgeFund.getPortfolio(config)
     portfolio.name shouldEqual "Test Portfolio"
     println(s"portfolio: $portfolio")
   }
 
-  "send back" taggedAs(Slow) in {
+  "send back" taggedAs Slow in {
     val model = new GoogleOptionModel()
     val blackboard = system.actorOf(Props.create(classOf[MockPortfolioBlackboard], testActor), "blackboard")
-    blackboard ! CandidateOption(model, "XX375", true, Map("strike" -> "45.2"), Map("underlying_id" -> "1234"))
+    blackboard ! CandidateOption(model, "XX375", put = true, Map("strike" -> "45.2"), Map("underlying_id" -> "1234"))
     val confirmationMsg = expectMsgClass(3.seconds, classOf[Confirmation])
     println("confirmation msg received: " + confirmationMsg)
     inside(confirmationMsg) {
-      case Confirmation(id, model, details) =>
+      case Confirmation(id, m, details) =>
         println(s"confirmation1 details: $details")
         id shouldEqual "XX375"
-        blackboard ! KnowledgeUpdate(model, "XX", Map("id" -> "1234"))
+        blackboard ! KnowledgeUpdate(m, "XX", Map("id" -> "1234"))
         val confirmationMsg2 = expectMsgClass(3.seconds, classOf[Confirmation])
         println("confirmation msg2 received: " + confirmationMsg2)
         // Note that the key "id" is in the model for symbols, not options
@@ -63,7 +63,7 @@ class PortfolioSpec(_system: ActorSystem) extends TestKit(_system) with Implicit
 class MockPortfolioBlackboard(testActor: ActorRef) extends Blackboard(Map(classOf[KnowledgeUpdate] -> "marketData", classOf[SymbolQuery] -> "marketData", classOf[OptionQuery] -> "marketData", classOf[CandidateOption] -> "optionAnalyzer", classOf[PortfolioUpdate] -> "updateLogger", classOf[Confirmation] -> "updateLogger"),
   Map("marketData" -> classOf[MarketData], "optionAnalyzer" -> classOf[OptionAnalyzer], "updateLogger" -> classOf[UpdateLogger])) {
 
-  override def receive =
+  override def receive: PartialFunction[Any, Unit] =
     {
       case msg: Confirmation => testActor forward msg
       case msg: QueryResponse => testActor forward msg

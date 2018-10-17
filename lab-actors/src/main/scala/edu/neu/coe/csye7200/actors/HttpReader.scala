@@ -8,12 +8,12 @@ import spray.http._
  */
 class HttpReader(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
-  val entityParser = context.actorOf(Props.create(classOf[EntityParser], blackboard), "EntityParser")
+  val entityParser: ActorRef = context.actorOf(Props.create(classOf[EntityParser], blackboard), "EntityParser")
 
   /**
    * @return
    */
-  override def receive = {
+  override def receive: PartialFunction[Any, Unit] = {
     case HttpResult(queryProtocol, request, HttpResponse(status, entity, headers, protocol)) =>
       log.info("request sent: {}; protocol: {}; response status: {}", request, protocol, status)
       if (status.isSuccess)
@@ -24,7 +24,7 @@ class HttpReader(blackboard: ActorRef) extends BlackboardActor(blackboard) {
     case m => super.receive(m)
   }
 
-  def processResponse(entity: HttpEntity, headers: List[HttpHeader], protocol: String) = {
+  def processResponse(entity: HttpEntity, headers: List[HttpHeader], protocol: String): Unit = {
     log.debug("response headers: {}; entity: {}",headers,entity)
     entityParser ! EntityMessage(protocol, entity)
   }

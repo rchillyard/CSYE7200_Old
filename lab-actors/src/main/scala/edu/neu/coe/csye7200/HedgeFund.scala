@@ -17,10 +17,10 @@ object HedgeFund {
 
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.load()
-    implicit val system = ActorSystem("HedgeFund")
+    implicit val system: ActorSystem = ActorSystem("HedgeFund")
     println(s"""${config.getString("name")}, ${config.getString("appVersion")}""")
     val engine: Option[Query] = config.getString("engine") match {
-      case "YQL" => Some(YQLQuery(config.getString("format"), false))
+      case "YQL" => Some(YQLQuery(config.getString("format"), diagnostics = false))
       case "Google" => Some(GoogleQuery("NASDAQ"))
       case _ => None
     }
@@ -41,9 +41,9 @@ object HedgeFund {
   }
   
 import scala.language.postfixOps
-  def getSymbols(config: Config, portfolio: Portfolio) = {
+  def getSymbols(config: Config, portfolio: Portfolio): List[String] = {
     // TODO add in the symbols from the portfolio
-    config.getString("symbols") split ("\\,") toList;
+    config.getString("symbols") split "\\," toList;
   }
 
 def getPortfolio(config: Config): Portfolio = {

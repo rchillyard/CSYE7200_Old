@@ -19,7 +19,7 @@ class UpdateLogger(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   var portfolio = new Portfolio("", Nil)
 
-  override def receive =
+  override def receive: PartialFunction[Any, Unit] =
     {
       case Confirmation(id, model, attrs) =>
         log.debug(s"update for identifier: $id")
@@ -36,23 +36,22 @@ class UpdateLogger(blackboard: ActorRef) extends BlackboardActor(blackboard) {
       case m => super.receive(m)
     }
 
-  implicit val timeout = Timeout(5 seconds)
+  implicit val timeout: Timeout = Timeout(5 seconds)
 
-  def processStock(identifier: String, model: Model) = {
+  def processStock(identifier: String, model: Model): Unit = {
     model.getKey("price") match {
-      case Some(p) => {
+      case Some(p) =>
         // sender is the MarketData actor
         val future = sender ? SymbolQuery(identifier, List(p))
         val result = Await.result(future, timeout.duration).asInstanceOf[QueryResponse]
-        result.attributes map {
+        result.attributes foreach {
           case (k, v) => log.info(s"$identifier attribute $k has been updated to: $v")
         }
-      }
       case None => log.warning(s"'price' not defined in model")
     }
   }
 
-  def processOption(identifier: String, model: Model, attributes: Map[String, Any]) = {
+  def processOption(identifier: String, model: Model, attributes: Map[String, Any]): Unit = {
     val key = "underlying"
     attributes.get(key) match {
       case Some(value) =>

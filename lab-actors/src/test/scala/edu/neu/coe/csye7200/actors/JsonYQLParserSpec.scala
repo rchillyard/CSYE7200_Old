@@ -27,7 +27,7 @@ class JsonYQLParserSpec(_system: ActorSystem) extends TestKit(_system) with Impl
   }
 
   import scala.language.postfixOps
-  val json = Source.fromFile(getClass.getResource("/yqlExample.json").getPath) mkString
+  val json: String = Source.fromFile(getClass.getResource("/yqlExample.json").getPath) mkString
 
   "json conversion" in {
     val body = HttpEntity(MediaTypes.`application/json`, json.getBytes())
@@ -64,18 +64,17 @@ import akka.pattern.ask
 import scala.concurrent.Await
 
 class MockYQLUpdateLogger(blackboard: ActorRef) extends UpdateLogger(blackboard) {
-  override def processStock(identifier: String, model: Model) = {
+  override def processStock(identifier: String, model: Model): Unit = {
     model.getKey("price") match {
-      case Some(p) => {
+      case Some(p) =>
         // sender is the MarketData actor
         val future = sender ? SymbolQuery(identifier, List(p))
         val result = Await.result(future, timeout.duration).asInstanceOf[QueryResponse]
-        result.attributes map {
+        result.attributes foreach {
           case (k, v) =>
             log.info(s"$identifier attribute $k has been updated to: $v")
             blackboard ! result
         }
-      }
       case None => log.warning(s"'price' not defined in model")
     }
   }
@@ -84,7 +83,7 @@ class MockYQLUpdateLogger(blackboard: ActorRef) extends UpdateLogger(blackboard)
 class MockYQLBlackboard(testActor: ActorRef) extends Blackboard(Map(classOf[KnowledgeUpdate] -> "marketData", classOf[SymbolQuery] -> "marketData", classOf[OptionQuery] -> "marketData", classOf[CandidateOption] -> "optionAnalyzer", classOf[Confirmation] -> "updateLogger"),
   Map("marketData" -> classOf[MarketData], "optionAnalyzer" -> classOf[OptionAnalyzer], "updateLogger" -> classOf[MockYQLUpdateLogger])) {
 
-  override def receive =
+  override def receive: PartialFunction[Any, Unit] =
     {
       case msg: Confirmation => msg match {
         // Cut down on the volume of messages

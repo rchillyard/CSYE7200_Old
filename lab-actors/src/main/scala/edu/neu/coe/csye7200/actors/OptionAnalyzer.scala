@@ -16,16 +16,16 @@ class OptionAnalyzer(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   // This is mutable state information.
   // When this actor is terminated and reborn, the rules/properties will be re-read from their respective files
-  var rules = Map[String, Predicate]()
-  var properties = List[Map[String, Any]]()
+  var rules: Map[String, Predicate] = Map[String, Predicate]()
+  var properties: List[Map[String, Any]] = List[Map[String, Any]]()
 
-  override def receive = {
+  override def receive: PartialFunction[Any, Unit] = {
     case CandidateOption(model, identifier, put, optionDetails, chainDetails) =>
       log.info("Option Analysis of identifier: {}", identifier)
       val candidate = OptionCandidate(put, model, identifier, optionDetails, chainDetails)
       if (applyRules(put, candidate)) {
         log.debug("Qualifies: sending confirmation message to blackboard")
-        val attributes = MapUtils.flatten[String, Any](List("underlying") map { k => (k -> candidate(k)) } toMap)
+        val attributes = MapUtils.flatten[String, Any](List("underlying") map { k => k -> candidate(k) } toMap)
         log.debug(s"attributes: $attributes")
         blackboard ! Confirmation(identifier, model, attributes)
       } else
@@ -39,18 +39,18 @@ class OptionAnalyzer(blackboard: ActorRef) extends BlackboardActor(blackboard) {
     properties = OptionAnalyzer.getProperties
   }
 
-  def getProperty(key: String, value: Any, property: String) =
+  def getProperty(key: String, value: Any, property: String): Option[Any] =
     getProperties(key, value) match {
       case Some(m) => m.get(property);
       case None => None
     }
 
-  def getProperties(key: String, value: Any) =
+  def getProperties(key: String, value: Any): Option[Map[String, Any]] =
     properties find { p => p.get(key) match { case Some(`value`) => true; case _ => false } }
 
   def applyRules(put: Boolean, candidate: Candidate): Boolean = {
     candidate("underlying") match {
-      case Some(u) => {
+      case Some(u) =>
         val candidateWithProperties = candidate ++ (getProperties("Id", u) match { case Some(p) => p; case _ => Map() })
         val key = if (put) "put" else "call"
         rules.get(key) match {
@@ -60,7 +60,6 @@ class OptionAnalyzer(blackboard: ActorRef) extends BlackboardActor(blackboard) {
           }
           case None => log.error(s"rules problem: $key doesn't define a rule"); false
         }
-      }
       case _ => println(s"underlying is not defined for option: $candidate"); false
     }
   }
@@ -70,7 +69,7 @@ object OptionAnalyzer {
   import java.io.File
   import com.typesafe.config._
 
-  def getRules(log: LoggingAdapter) = {
+  def getRules(log: LoggingAdapter): Map[String, Predicate] = {
     val userHome = System.getProperty("user.home")
     val sRules = "rules.txt"
     val sUserRules = s"$userHome/$sRules"
@@ -86,7 +85,7 @@ object OptionAnalyzer {
     } toMap
   }
 
-  def getProperties = {
+  def getProperties: List[Map[String, String]] = {
     val sProperties = "properties.txt"
     val sSysProperties = s"src/main/resources/$sProperties"
     val src = Source.fromFile(sSysProperties).getLines
@@ -104,12 +103,12 @@ object OptionAnalyzer {
  */
 case class OptionCandidate(put: Boolean, model: Model, id: String, optionDetails: Map[String, String], chainDetails: Map[String, Any]) extends Candidate {
 
-  val details = Map("put" -> put) ++ chainDetails ++ optionDetails
+  val details: Map[String, Any] = Map("put" -> put) ++ chainDetails ++ optionDetails
 
-  def identifier = id
+  def identifier: String = id
 
   // CONSIDER getting rid of the identifier case since we now have a method for that
-  def apply(s: String) = s match {
+  def apply(s: String): Option[Any] = s match {
     case "identifier" => Some(id)
     case _ => model.getKey(s) match {
       case Some(x) => details.get(x)

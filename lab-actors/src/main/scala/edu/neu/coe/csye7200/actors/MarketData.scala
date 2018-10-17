@@ -1,9 +1,11 @@
 package edu.neu.coe.csye7200.actors
 
-import akka.actor.{ ActorRef, Props }
+import akka.actor.{ActorRef, Props}
 import spray.http._
 import akka.actor.Identify
 import akka.actor.ActorIdentity
+
+import scala.collection.mutable
 
 /**
  * @author robinhillyard
@@ -13,9 +15,9 @@ class MarketData(blackboard: ActorRef) extends BlackboardActor(blackboard) {
   /**
    * see definition of get(String)
    */
-  val instruments = scala.collection.mutable.Map[String, Map[String, String]]()
+  val instruments: mutable.Map[String, Map[String, String]] = scala.collection.mutable.Map[String, Map[String, String]]()
 
-  override def receive = {
+  override def receive: PartialFunction[Any, Unit] = {
     case KnowledgeUpdate(model, identifier, update) =>
       log.debug("update to identifier: {}", identifier)
       instruments.put(identifier, update)
