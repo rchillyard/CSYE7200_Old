@@ -28,7 +28,7 @@ class PortfolioSpec(_system: ActorSystem) extends TestKit(_system) with Implicit
   "read portfolio" taggedAs Slow in {
     val config = ConfigFactory.load
     val portfolio = HedgeFund.getPortfolio(config)
-    portfolio should matchPattern { case Success(_) => }
+    portfolio should matchPattern { case Some(_) => }
     portfolio.get.name shouldEqual "Test Portfolio"
     println(s"portfolio: $portfolio")
   }
