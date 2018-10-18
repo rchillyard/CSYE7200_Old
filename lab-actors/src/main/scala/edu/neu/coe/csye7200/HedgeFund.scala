@@ -8,7 +8,7 @@ import edu.neu.coe.csye7200.portfolio.{Portfolio, PortfolioParser}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.FiniteDuration
-import scala.io.Source
+import scala.io.{BufferedSource, Source}
 import scala.language.implicitConversions
 import scala.util._
 
@@ -67,7 +67,7 @@ object HedgeFund {
     // NOTE: we try to different ways of getting the file:
     // (1) where file is a pure filename relative to the filing system;
     // (2) where file is the name of a resource relative to the current class.
-    val sy = Try(Source.fromFile(file)) orElse Try(Source.fromURL(getClass.getResource(file)))
+    val sy: Try[Source] = ???  // TODO
     val json = for (s <- sy) yield s.mkString
     json map PortfolioParser.decode
   }
