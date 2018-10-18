@@ -66,8 +66,7 @@ object HedgeFund {
   def getPortfolio(config: Config): Option[Portfolio] = {
     val filename = config.getString("portfolio")
     implicit val clazz: Class[_] = getClass
-    val sy: Option[Source] = getSource(filename)
-    val json = for (s <- sy) yield s.mkString
+    val json = for (s <- getSource(filename)) yield s.mkString
     json map PortfolioParser.decode
   }
 
