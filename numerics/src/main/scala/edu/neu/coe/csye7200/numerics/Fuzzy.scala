@@ -3,8 +3,7 @@ package edu.neu.coe.csye7200.numerics
 import org.apache.commons.math3.distribution._
 import scala.annotation.tailrec
 import scala.util._
-import edu.neu.coe.csye7200.parse.FuzzyParser
- 
+
 /**
  * The Fuzzy trait defines a quantity for which there is doubt about its actual value.
  * This Fuzzy trait is Numeric (it extends Fractional) and thus Fuzzy values can be ordered,

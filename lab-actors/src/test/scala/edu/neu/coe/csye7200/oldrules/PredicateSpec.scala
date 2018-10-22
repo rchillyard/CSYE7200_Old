@@ -1,6 +1,8 @@
-package edu.neu.coe.csye7200.rules
+package edu.neu.coe.csye7200.oldrules
 
 import org.scalatest.{Inside, Matchers, WordSpecLike}
+
+import scala.util.{Failure, Success}
 
 /**
   * This specification really tests much of the HedgeFund app but because it particularly deals with
@@ -10,21 +12,21 @@ class PredicateSpec extends WordSpecLike with Matchers with Inside {
 
   "Simple Predicate and Candidate" in {
     val predicate = NumberPredicate("x", "<", 3)
-    predicate.apply(MapCandidate("test", Map("x" -> "2"))) should matchPattern {
-      case Right(true) =>
+    predicate(MapCandidate("test", Map("x" -> "2"))) should matchPattern {
+      case Success(true) =>
     }
-    predicate.apply(MapCandidate("test", Map("x" -> "4"))) should matchPattern {
-      case Right(false) =>
+    predicate(MapCandidate("test", Map("x" -> "4"))) should matchPattern {
+      case Success(false) =>
     }
   }
 
   "Simple Predicate, bad Candidate" in {
     val predicate = NumberPredicate("x", "<", 3)
-    inside(predicate.apply(MapCandidate("test", Map("y" -> "2")))) {
-      case Left(x) => println(x)
+    inside(predicate(MapCandidate("test", Map("y" -> "2")))) {
+      case Failure(x) => println(x)
     }
-    inside(predicate.apply(MapCandidate("test", Map("x" -> "y")))) {
-      case Left(x) => println(x)
+    inside(predicate(MapCandidate("test", Map("x" -> "y")))) {
+      case Failure(x) => println(x)
     }
   }
 
@@ -38,8 +40,8 @@ class PredicateSpec extends WordSpecLike with Matchers with Inside {
 
   "Text Predicate" in {
     val predicate = Predicate("x == Hello")
-    predicate.apply(MapCandidate("test", Map("x" -> "Hello"))) should matchPattern {
-      case Right(true) =>
+    predicate(MapCandidate("test", Map("x" -> "Hello"))) should matchPattern {
+      case Success(true) =>
     }
   }
 }

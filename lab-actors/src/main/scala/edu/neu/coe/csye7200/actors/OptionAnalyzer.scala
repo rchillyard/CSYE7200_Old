@@ -4,10 +4,10 @@ import akka.actor.ActorRef
 import akka.event.LoggingAdapter
 import edu.neu.coe.csye7200.HedgeFund
 import edu.neu.coe.csye7200.model.{MapUtils, Model}
-import edu.neu.coe.csye7200.rules.{Candidate, Predicate, Rule}
+import edu.neu.coe.csye7200.oldrules.{Candidate, Predicate, SimpleRule}
 
 import scala.language.postfixOps
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 /**
   * @author robinhillyard
@@ -62,9 +62,9 @@ class OptionAnalyzer(blackboard: ActorRef) extends BlackboardActor(blackboard) {
         })
         val key = if (put) "put" else "call"
         rules.get(key) match {
-          case Some(r) => r.apply(candidateWithProperties) match {
-            case Right(b) => b
-            case Left(e) => log.error("rules problem: {}", e); false
+          case Some(r) => r(candidateWithProperties) match {
+            case Success(b) => b
+            case Failure(e) => log.error("rules problem: {}", e); false
           }
           case None => log.error(s"rules problem: $key doesn't define a rule"); false
         }
@@ -96,7 +96,7 @@ object OptionAnalyzer {
         List("put", "call") map { k => {
           val r = config.getString(k)
           log.info(s"rule: $k -> $r")
-          k -> Rule(r)
+          k -> SimpleRule(r)
         }
         } toMap
       case None => log.warning(s"unable to read rules configuration: $sUserRules or $sSysRules"); Map()

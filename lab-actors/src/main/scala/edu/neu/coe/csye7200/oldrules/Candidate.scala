@@ -1,4 +1,4 @@
-package edu.neu.coe.csye7200.rules
+package edu.neu.coe.csye7200.oldrules
 
 /**
   * @author robinhillyard

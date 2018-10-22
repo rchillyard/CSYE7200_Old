@@ -1,20 +1,20 @@
-package edu.neu.coe.csye7200.rules
+package edu.neu.coe.csye7200.oldrules
 
-import scala.util.{Failure, Try, _}
+import scala.util._
 
 /**
   * @author robinhillyard
   */
 case class StringPredicate(variable: String, operator: Operator[String], value: String) extends Predicate {
 
-  def apply(candidate: Candidate): Either[Throwable, Boolean] = candidate(variable) match {
+  def apply(candidate: Candidate): Try[Boolean] = candidate(variable) match {
     case Some(x) => Try {
       operator(x.toString, value)
     } match {
-      case Success(v) => Right(v)
-      case Failure(f) => Left(f)
+      case Success(v) => Success(v)
+      case Failure(f) => Failure(f)
     }
-    case _ => Left(new Exception(s"variable $variable not found in $candidate"))
+    case _ => Failure(new Exception(s"variable $variable not found in $candidate"))
   }
 }
 

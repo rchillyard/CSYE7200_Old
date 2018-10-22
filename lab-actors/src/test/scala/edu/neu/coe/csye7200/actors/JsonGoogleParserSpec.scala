@@ -2,6 +2,7 @@ package edu.neu.coe.csye7200.actors
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.testkit._
+import edu.neu.coe.csye7200.actors.JsonGoogleParser.Results
 import edu.neu.coe.csye7200.model.Model
 import org.scalatest._
 import spray.http._
@@ -28,10 +29,10 @@ class JsonGoogleParserSpec(_system: ActorSystem) extends TestKit(_system) with I
   val json: String = Source.fromFile(getClass.getResource("/googleExample.json").getPath) mkString
 
   "json read" in {
+    import JsonGoogleParser.MyJsonProtocol._
     import spray.json._
-    val obj = JsonGoogleParser.fix(json).parseJson
-    // TODO may have to work on this to make it generic
-//    obj shouldBe "[{\"e\":\"NASDAQ\",\"elt\":\"Jul 24, 7:15PM EDT\",\"s\":\"2\",\"ec\":\"+0.05\",\"cp_fix\":\"-0.53\",\"l_cur\":\"124.50\",\"ccol\":\"chr\",\"t\":\"AAPL\",\"el\":\"124.55\",\"yld\":\"1.67\",\"div\":\"0.52\",\"pcls_fix\":\"125.16\",\"el_cur\":\"124.55\",\"id\":\"22144\",\"ec_fix\":\"0.05\",\"l\":\"124.50\",\"el_fix\":\"124.55\",\"l_fix\":\"124.50\",\"ecp_fix\":\"0.04\",\"c_fix\":\"-0.66\",\"c\":\"-0.66\",\"eccol\":\"chg\",\"cp\":\"-0.53\",\"lt\":\"Jul 24, 4:08PM EDT\",\"ecp\":\"0.04\",\"lt_dts\":\"2015-07-24T16:08:30Z\",\"ltt\":\"4:08PM EDT\"},{\"e\":\"NASDAQ\",\"elt\":\"Jul 24, 6:34PM EDT\",\"s\":\"2\",\"ec\":\"+0.02\",\"cp_fix\":\"-0.92\",\"l_cur\":\"38.85\",\"ccol\":\"chr\",\"t\":\"YHOO\",\"el\":\"38.87\",\"yld\":\"\",\"div\":\"\",\"pcls_fix\":\"39.21\",\"el_cur\":\"38.87\",\"id\":\"658890\",\"ec_fix\":\"0.02\",\"l\":\"38.85\",\"el_fix\":\"38.87\",\"l_fix\":\"38.85\",\"ecp_fix\":\"0.06\",\"c_fix\":\"-0.36\",\"c\":\"-0.36\",\"eccol\":\"chg\",\"cp\":\"-0.92\",\"lt\":\"Jul 24, 4:08PM EDT\",\"ecp\":\"0.06\",\"lt_dts\":\"2015-07-24T16:08:28Z\",\"ltt\":\"4:08PM EDT\"}]"
+    val obj: Results = JsonGoogleParser.fix(json).parseJson.convertTo[Results]
+    obj shouldBe List(Map("e" -> Some("NASDAQ"), "elt" -> Some("Jul 24, 7:15PM EDT"), "s" -> Some("2"), "ec" -> Some("+0.05"), "cp_fix" -> Some("-0.53"), "l_cur" -> Some("124.50"), "ccol" -> Some("chr"), "t" -> Some("AAPL"), "el" -> Some("124.55"), "yld" -> Some("1.67"), "div" -> Some("0.52"), "pcls_fix" -> Some("125.16"), "el_cur" -> Some("124.55"), "id" -> Some("22144"), "ec_fix" -> Some("0.05"), "l" -> Some("124.50"), "el_fix" -> Some("124.55"), "l_fix" -> Some("124.50"), "ecp_fix" -> Some("0.04"), "c_fix" -> Some("-0.66"), "c" -> Some("-0.66"), "eccol" -> Some("chg"), "cp" -> Some("-0.53"), "lt" -> Some("Jul 24, 4:08PM EDT"), "ecp" -> Some("0.04"), "lt_dts" -> Some("2015-07-24T16:08:30Z"), "ltt" -> Some("4:08PM EDT")), Map("e" -> Some("NASDAQ"), "elt" -> Some("Jul 24, 6:34PM EDT"), "s" -> Some("2"), "ec" -> Some("+0.02"), "cp_fix" -> Some("-0.92"), "l_cur" -> Some("38.85"), "ccol" -> Some("chr"), "t" -> Some("YHOO"), "el" -> Some("38.87"), "yld" -> Some(""), "div" -> Some(""), "pcls_fix" -> Some("39.21"), "el_cur" -> Some("38.87"), "id" -> Some("658890"), "ec_fix" -> Some("0.02"), "l" -> Some("38.85"), "el_fix" -> Some("38.87"), "l_fix" -> Some("38.85"), "ecp_fix" -> Some("0.06"), "c_fix" -> Some("-0.36"), "c" -> Some("-0.36"), "eccol" -> Some("chg"), "cp" -> Some("-0.92"), "lt" -> Some("Jul 24, 4:08PM EDT"), "ecp" -> Some("0.06"), "lt_dts" -> Some("2015-07-24T16:08:28Z"), "ltt" -> Some("4:08PM EDT")))
   }
 
   "json conversion" in {
@@ -39,6 +40,7 @@ class JsonGoogleParserSpec(_system: ActorSystem) extends TestKit(_system) with I
     val entity = HttpEntity(contentTypeText, json.getBytes())
     val ok = JsonGoogleParser.decode(entity) match {
       case Right(x) =>
+        val z = x
         x.seq.length should equal(2)
         val quotes = x.seq
         quotes.head.get("t") should matchPattern { case Some(Some("AAPL")) => }
