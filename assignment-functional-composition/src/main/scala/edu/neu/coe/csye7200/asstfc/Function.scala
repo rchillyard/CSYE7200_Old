@@ -79,7 +79,9 @@ object Function {
     * @return a function of type (Try[T1],Try[T2])=>Try[R]
     */
   // TODO 8 (Think Simple, Elegant, Obvious)
-  def lift2[T1, T2, R](f: (T1, T2) => R): (Try[T1], Try[T2]) => Try[R] = map2(_,_)(f)
+  def lift2[T1, T2, R](f: (T1, T2) => R): (Try[T1], Try[T2]) => Try[R] =
+//   { (t1,t2) => map2(t1,t2))f) }
+   map2(_,_)(f)
 
   /**
     * Lift function to transform a function f of type (T1,T2,T3)=>R into a function of type (Try[T1],Try[T2],Try[T3])=>Try[R]

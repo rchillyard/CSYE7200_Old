@@ -1,6 +1,9 @@
 package edu.neu.coe.csye7200.numerics
 
+//import edu.neu.coe.csye7200.parse.FuzzyParser
+import edu.neu.coe.csye7200.parse.FuzzyParser
 import org.apache.commons.math3.distribution._
+
 import scala.annotation.tailrec
 import scala.util._
 

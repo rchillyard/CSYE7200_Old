@@ -1,4 +1,4 @@
-name := "CSYE7200-Solutions"
+name := "CSYE7200"
 
 version := "1.0"
 
