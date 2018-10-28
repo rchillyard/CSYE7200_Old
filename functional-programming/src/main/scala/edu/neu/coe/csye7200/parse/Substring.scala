@@ -28,7 +28,9 @@ object Substring {
       *         (3) recursively invoke substring on <code>p</code> and the tail of <code>s</code>.
       */
     @tailrec def substring(s: Seq[Char]): Boolean = p.length <= s.length && (
-      s.startsWith(p) || (
+//      s.startsWith(p) || (
+      // TODO implement the alternative as follows:
+      startsWith(s,p) || (
         s match {
           case Nil => false
           case _ :: z => substring(z)
@@ -39,4 +41,5 @@ object Substring {
     p.isEmpty || substring(string.toList)
   }
 
+  private def startsWith(s: Seq[Char], p: Seq[Char]): Boolean = s zip p forall (t => t._1==t._2) // TODO implement me!
 }
