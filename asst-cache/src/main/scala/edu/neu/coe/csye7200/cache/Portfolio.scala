@@ -5,16 +5,20 @@
 package edu.neu.coe.csye7200.cache
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util._
 
 case class Portfolio(positions: Seq[Position]) {
 
-  def value(cache: Cache[String, Double]): Future[Double] = ??? // TODO
+  def value(cache: Cache[String, Double]): Future[Double] = {
+    val xfs = for (p <- positions) yield for (v <- p.value(cache)) yield v
+    for (xs <- Future.sequence(xfs)) yield xs.sum
+  }
 
 }
 
 case class Position(symbol: String, quantity: Double) {
-  def value(cache: Cache[String, Double]): Future[Double] = ??? // TODO
+  def value(cache: Cache[String, Double]): Future[Double] = for (v <- cache(symbol)) yield v * quantity
 }
 
 object Portfolio {
@@ -32,7 +36,7 @@ object Position {
     case _ => Failure(new Exception(s"cannot parse $w as a Position"))
   }
 
-  def value(cache: Cache[String, Double])(w: String): Future[Double] = ??? // TODO
+  def value(cache: Cache[String, Double])(w: String): Future[Double] = flatten(for (p <- parse(w)) yield p.value(cache))
 
   private def flatten[X](xfy: Try[Future[X]]): Future[X] =
     xfy match {

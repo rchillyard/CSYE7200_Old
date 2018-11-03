@@ -1,6 +1,7 @@
 package edu.neu.coe.csye7200
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 import scala.util._
 
 /**
@@ -16,6 +17,11 @@ object MonadOps {
       case Success(xf) => xf
       case Failure(e) => Future.failed(e)
     }
+
+  // TODO test these two flatten signatures
+  def flatten[X](xoy: Try[Option[X]], t: => Throwable): Try[X] = for (xo <- xoy; x <- optionToTry(xo, t)) yield x
+
+  def flatten[X](xoy: Try[Option[X]]): Try[X] = for (xo <- xoy; x <- optionToTry(xo)) yield x
 
   // TODO implement. 6 points. Hint: write as a for-comprehension, using the method Future.sequence
   def flatten[X](xsfs: Seq[Future[Seq[X]]])(implicit ec: ExecutionContext): Future[Seq[X]] = Future.sequence(xsfs) map {
