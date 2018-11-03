@@ -40,7 +40,9 @@ lazy val labparser = project in file("lab-parser")
 
 lazy val labawscld = project in file("lab-awscloudformation")
 
-lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp, labactors, labsort, labparser, labawscld)
+lazy val lab99 = project in file("lab-99")
+
+lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp, labactors, labsort, labparser, labawscld, lab99)
 
 parallelExecution in Test := false
 
