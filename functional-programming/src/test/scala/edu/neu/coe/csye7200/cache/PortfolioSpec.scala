@@ -8,7 +8,6 @@ import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util._
 
 class PortfolioSpec extends FlatSpec with Matchers with Futures with ScalaFutures {
@@ -21,8 +20,8 @@ class PortfolioSpec extends FlatSpec with Matchers with Futures with ScalaFuture
 
   it should "get value" in {
     val xf = Position.value(cache)("MSFT 100.0")
-    whenReady(xf) { u => u should matchPattern { case x: Double =>  } }
-    xf.value.get.get shouldBe 364
+    whenReady(xf) { u => u should matchPattern { case _: Double => } }
+    xf.value.get.get shouldBe 10616.0
   }
 
   behavior of "Portfolio"
@@ -37,7 +36,7 @@ class PortfolioSpec extends FlatSpec with Matchers with Futures with ScalaFuture
     py should matchPattern { case Success(_) => }
     val portfolio = py.get
     val xf: Future[Double] = portfolio.value(cache)
-    whenReady(xf) { u => u should matchPattern { case x: Double =>  } }
+    whenReady(xf) { u => u should matchPattern { case _: Double => } }
     xf.value.get.get shouldBe 0.0
   }
 
@@ -47,8 +46,8 @@ class PortfolioSpec extends FlatSpec with Matchers with Futures with ScalaFuture
     py should matchPattern { case Success(_) => }
     val portfolio = py.get
     val xf: Future[Double] = portfolio.value(cache)
-    whenReady(xf) { u => u should matchPattern { case x: Double =>  } }
-    xf.value.get.get shouldBe 364
+    whenReady(xf) { u => u should matchPattern { case _: Double => } }
+    xf.value.get.get shouldBe 10616.0
   }
 
   it should "parse a portfolio (2)" in {
@@ -57,16 +56,11 @@ class PortfolioSpec extends FlatSpec with Matchers with Futures with ScalaFuture
     py should matchPattern { case Success(_) => }
     val portfolio = py.get
     val xf: Future[Double] = portfolio.value(cache)
-    whenReady(xf) { u => u should matchPattern { case x: Double =>  } }
-    xf.value.get.get shouldBe 345.6308
+    whenReady(xf) { u => u should matchPattern { case _: Double => } }
+    xf.value.get.get shouldBe 51606.4552
   }
 
-  val random = Random
-
-  def lookupStock(k: String): Future[Double] = Future {
-    random.setSeed(k.hashCode)
-    random.nextInt(1000) / 100.0
-  }
-  val cache = MyCache[String,Double](lookupStock)
+  implicit val resource: String = "stocks.txt"
+  private val cache = MyCache[String, Double](StockReader.getPrice)
 
 }
