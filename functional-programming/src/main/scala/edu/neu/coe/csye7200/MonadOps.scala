@@ -40,14 +40,7 @@ object MonadOps {
     for {es <- esf; e = filter(es)} yield e
   }
 
-//  def flatten[X](xfy: Try[Future[X]]): Future[X] =
-//    xfy match {
-//      case Success(xf) => xf
-//      case Failure(e) => (Promise[X] complete (throw e)).future
-//    }
-
   def flatten[K, V](voKm: Map[K, Option[V]]): Map[K, V] = for ((k, vo) <- voKm; v <- vo) yield k -> v
-
 
   def asFuture[X](xy: Try[X]): Future[X] = xy match {
     case Success(s) => Future.successful(s)
@@ -83,6 +76,10 @@ object MonadOps {
   def sequence[X](xe: Either[Throwable, X]): Option[X] = xe.right.toOption
 
   def zip[A, B](ao: Option[A], bo: Option[B]): Option[(A, B)] = for (a <- ao; b <- bo) yield (a, b)
+
+  def zip[A, B](ay: Try[A], by: Try[B]): Try[(A, B)] = for (a <- ay; b <- by) yield (a, b)
+
+  def zip[A, B](af: Future[A], bf: Future[B])(implicit executor: ExecutionContext): Future[(A, B)] = for (a <- af; b <- bf) yield (a, b)
 
   def optionToTry[X](xo: Option[X], t: => Throwable): Try[X] = Try(xo.get).recoverWith { case _: java.util.NoSuchElementException => Failure[X](t) }
 
