@@ -1,6 +1,7 @@
 package edu.neu.coe.csye7200
 
 import java.net.URL
+import java.util.NoSuchElementException
 
 import MonadOps._
 import org.scalatest.concurrent._
@@ -8,7 +9,7 @@ import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FlatSpec, Matchers, _}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent._
+import scala.concurrent.{Future, _}
 import scala.io.Source
 import scala.util._
 
@@ -121,6 +122,22 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     zip(one, two) should matchPattern { case Some((1, 2)) => }
     zip(none, two) should matchPattern { case None => }
     zip(one, none) should matchPattern { case None => }
+  }
+
+  "zip(Try,Try)" should "succeed" in {
+    val (one, two, fail) = (Success(1), Success(2), Failure(new NoSuchElementException))
+    zip(one, two) should matchPattern { case Success((1, 2)) => }
+    zip(fail, two) should matchPattern { case Failure(_) => }
+    zip(one, fail) should matchPattern { case Failure(_) => }
+  }
+
+  "zip(Future,Future)" should "succeed" in {
+    val one = Future(1)
+    val two = Future(2)
+    val fail = Future.failed(new NoSuchElementException)
+    whenReady(zip(one, two)) { x => x should matchPattern { case (1, 2) => } }
+    zip(fail, two).failed.futureValue shouldBe a [NoSuchElementException]
+    zip(one, fail).failed.futureValue shouldBe a [NoSuchElementException]
   }
 
   "optionToTry" should "succeed for Map" in {
