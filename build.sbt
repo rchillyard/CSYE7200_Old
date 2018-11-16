@@ -10,6 +10,8 @@ lazy val asstmd = project in file("assignment-movie-database")
 
 lazy val asstll = project in file("assignment-lazy")
 
+lazy val asstcache = project in file("asst-cache")
+
 lazy val asstrs = project in file("assignment-random-state")
 
 lazy val asstfc = project in file("assignment-functional-composition")
@@ -42,7 +44,7 @@ lazy val labawscld = project in file("lab-awscloudformation")
 
 lazy val lab99 = project in file("lab-99")
 
-lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp, labactors, labsort, labparser, labawscld, lab99)
+lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstcache, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp, labactors, labsort, labparser, labawscld, lab99)
 
 parallelExecution in Test := false
 
