@@ -25,6 +25,22 @@ trait Moves {
 }
 
 case class Point(x: Int, y: Int) {
+
+  def aligned(s: Point): (Boolean, Int) = if (x == s.x) (true, s.y) else if (y == s.y) (true, s.x) else (false, 0)
+
+  /**
+    * If this point is on final approach to s, return true.
+    * Final approach is define as vertically or horizontally aligned with s and at the correct distance from s.
+    *
+    * @param s the point we want to approach
+    * @return true if the conditions are (effectively) successful
+    */
+  def onFinalApproach(s: Point): Boolean = {
+    val (ok, x) = aligned(s)
+    ok && distance(s) % x == 0
+  }
+
+
   override def toString: String = "Point{" + "x=" + x + ", y=" + y + '}'
 
   /**
@@ -73,7 +89,9 @@ object Moves1 {
 }
 
 /**
-  * In Moves2, we work backwards from the target to the start
+  * In Moves2, we work backwards from the target to the start.
+  *
+  * This is not sufficiently fast to satisfy the LeetCode challenge.
   *
   * @param s the start point that we wish to reach
   */
@@ -81,13 +99,10 @@ case class Moves2(s: Point) extends Moves {
 
   def valid(t: Point): Boolean = {
     @tailrec
-    def inner(p: Point): Boolean = if (p == s) true else if (!p.valid) false else inner({
-      val x = move(p, true); println(x); x
-    })
+    def inner(p: Point): Boolean = if (p == s) true else if (!p.valid) false else inner(move(p, which = true))
 
     inner(t)
   }
-
 
   /**
     * This method defines the possible moves from point p
@@ -101,4 +116,33 @@ case class Moves2(s: Point) extends Moves {
 
 object Moves2 {
   def apply(x: Int, y: Int): Moves2 = apply(Point(x, y))
+}
+
+/**
+  * In Moves3, we work backwards from the target to the start, like in Moves2.
+  * But we add another optimization.
+  *
+  * @param s the start point that we wish to reach
+  */
+case class Moves3(s: Point) extends Moves {
+
+  def valid(t: Point): Boolean = {
+    @tailrec
+    def inner(p: Point): Boolean = if (p.onFinalApproach(s)) true else if (p == s) true else if (!p.valid) false else inner(move(p, which = true))
+
+    inner(t)
+  }
+
+  /**
+    * This method defines the possible moves from point p
+    *
+    * @param p     the point
+    * @param which ignored
+    * @return the point we moved to
+    */
+  override def move(p: Point, which: Boolean): Point = if (p.y > p.x) Point(p.x, p.y - p.x) else Point(p.x - p.y, p.y)
+}
+
+object Moves3 {
+  def apply(x: Int, y: Int): Moves3 = apply(Point(x, y))
 }
