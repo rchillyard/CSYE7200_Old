@@ -12,8 +12,8 @@ case class Greedy[T, R](fGreedy: T => T, fAdjust: (T, T) => T, fResult: (T, R) =
     @tailrec def inner(_t: T, _r: R): R =
       if (fDone(_t)) _r
       else {
-        val greedy = fGreedy.apply(_t)
-        inner(fAdjust.apply(_t, greedy), fResult.apply(greedy, _r))
+        val greedy = fGreedy(_t)
+        inner(fAdjust(_t, greedy), fResult(greedy, _r))
       }
 
     inner(t, r)
