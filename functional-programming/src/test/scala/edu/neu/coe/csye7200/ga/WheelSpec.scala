@@ -1,6 +1,6 @@
 package edu.neu.coe.csye7200.ga
 
-import org.scalatest.{FlatSpec, Matchers, PrivateMethodTester}
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.mutable
 import scala.language.postfixOps
@@ -39,9 +39,26 @@ class WheelSpec extends FlatSpec with Matchers {
   }
 
   behavior of "spin"
+  it should "manage simple Boolean" in {
+    val r: Random = new java.util.Random(0L)
+    val wheel = Wheel.create(true->1, false->1)
+    wheel.spin(r) shouldBe false
+    wheel.spin(r) shouldBe false
+    wheel.spin(r) shouldBe true
+    wheel.spin(r) shouldBe false
+    wheel.spin(r) shouldBe false
+    wheel.spin(r) shouldBe true
+    wheel.spin(r) shouldBe false
+    wheel.spin(r) shouldBe true
+    wheel.spin(r) shouldBe false
+    wheel.spin(r) shouldBe false
+    wheel.spin(r) shouldBe true
+    wheel.spin(r) shouldBe true
+    wheel.spin(r) shouldBe true
+  }
   it should "yield heads or tails" in {
       val r: Random = new java.util.Random(0L)
-      val wheel = Wheel.create("heads"->1,"tails"->1)
+      val wheel = Wheel.create("heads"->1, "tails"->1)
       wheel.spin(r) shouldBe "tails"
       wheel.spin(r) shouldBe "tails"
       wheel.spin(r) shouldBe "heads"
@@ -57,11 +74,27 @@ class WheelSpec extends FlatSpec with Matchers {
       wheel.spin(r) shouldBe "heads"
   }
 
+  it should "yield rain, clouds or sunshine" in {
+    val r: Random = new java.util.Random(0L)
+    val wheel = Wheel.create("rain"->2,"clouds"->3,"sunshine"->5)
+    wheel.spin(r) shouldBe "rain"
+    wheel.spin(r) shouldBe "sunshine"
+    wheel.spin(r) shouldBe "sunshine"
+    wheel.spin(r) shouldBe "sunshine"
+    wheel.spin(r) shouldBe "sunshine"
+    wheel.spin(r) shouldBe "clouds"
+    wheel.spin(r) shouldBe "rain"
+    wheel.spin(r) shouldBe "rain"
+    wheel.spin(r) shouldBe "sunshine"
+    wheel.spin(r) shouldBe "clouds"
+    wheel.spin(r) shouldBe "sunshine"
+  }
+
   it should "yield proper relative frequencies in video poker" in {
     val r: Random = new java.util.Random()
     val wheel = Wheel.create("highcard"->1302540, "pair"->1098240, "twopair"->123552,"trips"->54912, "straight"->10200, "flush"->5108, "fullhouse"->3744, "quads"->624, "straightflush"->36, "royal"->4)
     val frequencies = new Frequencies
-    for (x <- 1 to 1000000) frequencies.increment(wheel.spin(r))
+    for (_ <- 1 to 1000000) frequencies.increment(wheel.spin(r))
     frequencies.get("twopair").get/10000.0 shouldBe 5.0 +- 1
     frequencies.get("trips").get/10000.0 shouldBe 2.0 +- 0.7
   }
