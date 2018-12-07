@@ -15,6 +15,7 @@ class WheelSpec extends FlatSpec with Matchers {
     def increment(k: String) = put(k, getOrElse(k, 0)+1)
   }
 
+  /*
   behavior of "lookup"
   it should "yield 0->me, 1->you, 2->exception" in {
     val wheel = Wheel.create("me"->1, "you"->1)
@@ -37,6 +38,7 @@ class WheelSpec extends FlatSpec with Matchers {
     tester.invokePrivate("lookup", new Integer(8)) shouldBe "green"
     an[LogicError] shouldBe thrownBy(tester.invokePrivate("lookup", new Integer(9)))
   }
+  */
 
   behavior of "spin"
   it should "manage simple Boolean" in {

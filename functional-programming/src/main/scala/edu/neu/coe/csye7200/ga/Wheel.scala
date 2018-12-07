@@ -8,15 +8,9 @@ import scala.util.Random
   * @tparam Event the underlying type of an event.
   */
 case class Wheel[Event](eventOdds: Seq[EventOdds[Event]]) {
-  private val outcomes = (for (x <- eventOdds) yield x.odds) sum
+  private val outcomes = ??? //TODO
 
-  private def lookup(i: Int): Event = {
-    def inner(es: Seq[EventOdds[Event]], x: Int): Event = es match {
-      case Nil => throw LogicError(s"cannot get event for $i in $this")
-      case h :: t => if (x < h.odds) h.event else inner(t, x - h.odds)
-    }
-    inner(eventOdds, i)
-  }
+  private def lookup(i: Int): Event = ??? //TODO
 
   /**
     * Given a Random object, this method will "spin" the wheel and generate an event according to the probabilities
@@ -26,14 +20,6 @@ case class Wheel[Event](eventOdds: Seq[EventOdds[Event]]) {
     */
   def spin(r: Random): Event = lookup(r.nextInt(outcomes))
 
-  /**
-    * Create a cartesian product Wheel from this Wheel and other Wheel.
-    * @param other the other Wheel
-    * @tparam Event2 the underlying event type of the other wheel
-    * @return a new Wheel of event type (Event, Event2)
-    */
-  def product[Event2](other: Wheel[Event2]): Wheel[(Event, Event2)] =
-    Wheel(for (e1 <- eventOdds; e2 <- other.eventOdds) yield EventOdds[(Event, Event2)](e1.event -> e2.event, e1.odds * e2.odds))
 }
 
 object Wheel {
