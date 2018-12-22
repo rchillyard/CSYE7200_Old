@@ -100,4 +100,17 @@ class WheelSpec extends FlatSpec with Matchers {
     frequencies.get("twopair").get/10000.0 shouldBe 5.0 +- 1
     frequencies.get("trips").get/10000.0 shouldBe 2.0 +- 0.7
   }
+
+  it should "be junk" in {
+    def length(xs: List[Int]): Int = {
+      var l = 0;
+      var list=xs;
+      while (!list.isEmpty) {
+        l+=1;
+        list=list.tail
+      }
+      return l
+    }
+    length(Nil) shouldBe 0
+  }
 }

@@ -8,9 +8,13 @@ import scala.util.Random
   * @tparam Event the underlying type of an event.
   */
 case class Wheel[Event](eventOdds: Seq[EventOdds[Event]]) {
-  private val outcomes = ??? //TODO
+  private val outcomes = (for (x <- eventOdds) yield x.odds) sum
 
-  private def lookup(i: Int): Event = ??? //TODO
+  private def lookup(i: Int): Event = {    def inner(es: Seq[EventOdds[Event]], x: Int): Event = es match
+  {      case Nil => throw LogicError(s"cannot get event for $i in $this")
+    case h :: t => if (x < h.odds) h.event else inner(t, x - h.odds)    }
+    inner(eventOdds, i)  }
+
 
   /**
     * Given a Random object, this method will "spin" the wheel and generate an event according to the probabilities
