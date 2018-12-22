@@ -15,7 +15,6 @@ class WheelSpec extends FlatSpec with Matchers {
     def increment(k: String) = put(k, getOrElse(k, 0)+1)
   }
 
-  /*
   behavior of "lookup"
   it should "yield 0->me, 1->you, 2->exception" in {
     val wheel = Wheel.create("me"->1, "you"->1)
@@ -38,7 +37,6 @@ class WheelSpec extends FlatSpec with Matchers {
     tester.invokePrivate("lookup", new Integer(8)) shouldBe "green"
     an[LogicError] shouldBe thrownBy(tester.invokePrivate("lookup", new Integer(9)))
   }
-  */
 
   behavior of "spin"
   it should "manage simple Boolean" in {
@@ -99,18 +97,5 @@ class WheelSpec extends FlatSpec with Matchers {
     for (_ <- 1 to 1000000) frequencies.increment(wheel.spin(r))
     frequencies.get("twopair").get/10000.0 shouldBe 5.0 +- 1
     frequencies.get("trips").get/10000.0 shouldBe 2.0 +- 0.7
-  }
-
-  it should "be junk" in {
-    def length(xs: List[Int]): Int = {
-      var l = 0;
-      var list=xs;
-      while (!list.isEmpty) {
-        l+=1;
-        list=list.tail
-      }
-      return l
-    }
-    length(Nil) shouldBe 0
   }
 }
