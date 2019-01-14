@@ -24,10 +24,10 @@ import scala.util._
  * 
  * @author scalaprof
  *
- * @param <K1> (input) key type (may be Unit)
- * @param <K2> (output) key type
- * @param <V1> (input) value type
- * @param <V2> (output) value type
+ * @tparam K1 (input) key type (may be Unit)
+ * @tparam K2 (output) key type
+ * @tparam V1 (input) value type
+ * @tparam V2 (output) value type
  * 
  */
 class Mapper[K1,V1,K2,V2](f: (K1,V1)=>(K2,V2)) extends Actor with ActorLogging {
@@ -64,10 +64,10 @@ class Mapper[K1,V1,K2,V2](f: (K1,V1)=>(K2,V2)) extends Actor with ActorLogging {
  * 
  * @author scalaprof
  *
- * @param <K1>
- * @param <V1>
- * @param <K2>
- * @param <V2>
+ * @tparam K1
+ * @tparam V1
+ * @tparam K2
+ * @tparam V2
  */
 class Mapper_Forgiving[K1,V1,K2,V2](f: (K1,V1)=>(K2,V2)) extends Mapper[K1,V1,K2,V2](f) {
   

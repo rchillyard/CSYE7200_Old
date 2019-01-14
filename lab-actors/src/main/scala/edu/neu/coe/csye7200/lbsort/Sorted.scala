@@ -9,14 +9,14 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
 
   //noinspection ConvertExpressionToSAM
   def toOrdering: Ordering[T] = new Ordering[T]() {
-    def compare(x: T, y: T): Int = self(x, y).toInt // TODO implement
+    def compare(x: T, y: T): Int = ??? // TO BE IMPLEMENTED
   }
 
-  def >(tt: (T, T)): Boolean = self(tt.swap)().getOrElse(false)  // TODO implement
+  def >(tt: (T, T)): Boolean = ???  // TO BE IMPLEMENTED
 
   def <(tt: (T, T)): Boolean = self(tt)().getOrElse(false)
 
-  def ==(tt: (T, T)): Boolean = self(tt)().isEmpty  // TODO implement
+  def ==(tt: (T, T)): Boolean = ???  // TO BE IMPLEMENTED
 
   def >=(tt: (T, T)): Boolean = ! <(tt)
 
@@ -24,7 +24,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
 
   def !=(tt: (T, T)): Boolean = ! ==(tt)
 
-  def compose(f: Comparison => Comparison): Comparer[T] = (tt: (T, T)) => f(self(tt))
+  def compose(f: Comparison => Comparison): Comparer[T] = (tt: ((T, T))) => f(self(tt))
 
   def orElse(o: Comparer[T]): Comparer[T] = (tt: (T, T)) => self(tt).orElse(o(tt))
 
@@ -34,8 +34,7 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
 object Comparer {
 
   implicit val intComparer: Comparer[Int] = Ordering[Int]
-  // TODO what should follow this comment? [Yuan: remove strComparer from public]
-  implicit val strComparer: Comparer[String] = Ordering[String]
+  // TO BE IMPLEMENTED what should follow this comment?
 
   implicit def convert[T](x: Ordering[T]): Comparer[T] = (tt: (T, T)) => Comparison(x.compare(tt._1, tt._2))
 }

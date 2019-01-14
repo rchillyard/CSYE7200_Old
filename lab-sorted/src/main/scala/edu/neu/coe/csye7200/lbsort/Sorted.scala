@@ -9,14 +9,14 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
 
   //noinspection ConvertExpressionToSAM
   def toOrdering: Ordering[T] = new Ordering[T]() {
-    def compare(x: T, y: T): Int = ??? // TO BE IMPLEMENTED implement
+    def compare(x: T, y: T): Int = ??? // TO BE IMPLEMENTED
   }
 
-  def >(tt: (T, T)): Boolean = ??? // TO BE IMPLEMENTED implement
+  def >(tt: (T, T)): Boolean = ???  // TO BE IMPLEMENTED
 
   def <(tt: (T, T)): Boolean = self(tt)().getOrElse(false)
 
-  def ==(tt: (T, T)): Boolean = ???  // TO BE IMPLEMENTED implement
+  def ==(tt: (T, T)): Boolean = ???  // TO BE IMPLEMENTED
 
   def >=(tt: (T, T)): Boolean = ! <(tt)
 
@@ -34,8 +34,8 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
 object Comparer {
 
   implicit val intComparer: Comparer[Int] = Ordering[Int]
-  // TODO what should follow this comment?
-  implicit val strComparer: Comparer[String] = Ordering[String]
+  // TO BE IMPLEMENTED what should follow this comment?
+  ???
 
   implicit def convert[T](x: Ordering[T]): Comparer[T] = (tt: (T, T)) => Comparison(x.compare(tt._1, tt._2))
 }

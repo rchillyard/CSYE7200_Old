@@ -21,7 +21,7 @@ case class MyCache[K, V](fulfill: K=>Future[V]) extends Cache[K, V] {
 
   private def put(k: K, v: V): Unit = cache.+=((k,v))
 
-  override def apply(k: K): Future[V] = if (cache.contains(k)) Future(cache(k)) else for (v <- fulfill(k); _ = put(k, v)) yield v
+  override def apply(k: K): Future[V] = ??? // TO BE IMPLEMENTED
 
   def expire(k: K): Unit = cache.-=(k)
 

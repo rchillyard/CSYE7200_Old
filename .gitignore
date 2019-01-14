@@ -6,6 +6,6 @@ project/target/
 api/
 
 *.iml
-
+.idea
 
 output\.html
