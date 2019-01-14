@@ -1,17 +1,27 @@
 package edu.neu.coe.csye7200.minidatabase
 
 import scala.io.Source
+import scala.util.{Failure, Success, Try}
 
 /**
   * @author scalaprof
   */
 object MiniDatabase {
-  def load(filename: String): List[Entry] = {
-    val src = Source.fromFile(filename)
-    val database = src.getLines.toList.map(e => Entry(e.split(",")))
-    val result = database
-    src.close
-    result
+  def load(wo: Option[String]): List[Entry] = {
+    val sy = Try(wo match {
+      case Some(w) => Source.fromFile(w)
+      case None => Source.fromResource("minidatabase.csv")
+    })
+    sy match {
+      case Success(s) =>
+        println(s)
+        val result = s.getLines.toList.map(e => Entry(e.split(",")))
+        s.close()
+        result
+      case Failure(x) =>
+        System.err.println(x.getLocalizedMessage)
+        Nil
+    }
   }
 
   def measure(height: Height): String = height match {
@@ -23,10 +33,9 @@ object MiniDatabase {
   }
 
   def main(args: Array[String]): Unit = {
-    if (args.length > 0) {
-      val db = load(args(0))
+    val wo = args.headOption
+      val db = load(wo)
       print(db)
-    }
   }
 }
 
