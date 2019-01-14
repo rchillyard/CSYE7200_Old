@@ -35,13 +35,13 @@ trait RandomState[T] {
     * @return a new random state
     */
   //Hint: Think of the input and output, find the appropriate method that achieve this.
-  def flatMap[U](f: T=>RandomState[U]): RandomState[U] = ??? // TODO 10 points
+  def flatMap[U](f: T=>RandomState[U]): RandomState[U] = ??? // TO BE IMPLEMENTED 10 points
 
   /**
     * @return a stream of T values
     */
   //Hint: This a recursively method and it concatenate current element with following elements.
-  def toStream: Stream[T] = ??? // TODO 12 points
+  def toStream: Stream[T] = ??? // TO BE IMPLEMENTED 12 points
 }
 
 /**
@@ -52,11 +52,11 @@ trait RandomState[T] {
   */
 case class JavaRandomState[T](n: Long, g: Long=>T) extends RandomState[T] {
   //Hint: Remember to use the "seed" to generate next RandomState.
-  def next: RandomState[T] = ??? // TODO 7 points
+  def next: RandomState[T] = ??? // TO BE IMPLEMENTED 7 points
   //Hint: Think of the input and output.
-  def get: T = ??? // TODO 5 points
+  def get: T = ??? // TO BE IMPLEMENTED 5 points
   //Hint: This one need function composition.
-  def map[U](f: (T) => U): RandomState[U] = ??? // TODO 13 points
+  def map[U](f: (T) => U): RandomState[U] = ??? // TO BE IMPLEMENTED 13 points (alternatives exist)
 }
 
 case class DoubleRandomState(n: Long) extends RandomState[Double] {
@@ -77,7 +77,7 @@ object RandomState {
   def apply(n: Long): RandomState[Long] = JavaRandomState[Long](n,identity).next
   def apply(): RandomState[Long] = apply(System.currentTimeMillis)
   //Hint: This is a easy one, remember that it not only convert a Long to a Double but also scale down the number to -1 ~ 1.
-  val longToDouble: Long=>Double = ??? // TODO 4 points
+  val longToDouble: Long=>Double = ??? // TO BE IMPLEMENTED 4 points
   val doubleToUniformDouble: Double=>UniformDouble = {x => UniformDouble((x+1)/2)}
 }
 
@@ -89,9 +89,18 @@ object BetterRandomState {
   * This is essentially a wrapper of Double where (implicitly) 0 <= x <= 1.
   * Note that we would like to specify it as a Value type but require statements are not legal in Value types
   */
-case class UniformDouble(x: Double) {
-  require(x>=0.0 && x<=1.0)
-  def +(y: Double) = x + y
+case class UniformDouble(x: Double) extends AnyVal {
+//  if(x<0.0 || x>1.0) throw new RuntimeException(s"UniformDouble may not be outside range 0->1: $x")
+  def +(y: Double): UniformDouble = {
+    val z = x + y
+    if (z>=0.0 && z<=1.0)
+    new UniformDouble(z)
+    else throw new RuntimeException(s"UniformDouble may not be outside range 0->1: $z")
+  }
+}
+
+object UniformDouble {
+  def apply(x: Double): UniformDouble = new UniformDouble(x)+0
 }
 
 object UniformDoubleRandomState

@@ -23,7 +23,7 @@ object WordCount extends App {
   def wordCount3(lines: RDD[String], separator: String) = {
     lines.flatMap(_.split(separator))
         .filter(myFilter(_, "He"))
-        .map(myReplacer _)
+        .map(myReplacer)
         .map((_,1))
         .reduceByKey(_ + _)
   }

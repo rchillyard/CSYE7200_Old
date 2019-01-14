@@ -37,10 +37,7 @@ case class Movie(title: String, format: Format, production: Production, reviews:
   */
 case class Format(color: Boolean, language: String, aspectRatio: Double, duration: Int) {
   override def toString = {
-    val x = color match {
-      case true => "Color";
-      case _ => "B&W"
-    }
+    val x = if (color) "Color" else "B&W"
     s"$x,$language,$aspectRatio,$duration"
   }
 }
@@ -109,7 +106,7 @@ object Movie extends App {
   trait IngestibleMovie extends Ingestible[Movie] {
     //Hint: Think of the return type of method. Also, you need the apply method which is similar as a construction method in java.
     //The source file is a csv file which is separated by ","
-    def fromString(w: String): Try[Movie] = ??? // TODO 11 points
+    def fromString(w: String): Try[Movie] = ??? // TO BE IMPLEMENTED 11 points
   }
 
   implicit object IngestibleMovie extends IngestibleMovie
@@ -117,7 +114,9 @@ object Movie extends App {
   val ingester = new Ingest[Movie]()
   if (args.length > 0) {
     val source = Source.fromFile(args.head)
-    val kiwiMovies: Iterator[Try[Movie]] = for (my <- ingester(source)) yield for (m <- my; if m.production.isKiwi) yield m
+    val kiwiMovies: Iterator[Try[Movie]] =
+      for (my <- ingester(source)) yield
+        for (m <- my; if m.production.isKiwi) yield m
     kiwiMovies foreach { _ foreach { println(_) } }
     source.close()
   }
@@ -132,7 +131,7 @@ object Movie extends App {
   def elements(list: Seq[String], indices: Int*): List[String] = {
     val x = mutable.ListBuffer[String]()
     //Hint: form a new list which is consisted by the elements in list in position indices. Int* means array of Int.
-    ??? // TODO 6 points
+    ??? // TO BE IMPLEMENTED 6 points
     x.toList
   }
 
@@ -213,5 +212,6 @@ object Rating {
     * @return a Rating
     */
   //Hint: This should similar to apply method in Object Name. The parameter of apply in case match should be same as case class Rating
-  def apply(s: String): Rating = ??? // TODO 13 points
+  def apply(s: String): Rating = ??? // TO BE IMPLEMENTED 13 points
+  }
 }

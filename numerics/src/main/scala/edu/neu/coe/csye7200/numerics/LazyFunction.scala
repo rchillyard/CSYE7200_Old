@@ -7,7 +7,7 @@ package edu.neu.coe.csye7200.numerics
  * @author scalaprof
  */
 
-abstract class LazyFunction[X: Numeric] extends Function1[X,X] {    
+abstract class LazyFunction[X: Numeric] extends ((X) => X) {
     /**
      * Compose two functions, such that, when applied, parameter f is applied first
      */
@@ -26,7 +26,7 @@ abstract class LazyFunction[X: Numeric] extends Function1[X,X] {
 abstract class KnownDifferentiableFunction[X: Numeric](name: String, g: X=>X, ds: X=>Double*) extends DifferentiableFunction[X](g,ds:_*) {
   override def toString = name  
 }
-abstract class DifferentiableFunction[X: Numeric](g: X=>X, ds: X=>Double*) extends DiFuncBase[X](g,ds:_*) with Function1[X,X] {
+abstract class DifferentiableFunction[X: Numeric](g: X=>X, ds: X=>Double*) extends DiFuncBase[X](g,ds:_*) with ((X) => X) {
   def apply(x: X) = g(x)
 }
 

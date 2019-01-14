@@ -8,7 +8,7 @@ import spray.http._
  */
 class HttpReader(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
-  val entityParser = context.actorOf(Props.create(classOf[EntityParser], blackboard), "EntityParser")
+  private val entityParser = context.actorOf(Props.create(classOf[EntityParser], blackboard), "EntityParser")
 
   /**
    * @return
@@ -24,7 +24,7 @@ class HttpReader(blackboard: ActorRef) extends BlackboardActor(blackboard) {
     case m => super.receive(m)
   }
 
-  def processResponse(entity: HttpEntity, headers: List[HttpHeader], protocol: String) = {
+  private def processResponse(entity: HttpEntity, headers: List[HttpHeader], protocol: String) = {
     log.debug("response headers: {}; entity: {}",headers,entity)
     entityParser ! EntityMessage(protocol, entity)
   }

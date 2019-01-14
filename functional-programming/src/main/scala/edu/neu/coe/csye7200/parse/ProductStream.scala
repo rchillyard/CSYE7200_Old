@@ -51,8 +51,7 @@ trait ProductStream[X <: Product] {
     * @param f function to be applied to each tuple
     * @return a ProductStream of transformed tuples
     */
-  def map[Y <: Product](f: X => Y): ProductStream[Y] = // TODO Assignment6 5
-    ConcreteProductStream[Y](header, tuples map f)
+  def map[Y <: Product](f: X => Y): ProductStream[Y] = ??? // TO BE IMPLEMENTED Assignment6 5
 
   /**
     * flatMap method
@@ -60,8 +59,7 @@ trait ProductStream[X <: Product] {
     * @param f function to be applied to each tuple
     * @return a ProductStream of transformed tuples
     */
-  def flatMap[Y <: Product](f: X => GenTraversableOnce[Y]): ProductStream[Y] = // TODO Assignment6 5
-    ConcreteProductStream[Y](header, tuples flatMap f)
+  def flatMap[Y <: Product](f: X => GenTraversableOnce[Y]): ProductStream[Y] = ??? // TO BE IMPLEMENTED Assignment6 5
 
   /**
     * toMap method
@@ -94,7 +92,7 @@ abstract class ProductStreamBase[X <: Product] extends ProductStream[X] {
     *
     * @return a Stream of Map[String,Any] objects
     */
-  def asMaps: Stream[Map[String, Any]] = // TODO Assignment6 14
+  def asMaps: Stream[Map[String, Any]] = // TO BE IMPLEMENTED Assignment6 14
     tuples map { t => (t.productIterator zip header.toIterator map { case (v, k) => k -> v }).toMap }
 }
 
@@ -213,8 +211,8 @@ object TupleStream {
 
   def project[X <: Product](i: Int)(x: X): String = x.productElement(i).asInstanceOf[String]
 
-  def toTuple[X <: Product](ats: Seq[Try[Any]]): Try[X] = // TODO Assignment6 8 Hint: use MonadOps.sequence; Tuples.toTuple; and asInstanceOf
-    for (as <- MonadOps.sequence(ats)) yield Tuples.toTuple(as).asInstanceOf[X]
+  def toTuple[X <: Product](ats: Seq[Try[Any]]): Try[X] = // TO BE IMPLEMENTED Assignment6 8 Hint: use MonadOps.sequence; Tuples.toTuple; and asInstanceOf
+    ???
 
   def seqToTuple[X <: Product](ws: Seq[String])(f: String => Try[Any]): Try[X] = toTuple(ws map f)
 }
@@ -274,8 +272,8 @@ case class CsvParser(
     *
     * @return a Parser of List of String
     */
-  def row: Parser[List[String]] = // TODO Assignment6 3: row ::= term { delimiter term }
-    repsep(term, delimiter)
+  def row: Parser[List[String]] = // TO BE IMPLEMENTED Assignment6 3: row ::= term { delimiter term }
+    ???
 
   /**
     * Internal parser method to parse a term.
@@ -284,8 +282,8 @@ case class CsvParser(
     *
     * @return a Parser of String
     */
-  def term: Parser[String] = // TODO Assignment6 7: term ::= quoteChar text quoteChar | text
-    stringInQuotes | nonDelimiters | failure("term failure")
+  def term: Parser[String] = // TO BE IMPLEMENTED Assignment6 7: term ::= quoteChar text quoteChar | text
+    ???
 
   /**
     * Internal parser method to parse a string within quotes.

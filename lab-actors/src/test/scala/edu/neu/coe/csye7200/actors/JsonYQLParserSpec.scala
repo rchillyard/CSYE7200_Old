@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.testkit._
 import edu.neu.coe.csye7200.model.Model
 import org.scalatest._
-import spray.http.ContentType.apply
+import spray.http.ContentType._
 import spray.http._
 
 import scala.concurrent.duration._

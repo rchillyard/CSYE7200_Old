@@ -6,7 +6,6 @@ import edu.neu.coe.csye7200.util.Lift
 import org.joda.time._
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.io.Source
 import scala.util._
 
 /**
@@ -161,71 +160,10 @@ class ProductStreamSpec extends FlatSpec with Matchers {
     iWts.size should be(8)
     (iWts take 8).toList(7) should be("TGIF, Bruh", 8)
   }
-  it should "be (String,Int) stream using Source" in {
-    val iWts = CSV[(String, Int)](Source.fromFile(getClass.getResource("sample.csv").toURI)).tuples
-    iWts.head match {
-      case (x, y) => assert(x == "Sunday" && y == 1)
-    }
-    iWts.tail.head match {
-      case (x, y) => assert(x == "Monday" && y == 2)
-    }
-    iWts.size should be(8)
-    (iWts take 8).toList(7) should be("TGIF, Bruh", 8)
-  }
 }
 
 class CsvParserSpec extends FlatSpec with Matchers {
   val defaultParser = CsvParser()
-  behavior of "containingEscapedQuotes"
-  it should """parse "x""y"  """ in {
-    val result = defaultParser.parseAll(defaultParser.containingEscapedQuotes, """x""y""")
-    result should matchPattern { case defaultParser.Success(_, _) => }
-    result.get shouldBe """x"y"""
-  }
-  behavior of "quotedString"
-  it should """parse "x"  """ in {
-    defaultParser.parseAll(defaultParser.stringInQuotes, """"x"""") should matchPattern { case defaultParser.Success(_, _) => }
-  }
-  it should """parse "x,y"  """ in {
-    defaultParser.parseAll(defaultParser.stringInQuotes, """"x,y"""") should matchPattern { case defaultParser.Success(_, _) => }
-  }
-  it should """parse "x""y"  """ in {
-    val result = defaultParser.parseAll(defaultParser.stringInQuotes, """"x""y"""")
-    result should matchPattern { case defaultParser.Success(_, _) => }
-    result.get shouldBe """x"y"""
-  }
-  behavior of "nonDelimiters"
-  it should """parse x""" in {
-    defaultParser.parseAll(defaultParser.nonDelimiters, """x""") should matchPattern { case defaultParser.Success(_, _) => }
-  }
-  behavior of "term"
-  it should """parse "x"  """ in {
-    defaultParser.parseAll(defaultParser.term, """ "x" """) should matchPattern { case defaultParser.Success(_, _) => }
-  }
-  it should """parse x""" in {
-    defaultParser.parseAll(defaultParser.term, """x""") should matchPattern { case defaultParser.Success(_, _) => }
-  }
-  it should """parse Hello""" in {
-    defaultParser.parseAll(defaultParser.term, """Hello""") should matchPattern { case defaultParser.Success(_, _) => }
-  }
-  behavior of "row"
-  it should """parse x  y""" in {
-    val parser = CsvParser(delimiter = '\t'+"")
-    val result = parser.parseAll(parser.row, """x  y""")
-    result should matchPattern { case parser.Success(_, _) => }
-  }
-  it should """parse "Username"	"Last Name"""" in {
-    val parser = CsvParser(delimiter = '\t'+"")
-    val result = parser.parseAll(parser.row, """"Username"	Hello "Last Name"""")
-    result should matchPattern { case parser.Success(_, _) => }
-  }
-  it should """parse "Username","Last Name"""" in {
-    val parser = CsvParser()
-    val result = parser.parseAll(parser.row, """"Username",Hello,"Last Name"""")
-    result should matchPattern { case parser.Success(_, _) => }
-    result.get shouldBe Seq("Username","Hello","Last Name")
-  }
-
   "CsvParser()" should """parse "x" as Success(List("x"))""" in {
     defaultParser.parseRow(""""x"""") should matchPattern { case scala.util.Success(List("x")) => }
   }

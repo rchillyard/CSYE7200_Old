@@ -11,14 +11,16 @@ import com.monsanto.arch.cloudformation.model.resource._
   */
 object S3Bucket extends VPCWriter {
 
-  //TODO add a String type parameter with name DomainName
-  val domainParameter = ???
+  //TODO add a String type parameter
+  val domainParameter = StringParameter(
+    name = "DomainName"
+  )
 
   //TODO add all parameters in a Seq
-  val parameters = ???
+  val parameters = Seq(domainParameter)
 
   //TODO create a AWS::S3::Bucket with name testS3Bucket, BucketName csye7200.${DomainName}.lab, you can use AWS CloudFormation Function Fn::Join to achieve this
-  val myS3Bucket = ???
+  val myS3Bucket = `AWS::S3::Bucket`("testS3Bucket",Some(`Fn::Join`(".",Seq("csye7200",ParameterRef(domainParameter),"lab"))))
 
   val simpleTemplate = Template(
     AWSTemplateFormatVersion = "2010-09-09",

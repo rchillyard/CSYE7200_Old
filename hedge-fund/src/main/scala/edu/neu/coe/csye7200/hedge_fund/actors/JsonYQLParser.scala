@@ -16,13 +16,12 @@ class JsonYQLParser(blackboard: ActorRef) extends BlackboardActor(blackboard) {
   val model: Model = new YQLModel
 
   override def receive = {
-    case ContentMessage(entity) => {
+    case ContentMessage(entity) =>
       log.debug("JsonYQLParser received ContentMessage")
       JsonYQLParser.decode(entity) match {
         case Right(response) => processQuote(response.query.results.quote)
         case Left(message) => log.warning(message.toString())
       }
-    }
     case m => super.receive(m)
   }
 

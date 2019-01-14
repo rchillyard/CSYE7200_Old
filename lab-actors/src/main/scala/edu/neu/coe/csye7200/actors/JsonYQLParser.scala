@@ -78,11 +78,11 @@ object JsonYQLParser {
     implicit val diagnosticsJavascriptFormat: RootJsonFormat[DiagnosticsJavascript] = jsonFormat5(DiagnosticsJavascript)
     implicit val diagnosticsFormat: RootJsonFormat[Diagnostics] = jsonFormat8(Diagnostics)
     implicit val resultsFormat: RootJsonFormat[Results] = jsonFormat1(Results)
-    implicit val queryFormat: RootJsonFormat[Query] = ??? // TODO
-    implicit val entityFormat: RootJsonFormat[Response] = ??? // TODO
+    implicit val queryFormat: RootJsonFormat[Query] = jsonFormat5(Query)
+    implicit val entityFormat: RootJsonFormat[Response] = jsonFormat1(Response)
   }
 
-  // TODO how do we get those implicit vals into scope here?
+  import MyJsonProtocol._
 
   def decode(entity: HttpEntity): Deserialized[Response] = entity.as[Response]
 

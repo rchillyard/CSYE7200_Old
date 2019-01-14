@@ -1,15 +1,18 @@
 package edu.neu.coe.csye7200.mapreduce
 
-import scala.collection.mutable.{HashMap,MutableList}
-import scala.concurrent.{Future,Await}
+import scala.collection.mutable.{HashMap, MutableList}
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.util._
-import akka.actor.{ Actor, ActorSystem, Props, ActorRef, ActorLogging }
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import java.net.URL
+
 import scala.concurrent._
 import com.typesafe.config.Config
+
+import scala.language.postfixOps
 
 class Master[K1, V1, K2, V2, V3>:V2](config: Config, f: (K1,V1)=>(K2,V2), g: (V3,V2)=>V3) extends MasterBase[K1, V1, K2, V2, V3](config, f, g, Master.zero) with ByReduce[K1, V1, K2, V2, V3] 
 
@@ -115,9 +118,7 @@ abstract class MasterBase[K1, V1, K2, V2, V3](config: Config, f: (K1,V1)=>(K2,V2
   private def doMap(i: Incoming[K1,V1]): Future[Map[K2,Seq[V2]]] = {
     val reply = (mapper ? i)
     if (config.getBoolean("forgiving"))
-      reply.mapTo[(Map[K2,Seq[V2]],Seq[Throwable])] map {
-        _ match { case (v2sK2m,xs) => for (x <- xs) log.warning("mapper exception:",x); v2sK2m }
-      }
+      reply.mapTo[(Map[K2,Seq[V2]],Seq[Throwable])] map { case (v2sK2m, xs) => for (x <- xs) log.warning("mapper exception:", x); v2sK2m }
     else {
       val v2sK2mtf = reply.mapTo[Try[Map[K2,Seq[V2]]]]
       Master.flatten(v2sK2mtf)
@@ -125,7 +126,7 @@ abstract class MasterBase[K1, V1, K2, V2, V3](config: Config, f: (K1,V1)=>(K2,V2
   }
 
   private def doDistributeReduceCollate(v2sK2m: Map[K2,Seq[V2]]): Future[Map[K2,Either[Throwable,V3]]] = {
-    if (v2sK2m.size==0) log.warning("mapper returned empty map"+(if(config.getBoolean("forgiving"))""else": see log for problem and consider using Mapper_Forgiving instead"))
+    if (v2sK2m.isEmpty) log.warning("mapper returned empty map"+(if(config.getBoolean("forgiving"))""else": see log for problem and consider using Mapper_Forgiving instead"))
     maybeLog("doDistributeReduceCollate", v2sK2m)
     val rs = Stream.continually(reducers.toStream).flatten
     val v2sK2s = for ((k2,v2s) <- v2sK2m.toSeq) yield (k2,v2s)

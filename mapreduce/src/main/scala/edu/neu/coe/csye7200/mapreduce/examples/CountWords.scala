@@ -8,14 +8,17 @@ import akka.actor.{ActorSystem, Props}
 import akka.util.Timeout
 import akka.pattern.ask
 import java.net.URI
+
 import edu.neu.coe.csye7200.mapreduce._
+
+import scala.language.postfixOps
 
 /**
  * @author scalaprof
  */
 object CountWords extends App {
   val config = ConfigFactory.load()
-  implicit val system = ActorSystem("CountWords")    
+  private implicit val system = ActorSystem("CountWords")
   implicit val timeout: Timeout = Timeout(10 seconds)
   import system.dispatcher
   
@@ -33,9 +36,9 @@ object CountWords extends App {
   val iUrf = for (wsUr <- wsUrf; iUr <- master2.ask(wsUr.right).mapTo[Response[URI,Int]]) yield iUr
   iUrf.onComplete {
     case Success(iUr) =>
-      val n = iUr.right.values.reduce{_+_};
-      println(s"total words: $n");
-      if (iUr.left.size!=0)
+      val n = iUr.right.values.sum
+      println(s"total words: $n")
+      if (iUr.left.nonEmpty)
         for ((k,x) <- iUr.left) Console.err.println(s"exception thrown for key $k: $x")
       system.terminate
     case Failure(x) => Console.err.println(s"Map/reduce error: ${x.getLocalizedMessage}"); system.terminate

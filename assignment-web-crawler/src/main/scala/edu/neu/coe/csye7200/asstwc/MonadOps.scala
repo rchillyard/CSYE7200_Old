@@ -1,6 +1,7 @@
 package edu.neu.coe.csye7200.asstwc
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 import scala.util._
 
 /**
@@ -9,7 +10,7 @@ import scala.util._
 object MonadOps {
 
   // Hint: write as a for-comprehension, using the method asFuture (below).
-  def flatten[X](xyf: Future[Try[X]])(implicit executor: ExecutionContext): Future[X] = ???
+  def flatten[X](xyf: Future[Try[X]])(implicit executor: ExecutionContext): Future[X] = for (xy <- xyf; x <- asFuture(xy)) yield x
 
   def flatten[X](xfy: Try[Future[X]]): Future[X] =
     xfy match {
@@ -18,7 +19,9 @@ object MonadOps {
     }
 
   // Hint: write as a for-comprehension, using the method Future.sequence
-  def flatten[X](xsfs: Seq[Future[Seq[X]]])(implicit ec: ExecutionContext): Future[Seq[X]] = ???
+  def flatten[X](xsfs: Seq[Future[Seq[X]]])(implicit ec: ExecutionContext): Future[Seq[X]] = Future.sequence(xsfs) map {
+    _ flatten
+  }
 
   def flattenRecover[X](esf: Future[Seq[Either[Throwable, Seq[X]]]], f: => Throwable => Unit)(implicit executor: ExecutionContext): Future[Seq[X]] = {
     def filter(uses: Seq[Either[Throwable, Seq[X]]]): Seq[X] = {
@@ -47,12 +50,16 @@ object MonadOps {
   }
 
   // implement.
-  def sequence[X](xy: Try[X]): Either[Throwable, X] = ???
+  def sequence[X](xy: Try[X]): Either[Throwable, X] =
+    xy match {
+      case Success(s) => Right(s)
+      case Failure(e) => Left(e)
+    }
 
   def sequence[X](xf: Future[X])(implicit executor: ExecutionContext): Future[Either[Throwable, X]] =
     xf transform( { s => Right(s) }, { f => f }) recoverWith[Either[Throwable, X]] { case f => Future(Left(f)) }
 
-  // TODO implement. 6 points. Hint: write as a for-comprehension, using the method sequence (above). 
+  // TO BE IMPLEMENTED implement. 6 points. Hint: write as a for-comprehension, using the method sequence (above).
   def sequence[X](xfs: Seq[Future[X]])(implicit executor: ExecutionContext): Seq[Future[Either[Throwable, X]]] = ???
 
   def sequence[X](xys: Seq[Try[X]]): Try[Seq[X]] = (Try(Seq[X]()) /: xys) {
@@ -67,7 +74,7 @@ object MonadOps {
     (xso, xo) => for (xs <- xso; x <- xo) yield xs :+ x
   }
 
-  // TODO implement. 7 points. This one is a little more tricky. Remember what I mentioned about Either not being a pure monad -- it needs projecting
+  // TO BE IMPLEMENTED implement. 7 points. This one is a little more tricky. Remember what I mentioned about Either not being a pure monad -- it needs projecting
   def sequence[X](xe: Either[Throwable, X]): Option[X] = ???
 
   def zip[A, B](ao: Option[A], bo: Option[B]): Option[(A, B)] = for (a <- ao; b <- bo) yield (a, b)

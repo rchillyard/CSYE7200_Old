@@ -2,7 +2,7 @@ package edu.neu.coe.csye7200
 
 import java.net.URL
 
-import edu.neu.coe.csye7200.MonadOps._
+import MonadOps._
 import org.scalatest.concurrent._
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{FlatSpec, Matchers, _}
@@ -19,13 +19,13 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
 
   "lift(Future[Try[T]])" should "succeed for http://www.google.com" in {
     val uyf = Future(Try(new URL("http://www.google.com")))
-    val uf = MonadOps.flatten(uyf)
+    val uf = flatten(uyf)
     whenReady(uf) { u => u should matchPattern { case _: URL => } }
   }
 
   "lift(Try[Future[T]])" should "succeed for http://www.google.com" in {
     val ufy = Try(Future(new URL("http://www.google.com")))
-    val uf = MonadOps.flatten(ufy)
+    val uf = flatten(ufy)
     whenReady(uf) { u => u should matchPattern { case _: URL => } }
   }
 
@@ -39,7 +39,7 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   it should "succeed for http://www.google.com, etc." in {
     val ws = List("http://www.google.com", "http://www.microsoft.com")
     val uys = for {w <- ws; url = Try(new URL(w))} yield url
-    MonadOps.sequence(uys) match {
+    sequence(uys) match {
       case Success(us) => Assertions.assert(us.length == 2)
       case _ => Failed
     }
@@ -47,7 +47,7 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   it should "fail for www.google.com, etc." in {
     val ws = List("www.google.com", "http://www.microsoft.com")
     val uys = for {w <- ws; uy = Try(new URL(w))} yield uy
-    MonadOps.sequence(uys) match {
+    sequence(uys) match {
       case Failure(_) => Succeeded
       case _ => Failed
     }
@@ -63,8 +63,8 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   "sequence(Seq[Option[T]])" should "succeed for 1, 2, ..." in {
     val ws = List("1", "2", "")
     val xos: Seq[Option[Int]] = for {w <- ws; xo = Try(w.toInt).toOption} yield xo
-    println(MonadOps.sequence(xos))
-    MonadOps.sequence(xos) match {
+    println(sequence(xos))
+    sequence(xos) match {
       case Some(_) => Failed("failure")
       case _ =>
     }
@@ -79,7 +79,7 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
     val ws = List("http://www.google.com", "http://www.microsoft.com")
     val ufs = for {w <- ws; uf = Future(new URL(w))} yield uf
     val usfs = List(Future.sequence(ufs))
-    whenReady(MonadOps.flatten(usfs)) { us => Assertions.assert(us.length == 2) }
+    whenReady(flatten(usfs)) { us => Assertions.assert(us.length == 2) }
   }
   it should "succeed for empty list" in {
     val ws = List[String]()
@@ -96,7 +96,7 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   "sequence" should "succeed for http://www.google.com, www.microsoft.com" in {
     val ws = Seq("http://www.google.com", "http://www.microsoft.com", "www.microsoft.com")
     val ufs = for {w <- ws; uf = Future(new URL(w))} yield uf
-    val uefs = for {uf <- ufs} yield MonadOps.sequence(uf)
+    val uefs = for {uf <- ufs} yield sequence(uf)
     val uesf = Future.sequence(uefs)
     whenReady(uesf) { ues => Assertions.assert(ues.length == 3) }
     whenReady(uesf) { ues => (ues.head, ues(1)) should matchPattern { case (Right(_), Right(_)) => } }
@@ -105,15 +105,15 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
 
   "sequence(Future=>Future(Either))" should "succeed for http://www.google.com, www.microsoft.com" in {
     val ws = Seq("http://www.google.com", "http://www.microsoft.com", "www.microsoft.com")
-    val uefs = for {w <- ws; uf = Future(new URL(w))} yield MonadOps.sequence(uf)
+    val uefs = for {w <- ws; uf = Future(new URL(w))} yield sequence(uf)
     for {uef <- uefs} whenReady(uef) { case Right(_) => true; case Left(_) => true; case _ => Assertions.fail() }
   }
 
   "Sequence[Either]" should "succeed" in {
     val l: Either[Throwable, Int] = Left(new RuntimeException("bad"))
     val r: Either[Throwable, Int] = Right(99)
-    MonadOps.sequence(l) should matchPattern { case None => }
-    MonadOps.sequence(r) should matchPattern { case Some(99) => }
+    sequence(l) should matchPattern { case None => }
+    sequence(r) should matchPattern { case Some(99) => }
   }
 
   "zip(Option,Option)" should "succeed" in {
@@ -154,12 +154,22 @@ class MonadOpsSpec extends FlatSpec with Matchers with Futures with ScalaFutures
   "flattenRecover" should "succeed for http://www.htmldog.com/examples/, www.microsoft.com" in {
     val sb = new StringBuffer("caught exception: ")
     val ws: Seq[String] = Seq("http://www.htmldog.com/examples/", "www.microsoft.com")
-    val wsfs: Seq[Future[Seq[String]]] = for (w <- ws; uf = Future(new URL(w))) yield for (u <- uf; s <- Future(Source.fromURL(u))) yield s.mkString.split("\n").toSeq
-    val wsXefs: Seq[Future[Either[Throwable, Seq[String]]]] = for (wsf <- wsfs) yield MonadOps.sequence(wsf)
+//    val wsfs: Seq[Future[Seq[String]]] = for (w <- ws; uf = Future(new URL(w))) yield for (u <- uf; s <- Future(Source.fromURL(u))) yield s.mkString.split("\n").toSeq
+    val wsfs: Seq[Future[Seq[String]]] = outerForLoop(ws)
+    val wsXefs: Seq[Future[Either[Throwable, Seq[String]]]] = for (wsf <- wsfs) yield sequence(wsf)
     val wsf: Future[Seq[String]] = flattenRecover(Future.sequence(wsXefs), e => sb.append(e.toString))
     whenReady(wsf, timeout(Span(6, Seconds))) { ws => assert(ws.size > 320) }
     sb.toString shouldBe "caught exception: java.net.MalformedURLException: no protocol: www.microsoft.com"
   }
 
 
+  private def outerForLoop(ws: Seq[String]) = {
+//    for (w <- ws; uf = Future(new URL(w))) yield innerForLoop(uf)
+    ws.map{ w => innerForLoop(Future(new URL(w)))}
+    //    ws.map { case x$1@w => (x$2, x$1) }.map { case (uf, w) => innerForLoop(uf) }
+  }
+
+  private def innerForLoop(uf: Future[URL]) = {
+    uf.flatMap(u => Future(Source.fromURL(u)).map(s => s.mkString.split("\n").toSeq))
+  }
 }

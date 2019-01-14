@@ -1,10 +1,13 @@
 package edu.neu.coe.csye7200.numerics
 
-import org.apache.commons.math3.distribution._
-import scala.annotation.tailrec
-import scala.util._
+//import edu.neu.coe.csye7200.parse.FuzzyParser
 import edu.neu.coe.csye7200.parse.FuzzyParser
- 
+import org.apache.commons.math3.distribution._
+
+import scala.annotation.tailrec
+import scala.language.implicitConversions
+import scala.util._
+
 /**
  * The Fuzzy trait defines a quantity for which there is doubt about its actual value.
  * This Fuzzy trait is Numeric (it extends Fractional) and thus Fuzzy values can be ordered,
@@ -87,7 +90,7 @@ abstract class FuzzyBase(nominal: Double, delta: Double, distribution: AbstractR
   def + (that: Long): Fuzzy = this + Exact(that)
   def - (that: Fuzzy): Fuzzy = minus(this,that)
   def - (that: Long): Fuzzy = this - Exact(that)
-  def unary_-: = negate(this)
+  def unary_-: : Fuzzy = negate(this)
   def * (that: Fuzzy): Fuzzy = times(this,that)
   def * (that: Long): Fuzzy = this * Exact(that)
   def / (that: Fuzzy): Fuzzy = this * Fuzzy.invert(that)
@@ -112,7 +115,7 @@ abstract class FuzzyBase(nominal: Double, delta: Double, distribution: AbstractR
   type PairFunction = (Double,Double)=>Double
 
   // Other methods appropriate to Fuzzy
-  def fuzz = delta
+  def fuzz: Double = delta
   def getRealDistribution: RealDistribution = distribution
   def prob(y: Double, delta: Double): Try[Double] = Try(distribution.probability(y-math.abs(delta), y+math.abs(delta)))
   def inverseCumulativeProbability(p: Double): Try[Double] = Try(distribution.inverseCumulativeProbability(p))
@@ -124,12 +127,12 @@ abstract class FuzzyBase(nominal: Double, delta: Double, distribution: AbstractR
 	 * @return a new Fuzzy composed from this and o
  	*/
   def combine(o: Fuzzy, f: PairFunction, df_dx: PairFunction, df_dy: PairFunction): Fuzzy
-  def negate = map(Negative)
+  def negate: Fuzzy = map(Negative)
   def get = nominal
   def map(f: DiFunc[Double]): Fuzzy = newFuzzy(f.f(nominal),math.abs(f.df_dx(0)(nominal)*delta))
-  def map2(f: DiFunc[Double])(delta2: Double) = newFuzzy(f.f(nominal),math.abs(f.df_dx(0)(nominal)*delta)+math.abs(f.df_dx(1)(nominal)*delta2))
-  def power(x: Int) = powerExact(this, x)
-  def power(x: Double) = map(Power(x))
+  def map2(f: DiFunc[Double])(delta2: Double): Fuzzy = newFuzzy(f.f(nominal),math.abs(f.df_dx(0)(nominal)*delta)+math.abs(f.df_dx(1)(nominal)*delta2))
+  private def power(x: Int) = powerExact(this, x)
+  def power(x: Double): Fuzzy = map(Power(x))
   def power(x: Fuzzy) = map2(Power(x.get))(x.fuzz)
   
   // Abstract factory method
@@ -149,7 +152,7 @@ case class Exact(x: Double) extends FuzzyBase(x,0,new ConstantRealDistribution(x
   }
   override def map(f: DiFunc[Double]) = Exact(f.f(x))
   override def map2(f: DiFunc[Double])(delta: Double) = throw new UnsupportedOperationException("cannot introduce fuzz to Exact")
-  def newFuzzy(x: Double, delta: Double) = {require(delta==0); Exact(x)}
+  def newFuzzy(x: Double, delta: Double): Exact = {require(delta==0); Exact(x)}
   override def toString = s"Exact: $x"
 }
 case class Gaussian(mu: Double, sigma: Double) extends FuzzyBase(mu,sigma,new NormalDistribution(mu.doubleValue,sigma.doubleValue)) {
@@ -184,7 +187,7 @@ case class General(dist: AbstractRealDistribution) extends FuzzyBase(dist.getNum
 
 object Fuzzy {
   implicit object FuzzyNumeric extends FuzzyIsFractional
-  implicit def intToFuzzy(x: Int) = Exact(x)
+  private implicit def intToFuzzy(x: Int) = Exact(x)
   val parser = new FuzzyParser
   def apply(i: String, x: Option[String], f: Option[String], e: Option[String]): Fuzzy = {
     def exponent(n: Int) = math.pow(10,n)
@@ -201,7 +204,7 @@ object Fuzzy {
     val fuzz = for { z <- f; w <- fraction; y <- (exp orElse Some(1.0)) } yield fuzzFactor(z,w._2)*y
 //    println(s"creating Fuzzy: with parameters: $i $x $f $e with intermediate results fraction=$fraction, fuzz=$fuzz, exponent=$exponent")
     // FIXME this is not really going to work: it creates a Gaussian without exponent in preference to an Exact with exponent. 
-    map3(fraction,exp,fuzz)(createFuzzyXEF) orElse map2(fraction,fuzz)(createFuzzyXF) orElse map2(fraction,exp)(createFuzzyXE) orElse (fraction map {createFuzzyX _}) match {
+    map3(fraction,exp,fuzz)(createFuzzyXEF) orElse map2(fraction,fuzz)(createFuzzyXF) orElse map2(fraction,exp)(createFuzzyXE) orElse (fraction map createFuzzyX) match {
       case Some(q) => q
       case None => Exact(i.toInt)
     }

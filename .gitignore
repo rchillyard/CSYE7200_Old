@@ -1,12 +1,11 @@
 *.class
 *.log
-target
-project/target
-*/bin
-*.iml
-.idea
-api
 
+target/
+project/target/
+api/
+
+*.iml
 
 
 output\.html

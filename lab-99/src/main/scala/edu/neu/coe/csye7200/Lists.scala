@@ -7,9 +7,9 @@ package edu.neu.coe.csye7200
 object P01 {
 
   def last(xs: List[Int]): Int = xs match {
-    case Nil => throw new Exception("no such element")
     case x :: Nil => x
     case x :: t => last(t)
+    case _ => throw new NoSuchElementException
   }
 }
 

@@ -12,5 +12,6 @@
 #   & (and) or | (or) but
 #   that if there are multiple closing parentheses, these must be at the rightmost end of the string.
  
-put="(strikePrice > 44) & ((strikePrice < 48) & (sharpeRatio > 0.4))"
+#put="(strikePrice > 44) & ((strikePrice < 48) & (sharpeRatio > 0.4))"
+put="(strikePrice > 44) & (strikePrice < 48)"
 call=Never

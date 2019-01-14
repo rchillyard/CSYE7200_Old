@@ -14,7 +14,7 @@ case class GoogleQuery(exchange: String) extends Query {
     //https://www.google.com/finance/option_chain?q=NASDAQ%3AMSFT&ei=qw-xVbnzC9DDeJWDLQ
     val symbolList = symbols mkString ","
     val exchangeName = if (exchange != null) s"$exchange:" else ""
-    val queryParams = Map("q" -> s"${exchangeName}${symbolList}", "client" -> "ig")
+    val queryParams = Map("q" -> s"$exchangeName$symbolList", "client" -> "ig")
     uriGet.get(GoogleQuery.server, GoogleQuery.path, queryParams)
   }
 
@@ -28,7 +28,7 @@ object GoogleQuery {
 
 class GoogleModel extends Model {
   def isOption = false
-  def getKey(query: String) = query match {
+  def getKey(query: String): Option[String] = query match {
     case "name" => Some("GF")
     case "symbol" => Some("t")
     case "price" => Some("l")

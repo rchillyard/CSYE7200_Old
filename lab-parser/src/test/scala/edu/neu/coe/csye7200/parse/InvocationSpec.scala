@@ -264,7 +264,7 @@ class InvocationSpec extends FlatSpec with Matchers {
     testComparison("<=", 1, 1, result = true)
   }
 
-  private def testComparison(op: String, x: Int, y: Int, result: Boolean) = {
+  private def testComparison(op: String, x: Int, y: Int, result: Boolean): Unit = {
     val rowData = Map("x" -> x, "y" -> y)
     val lookup: Lookup[Int] = { () => mapLookup(rowData) }
     val invocation = InvocationComparison(Right(InvocationLookup("x")), op, Right(InvocationLookup("y")))

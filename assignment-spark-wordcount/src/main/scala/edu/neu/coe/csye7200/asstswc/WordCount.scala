@@ -15,8 +15,8 @@ object WordCount extends App {
 
   def wordCount(lines: RDD[String], separator: String) = {
     lines.flatMap(_.split(separator))
-      .map((_,1))
-      .reduceByKey(???) // TODO
+      .map((_, 1))
+      .reduceByKey(_ + _)
       .sortBy(-_._2)
   }
 

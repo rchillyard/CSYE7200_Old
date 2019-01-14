@@ -20,8 +20,7 @@ class IngestSpec extends FlatSpec with Matchers {
     val source = Source.fromChars(Array('x', '\n', '4', '2'))
     val ingester = new Ingest[Int]()
     val xys = ingester(source).toSeq
-    // TODO check that xys has exactly one element, consisting of Success(42) -- 10 points
-    ???
+    // TO BE IMPLEMENTED check that xys has exactly one element, consisting of Success(42) -- 10 points
   }
 
   it should "work for movie database" in {

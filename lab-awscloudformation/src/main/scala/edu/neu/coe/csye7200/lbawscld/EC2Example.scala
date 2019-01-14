@@ -32,7 +32,7 @@ object EC2Example extends VPCWriter with App {
 
   val parameters = Seq(keyNameParameter,allowSSHFromParameter,allowHTTPFromParameter,folderName)
 
-  implicit val vpc = `AWS::EC2::VPC`("myVPC",CidrBlock(10, 0, 0, 0, 16),AmazonTag.fromName("myVPC"))
+  private implicit val vpc = `AWS::EC2::VPC`("myVPC",CidrBlock(10, 0, 0, 0, 16),AmazonTag.fromName("myVPC"))
 
   implicit val subnet = `AWS::EC2::Subnet`("mySubnet",vpc,None,CidrBlock(10, 0, 0, 1, 24),AmazonTag.fromName("mySubnet"),Some(true))
 

@@ -1,6 +1,8 @@
 package edu.neu.coe.csye7200.mapreduce
 
-import akka.actor.{ Actor, ActorLogging, ActorRef }
+import akka.actor.{Actor, ActorLogging, ActorRef}
+
+import scala.collection.mutable
 import scala.collection.mutable.HashMap
 import scala.util._
 
@@ -13,7 +15,7 @@ import scala.util._
  * 
  * The mapper is an actor whose constructor takes a function f which converts a (K1,V1) into a (K2,V2).
  * The receive method recognizes an Incoming[K1,V1] as a message.
- * It replies with a Try[Map[K2,Seq[V2]]] which will be a Failure if any of the mappings fail.
+ * It replies with a Try[Map[K2,Seq[V2] which will be a Failure if any of the mappings fail.
  * 
  * Incoming is a convenience incoming message wrapper. It has the advantage of not suffering type erasure.
  * 
@@ -42,11 +44,10 @@ class Mapper[K1,V1,K2,V2](f: (K1,V1)=>(K2,V2)) extends Actor with ActorLogging {
   
   def prepareReply(v2k2ts: Seq[Try[(K2,V2)]]): Any = {
     Master.sequence(v2k2ts) match {
-      case Success(v2k2s) => {
-        val v2sK2m = HashMap[K2,Seq[V2]]() // mutable
-        for ((k2,v2) <- v2k2s) v2sK2m put(k2, v2+:(v2sK2m get(k2) getOrElse(Nil)))
+      case Success(v2k2s) =>
+        val v2sK2m = mutable.HashMap[K2,Seq[V2]]() // mutable
+        for ((k2,v2) <- v2k2s) v2sK2m put(k2, v2+:v2sK2m.getOrElse((k2), (Nil)))
         Success(v2sK2m.toMap)
-      }
       case f @ Failure(x) => f
     }
   }
@@ -71,14 +72,14 @@ class Mapper[K1,V1,K2,V2](f: (K1,V1)=>(K2,V2)) extends Actor with ActorLogging {
 class Mapper_Forgiving[K1,V1,K2,V2](f: (K1,V1)=>(K2,V2)) extends Mapper[K1,V1,K2,V2](f) {
   
   override def prepareReply(v2k2ts: Seq[Try[(K2,V2)]]) = {
-      val v2sK2m = HashMap[K2,Seq[V2]]() // mutable
+      val v2sK2m = mutable.HashMap[K2,Seq[V2]]() // mutable
       val xs = Seq[Throwable]() // mutable
       for (v2k2t <- v2k2ts; v2k2e = Master.sequence(v2k2t))
         v2k2e match {
-          case Right((k2,v2)) => v2sK2m put(k2, v2+:(v2sK2m get(k2) getOrElse(Nil)))
+          case Right((k2,v2)) => v2sK2m put(k2, v2+:v2sK2m.getOrElse((k2), (Nil)))
           case Left(x) => xs :+ x
       }
-      (v2sK2m.toMap, xs.toSeq)
+      (v2sK2m.toMap, xs)
   }
 }
 

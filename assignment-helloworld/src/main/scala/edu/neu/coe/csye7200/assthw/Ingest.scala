@@ -1,16 +1,12 @@
 package edu.neu.coe.csye7200.assthw
 
 /**
-  * This is the second part of assignment,
-  * You should be able to run this program
-  * with provided csv file.
-  * You task is to replace line 38 with
-  * the following 2 lines code:
-  * val kiwiMovies = for (m <- ingester(source); if (m.properties(20)=="New Zealand")) yield m
-  * println(kiwiMovies.size)
-  * Run this program with provided csv file,
-  * and submit the screenshot of the result.
-  * It should be the number of Kiwi (New Zealand) Movies.
+  * This is the second part of assignment "helloworld."
+  * You should be able to run this program with provided csv file using sbt run.
+  * You task is to replace line 38 with the following line of code:
+  *   println((for (m <- ingester(source); if (m.properties(20)=="New Zealand")) yield m).size)
+  * Run this program with provided csv file, and submit a screenshot of the result.
+  * It should print the number of Kiwi (New Zealand) Movies.
   */
 
 import scala.io.Source
@@ -34,10 +30,14 @@ object Ingest extends App {
   implicit object IngestibleMovie extends IngestibleMovie
 
   val ingester = new Ingest[Movie]()
-  val source = Source.fromFile(args.toList match {
-    case Nil => "movie_metadata_5000.csv"
-    case h :: _ => h
-  })
+  val source = args.toList match {
+    case Nil => Source.fromResource("movie_metadata_5000.csv")
+    case h :: _ => Source.fromFile(h)
+  }
+
   for (m <- ingester(source)) println(m.properties.mkString(", "))
   source.close()
+
+  // Please note that an alternative to the definition of source above would be as in the following comment:
+  //  val source = Source.fromFile(if (args.length>0) args.head else "movie_metadata_5000.csv")
 }

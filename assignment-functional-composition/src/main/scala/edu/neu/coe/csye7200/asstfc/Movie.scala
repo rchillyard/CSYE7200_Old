@@ -97,8 +97,7 @@ object Movie extends App {
 
   //Hint: You may refer to the slides discussed in class for how to serialize object to json
   object MoviesProtocol extends DefaultJsonProtocol {
-    ???
-    // TODO 20 points
+    // TO BE IMPLEMENTED 20 points
   }
 
   implicit object IngestibleMovie extends IngestibleMovie
@@ -117,8 +116,8 @@ object Movie extends App {
 
   //Hint: Serialize the input to Json format and deserialize back to Object, check the result is still equal to original input.
   def testSerializationAndDeserialization(ms: Seq[Movie]): Boolean = {
-    ???
-    // TODO 5 points
+    import MoviesProtocol._
+    ???    // TO BE IMPLEMENTED 5 points
  }
 
   def getMoviesFromCountry(country: String, movies: Iterator[Try[Movie]]): Try[Seq[Movie]] = {

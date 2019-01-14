@@ -17,7 +17,7 @@ import edu.neu.coe.csye7200.hedge_fund.portfolio.{Contract, Portfolio, Position}
  */
 class UpdateLogger(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
-  var portfolio = new Portfolio("", Nil)
+  var portfolio = Portfolio("", Nil)
 
   override def receive =
     {
@@ -40,14 +40,13 @@ class UpdateLogger(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   def processStock(identifier: String, model: Model) = {
     model.getKey("price") match {
-      case Some(p) => {
+      case Some(p) =>
         // sender is the MarketData actor
         val future = sender ? SymbolQuery(identifier, List(p))
         val result = Await.result(future, timeout.duration).asInstanceOf[QueryResponse]
-        result.attributes map {
+        result.attributes foreach {
           case (k, v) => log.info(s"$identifier attribute $k has been updated to: $v")
         }
-      }
       case None => log.warning(s"'price' not defined in model")
     }
   }
@@ -63,14 +62,14 @@ class UpdateLogger(blackboard: ActorRef) extends BlackboardActor(blackboard) {
     }
   }
 
-  def showPortfolio {
+  def showPortfolio() {
     println(s"Portfolio for ${portfolio.name}")
-    portfolio.positions foreach { showPosition(_) }
+    portfolio.positions foreach { showPosition }
   }
 
   def showPosition(position: Position) {
     println(s"position for ${position.symbol}: quantity=${position.quantity}; options=")
-    position.contracts foreach { showContract(_) }
+    position.contracts foreach { showContract }
   }
 
   def showContract(contract: Contract) {

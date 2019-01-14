@@ -50,7 +50,7 @@ class OptionAnalyzer(blackboard: ActorRef) extends BlackboardActor(blackboard) {
 
   def applyRules(put: Boolean, candidate: Candidate): Boolean = {
     candidate("underlying") match {
-      case Some(u) => {
+      case Some(u) =>
         val candidateWithProperties = candidate ++ (getProperties("Id", u) match { case Some(p) => p; case _ => Map() })
         val key = if (put) "put" else "call"
         rules.get(key) match {
@@ -60,7 +60,6 @@ class OptionAnalyzer(blackboard: ActorRef) extends BlackboardActor(blackboard) {
           }
           case None => log.error(s"rules problem: $key doesn't define a rule"); false
         }
-      }
       case _ => println(s"underlying is not defined for option: $candidate"); false
     }
   }

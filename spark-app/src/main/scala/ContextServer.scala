@@ -5,7 +5,7 @@ import org.apache.spark.SparkContext
   */
 class ContextServer {
 
- var sparkContext: SparkContext = null
+ var sparkContext: SparkContext = _
 
 
 //  var hiveContext: HiveContext
@@ -13,12 +13,12 @@ class ContextServer {
 
 object ContextServer {
 
-  var contextServer: ContextServer = null
+  var contextServer: ContextServer = _
 
-  def getContextServer() = {
+  def getContextServer(): ContextServer = {
     if (contextServer==null)
       contextServer = new ContextServer
     contextServer
   }
-  def sc = getContextServer().sparkContext
+  def sc: SparkContext = getContextServer().sparkContext
 }

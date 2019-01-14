@@ -1,5 +1,6 @@
 package edu.neu.coe.csye7200.poets
 
+import scala.language.postfixOps
 import scala.xml.{Elem, Node, NodeSeq, XML}
 
 case class Name(name: String, language: String) {

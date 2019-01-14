@@ -1,6 +1,7 @@
 package edu.neu.coe.csye7200
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 import scala.util._
 
 /**
@@ -8,7 +9,7 @@ import scala.util._
   */
 object MonadOps {
 
-  // TODO implement. 6 points. Hint: write as a for-comprehension, using the method asFuture (below).
+  // TO BE IMPLEMENTED implement. 6 points. Hint: write as a for-comprehension, using the method asFuture (below).
   def flatten[X](xyf: Future[Try[X]])(implicit executor: ExecutionContext): Future[X] = ???
 
   def flatten[X](xfy: Try[Future[X]]): Future[X] =
@@ -17,7 +18,12 @@ object MonadOps {
       case Failure(e) => Future.failed(e)
     }
 
-  // TODO implement. 6 points. Hint: write as a for-comprehension, using the method Future.sequence
+  // TODO test these two flatten signatures
+  def flatten[X](xoy: Try[Option[X]], t: => Throwable): Try[X] = for (xo <- xoy; x <- optionToTry(xo, t)) yield x
+
+  def flatten[X](xoy: Try[Option[X]]): Try[X] = for (xo <- xoy; x <- optionToTry(xo)) yield x
+
+  // TO BE IMPLEMENTED implement. 6 points. Hint: write as a for-comprehension, using the method Future.sequence
   def flatten[X](xsfs: Seq[Future[Seq[X]]])(implicit ec: ExecutionContext): Future[Seq[X]] = ???
 
   def flattenRecover[X](esf: Future[Seq[Either[Throwable, Seq[X]]]], f: => Throwable => Unit)(implicit executor: ExecutionContext): Future[Seq[X]] = {
@@ -46,13 +52,13 @@ object MonadOps {
     case Failure(e) => Future.failed(e)
   }
 
-  // TODO implement. 4 points. 
+  // TO BE IMPLEMENTED implement. 4 points.
   def sequence[X](xy: Try[X]): Either[Throwable, X] = ???
 
   def sequence[X](xf: Future[X])(implicit executor: ExecutionContext): Future[Either[Throwable, X]] =
     xf transform( { s => Right(s) }, { f => f }) recoverWith[Either[Throwable, X]] { case f => Future(Left(f)) }
 
-  // TODO implement. 6 points. Hint: write as a for-comprehension, using the method sequence (above). 
+  // TO BE IMPLEMENTED implement. 6 points. Hint: write as a for-comprehension, using the method sequence (above).
   def sequence[X](xfs: Seq[Future[X]])(implicit executor: ExecutionContext): Seq[Future[Either[Throwable, X]]] = ???
 
   def sequence[X](xys: Seq[Try[X]]): Try[Seq[X]] = (Try(Seq[X]()) /: xys) {
@@ -67,7 +73,7 @@ object MonadOps {
     (xso, xo) => for (xs <- xso; x <- xo) yield xs :+ x
   }
 
-  // TODO implement. 7 points. This one is a little more tricky. Remember what I mentioned about Either not being a pure monad -- it needs projecting
+  // TO BE IMPLEMENTED implement. 7 points. This one is a little more tricky. Remember what I mentioned about Either not being a pure monad -- it needs projecting
   def sequence[X](xe: Either[Throwable, X]): Option[X] = ???
 
   def zip[A, B](ao: Option[A], bo: Option[B]): Option[(A, B)] = for (a <- ao; b <- bo) yield (a, b)

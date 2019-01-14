@@ -8,10 +8,10 @@ import scala.util._
   */
 object MiniDatabase2 extends App {
 
-  // TODO 1: Implement this method, similar to the map2 you already know (4 points)
+  // TO BE IMPLEMENTED 1: Implement this method, similar to the map2 you already know (4 points)
   def map3[A, B, C, D](a: Option[A], b: Option[B], c: Option[C])(f: (A, B, C) => D): Option[D] = ???
 
-  // TODO 2: Implement this method, similar to the map2 you already know (4 points)
+  // TO BE IMPLEMENTED 2: Implement this method, similar to the map2 you already know (4 points)
   def map2[A, B, C](a: Try[A], b: Try[B])(f: (A, B) => C): Try[C] = ???
 
   def load(filename: String) = {

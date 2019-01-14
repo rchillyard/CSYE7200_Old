@@ -16,20 +16,19 @@ class JsonGoogleOptionParser(blackboard: ActorRef) extends BlackboardActor(black
   val model: Model = new GoogleOptionModel
 
   override def receive = {
-    case ContentMessage(entity) => {
+    case ContentMessage(entity) =>
       log.debug("JsonGoogleOptionParser received ContentMessage")
       JsonGoogleOptionParser.decode(entity) match {
         case Right(optionChain) => processOptionChain(optionChain)
         case Left(message) => log.warning("Decoding error: " + message)
       }
-    }
     case m => super.receive(m)
   }
 
   def processOptionChain(optionChain: OptionChain) = {
     val chainMap = Map("expiry" -> optionChain.expiry, "expirations" -> optionChain.expirations, "underlying_id" -> optionChain.underlying_id, "underlying_price" -> optionChain.underlying_price)
-    optionChain.puts map { processPut(_, chainMap)(true) }
-    optionChain.puts map { processPut(_, chainMap)(false) }
+    optionChain.puts foreach { processPut(_, chainMap)(put = true) }
+    optionChain.puts foreach { processPut(_, chainMap)(put = false) }
   }
 
   def processPut(optionDetails: Map[String, String], chainDetails: Map[String, Any])(put: Boolean) = model.getKey("identifier") match {
@@ -46,7 +45,7 @@ class JsonGoogleOptionParser(blackboard: ActorRef) extends BlackboardActor(black
 case class YMD(y: Int, m: Int, d: Int) {
     import com.github.nscala_time.time.Imports._
     def asDate(ymd: YMD): DateTime = ymd match {
-      case YMD(y,m,d) => new DateTime(y,m,d)
+      case YMD(_y,_m,_d) => new DateTime(_y,_m,_d)
     }
 }
 
