@@ -1,5 +1,6 @@
 package edu.neu.coe.csye7200.ga
 
+import scala.language.{implicitConversions, postfixOps}
 import scala.util.Random
 
 /**

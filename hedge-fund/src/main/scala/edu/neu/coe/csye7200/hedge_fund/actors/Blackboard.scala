@@ -13,7 +13,7 @@ class Blackboard(forwardMap: Map[Class[_ <: Any], String], actors: Map[String, C
   }
 
   // To encode specific, non-forwarding behavior, override this method
-  override def receive = {
+  override def receive: PartialFunction[Any, Unit] = {
     case message =>
       forwardMap.get(message.getClass) match {
         case Some(s) => actorMap.get(s) match {

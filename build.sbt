@@ -28,7 +28,7 @@ lazy val mapred = project in file("mapreduce")
 
 lazy val concor = project in file("concordance")
 
-lazy val hedgefund = project in file("hedge-fund")
+// lazy val hedgefund = project in file("hedge-fund")
 
 lazy val sparkexp = project in file("spark-example")
 
@@ -42,7 +42,7 @@ lazy val labawscld = project in file("lab-awscloudformation")
 
 lazy val lab99 = project in file("lab-99")
 
-lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, hedgefund, sparkexp, labactors, labsort, labparser, labawscld, lab99)
+lazy val root = (project in file(".")).aggregate(assthw, asstmd, asstrs, asstfc, asstwc, asstswc, fp, num, sparkapp, mapred, concor, sparkexp, labactors, labsort, labparser, labawscld, lab99)
 
 parallelExecution in Test := false
 

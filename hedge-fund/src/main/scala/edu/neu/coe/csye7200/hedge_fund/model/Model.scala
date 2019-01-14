@@ -8,5 +8,5 @@ trait Model {
   def isOption: Boolean
   // CONSIDER dealing with any missing keys as error condition
   def mapKeys(list: List[String]): List[String] = list flatMap { k => getKey(k) }
-  override def toString() = getKey("name") match { case Some(x) => "model: " + x; case _ => "unnamed model" }
+  override def toString = getKey("name") match { case Some(x) => "model: " + x; case _ => "unnamed model" }
 }

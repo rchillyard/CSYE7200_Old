@@ -81,7 +81,7 @@ object MergeSort extends Sort {
       step *= 2
     }
 
-    if (buf1 != data) System.arraycopy(buf1, 0, data, 0, len)
+    if (!(buf1 sameElements data)) System.arraycopy(buf1, 0, data, 0, len)
   }
 
   /**

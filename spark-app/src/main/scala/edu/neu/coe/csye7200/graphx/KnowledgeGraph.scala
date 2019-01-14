@@ -29,7 +29,7 @@ object KnowledgeGraph extends App {
   
     val nodes = sc.parallelize(vArray)
   
-    val pairs = for (r <- triplesDoc1) yield Edge(r.from.toLong,r.to.toLong,r.relationship)
+    val pairs = for (r <- triplesDoc1) yield Edge(r.from, r.to,r.relationship)
   
     val eArray = pairs.toArray
   

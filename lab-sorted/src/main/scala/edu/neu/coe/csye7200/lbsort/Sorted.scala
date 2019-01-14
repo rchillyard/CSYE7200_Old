@@ -9,14 +9,14 @@ trait Comparer[T] extends (((T, T)) => Comparison) {
 
   //noinspection ConvertExpressionToSAM
   def toOrdering: Ordering[T] = new Ordering[T]() {
-    def compare(x: T, y: T): Int = self(x, y).toInt // TODO implement
+    def compare(x: T, y: T): Int = ??? // TO BE IMPLEMENTED implement
   }
 
-  def >(tt: (T, T)): Boolean = self(tt).flip().getOrElse(false) // TODO implement
+  def >(tt: (T, T)): Boolean = ??? // TO BE IMPLEMENTED implement
 
   def <(tt: (T, T)): Boolean = self(tt)().getOrElse(false)
 
-  def ==(tt: (T, T)): Boolean = self(tt)().isEmpty  // TODO implement
+  def ==(tt: (T, T)): Boolean = ???  // TO BE IMPLEMENTED implement
 
   def >=(tt: (T, T)): Boolean = ! <(tt)
 

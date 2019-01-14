@@ -3,7 +3,7 @@ package edu.neu.coe.csye7200.hedge_fund.rules
 /**
  * @author robinhillyard
  */
-sealed trait Operator[T] extends Function2[T, T, Boolean]
+sealed trait Operator[T] extends ((T, T) => Boolean)
 
 case class LessThan() extends Operator[Double] {
   def apply(x: Double, y: Double): Boolean = x < y

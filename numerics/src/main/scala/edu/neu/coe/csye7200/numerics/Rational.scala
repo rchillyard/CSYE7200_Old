@@ -2,6 +2,7 @@ package edu.neu.coe.csye7200.numerics
 
 import scala.math.pow
 import scala.annotation.tailrec
+import scala.language.implicitConversions
 
 /**
  * @author scalaprof

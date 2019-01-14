@@ -19,7 +19,7 @@ abstract class LazyNumber[X : Fractional](x: => X, f: X=>X) extends Valuable[X] 
   // XXX Could we use CanBuildFrom/Builder here?
   def construct(x: => X, f: X=>X): LazyNumber[X]
   def unit(x: =>X): LazyNumber[X] = construct(x,identity)
-  def flatMap(g: X=>LazyNumber[X]): LazyNumber[X] = g(get) // TODO 7 marks
+  def flatMap(g: X=>LazyNumber[X]): LazyNumber[X] = ??? // TO BE IMPLEMENTED 7 marks
   def map(f: X=>X): LazyNumber[X] = flatMap (a => unit(f(a)))
   def fNegate = Product(z.negate(z.one))
   def fInvert = Named("invert",{x: X => z.div(z.one,x)})
@@ -52,7 +52,7 @@ abstract class LazyNumber[X : Fractional](x: => X, f: X=>X) extends Valuable[X] 
 object LazyNumber {
   def apply[X : Numeric](x: X): LazyNumber[X] =
     x match {
-      case r @ Rational(_,_) => LazyRational(r,identity _).asInstanceOf[LazyNumber[X]]
+      case r @ Rational(_,_) => LazyRational(r,identity).asInstanceOf[LazyNumber[X]]
       case l: Long => LazyRational(l).asInstanceOf[LazyNumber[X]]
       case i: Int => LazyRational(i).asInstanceOf[LazyNumber[X]]
       case d => LazyDouble(implicitly[Numeric[X]].toDouble(d)).asInstanceOf[LazyNumber[X]]

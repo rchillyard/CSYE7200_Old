@@ -16,13 +16,12 @@ class JsonGoogleParser(blackboard: ActorRef) extends BlackboardActor(blackboard)
   val model: Model = new GoogleModel
 
   override def receive = {
-    case ContentMessage(entity) => {
+    case ContentMessage(entity) =>
       log.debug("JsonGoogleParser received ContentMessage")
       JsonGoogleParser.decode(entity) match {
         case Right(results) => processQuote(results)
         case Left(message) => log.warning("Decoding error: " + message)
       }
-    }
     case m => super.receive(m)
   }
 

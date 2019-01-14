@@ -30,10 +30,10 @@ object Ingest extends App {
   implicit object IngestibleMovie extends IngestibleMovie
 
   val ingester = new Ingest[Movie]()
-  val source = Source.fromFile(args.toList match {
-    case Nil => "movie_metadata_5000.csv"
-    case h :: _ => h
-  })
+  val source = args.toList match {
+    case Nil => Source.fromResource("movie_metadata_5000.csv")
+    case h :: _ => Source.fromFile(h)
+  }
 
   for (m <- ingester(source)) println(m.properties.mkString(", "))
   source.close()

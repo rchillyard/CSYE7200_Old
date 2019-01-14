@@ -1,5 +1,7 @@
 package edu.neu.coe.csye7200.numerics
 
+import scala.language.postfixOps
+
 /**
   * Created by scalaprof on 10/28/16.
   */

@@ -5,7 +5,7 @@ import org.apache.spark.SparkContext
   */
 class ApplicationClass {
 
-  def doSomethingUseful = {
+  def doSomethingUseful(): Unit = {
     val sc: SparkContext = ContextServer.sc
     println("I have a SparkContext")
   }

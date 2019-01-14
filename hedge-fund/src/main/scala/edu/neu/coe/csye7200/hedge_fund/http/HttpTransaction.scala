@@ -18,7 +18,7 @@ import edu.neu.coe.csye7200.hedge_fund.actors.HttpResult
 case class HttpTransaction(queryProtocol: String, request: HttpRequest, actor: ActorRef) {
   import akka.pattern.pipe
 
-  implicit val system = ActorSystem()
+  private implicit val system = ActorSystem()
 
   val pipeline: HttpRequest => Future[HttpResponse] = sendReceive
 

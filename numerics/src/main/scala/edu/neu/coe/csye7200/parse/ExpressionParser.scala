@@ -26,7 +26,7 @@ abstract class ExpressionParser[T] extends JavaTokenParsers with (String => Try[
   abstract class Factor extends Expression
   case class Expr(t: Term, ts: List[String~Term]) extends Expression {
     def termVal(t: String~Term): Try[T] = t match {case "+"~x => x.value; case "-"~x => lift(x.value)(negate); case z~_ => scala.util.Failure(ParseException(s"Expr: operator $z is not supported")) }
-    def value = ts.foldLeft(t.value)((a,x) => map2(a,termVal(x))(plus))
+    def value: Try[T] = ts.foldLeft(t.value)((a, x) => map2(a,termVal(x))(plus))
   }
   case class Term(f: Factor, fs: List[String~Factor]) extends Expression {
     def factorVal(t: String~Factor): Try[T] = t match {case "*"~x => x.value; case "/"~x => map2(Try(one),x.value)(div); case z~_ => scala.util.Failure(ParseException(s"Term: operator $z is not supported")) }
@@ -36,7 +36,7 @@ abstract class ExpressionParser[T] extends JavaTokenParsers with (String => Try[
     def value = self.apply(x)
   }
   case class Parentheses(e: Expr) extends Factor {
-    def value = e.value
+    def value: Try[T] = e.value
   }
   
   def expr: Parser[Expr] = term~rep("+"~term | "-"~term | failure("expr")) ^^ { case t~r => r match {case x: List[String~Term] => Expr(t,x)}}

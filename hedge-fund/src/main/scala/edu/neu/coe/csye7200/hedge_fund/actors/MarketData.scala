@@ -36,7 +36,7 @@ class MarketData(blackboard: ActorRef) extends BlackboardActor(blackboard) {
         case None => List()
       }
       import scala.language.postfixOps
-      val x = attributes flatten;
+      val x = attributes flatten
       val y = x toMap;
       log.debug(s"creating QueryResponse: $identifier $y")
       sender ! QueryResponse(identifier, y)
