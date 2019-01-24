@@ -18,22 +18,22 @@ object P00 {
 
 object P01 {
 
-  def last[X](xs: List[X]): X = ??? // TO BE IMPLEMENTED
+  def last[X](xs: Seq[X]): X = ??? // TO BE IMPLEMENTED
 }
 
 object P02 {
 
-  def penultimate[X](xs: List[X]): X = ??? // TO BE IMPLEMENTED
+  def penultimate[X](xs: Seq[X]): X = ??? // TO BE IMPLEMENTED
 }
 
 object P03 {
 
-  def kth[X](k: Int, xs: List[X]): X = ??? // TO BE IMPLEMENTED
+  def kth[X](k: Int, xs: Seq[X]): X = ??? // TO BE IMPLEMENTED
 }
 
 object P04 {
 
-  def length[X](xs: List[X]): Int = {
+  def length[X](xs: Seq[X]): Int = {
     // TO BE IMPLEMENTED
     ???
   }
@@ -41,7 +41,7 @@ object P04 {
 
 object P05 {
 
-  def reverse[X](xs: List[X]): List[X] = {
+  def reverse[X](xs: Seq[X]): Seq[X] = {
     // TO BE IMPLEMENTED
     ???
   }
@@ -50,7 +50,7 @@ object P05 {
 object P06 {
 
   // inefficient solution
-  def isPalindrome[X](xs: List[X]): Boolean = ??? // TO BE IMPLEMENTED
+  def isPalindrome[X](xs: Seq[X]): Boolean = ??? // TO BE IMPLEMENTED
 }
 
 object P07 {
@@ -65,7 +65,7 @@ object P07 {
 
 object P08 {
 
-  def compress[X](xs: List[X]): Seq[X] = {
+  def compress[X](xs: Seq[X]): Seq[X] = {
     // TO BE IMPLEMENTED
     ???
   }
@@ -73,7 +73,7 @@ object P08 {
 
 object P09 {
 
-  def pack[X](xs: List[X]): Seq[Seq[X]] = {
+  def pack[X](xs: Seq[X]): Seq[Seq[X]] = {
     // TO BE IMPLEMENTED
     ???
   }
@@ -81,12 +81,12 @@ object P09 {
 
 object P10 {
 
-  def encode[X](xs: List[X]): Seq[(Int, X)] = ??? // TO BE IMPLEMENTED
+  def encode[X](xs: Seq[X]): Seq[(Int, X)] = ??? // TO BE IMPLEMENTED
 }
 
 object P11 {
 
-  def encodeModified[X](xs: List[X]): Seq[Any] = ??? // TO BE IMPLEMENTED
+  def encodeModified[X](xs: Seq[X]): Seq[Any] = ??? // TO BE IMPLEMENTED
 }
 
 object P12 {
@@ -96,7 +96,7 @@ object P12 {
 
 object P13 {
 
-  def encodeDirect[X](xs: List[X]): Seq[(Int, X)] = {
+  def encodeDirect[X](xs: Seq[X]): Seq[(Int, X)] = {
     // TO BE IMPLEMENTED
     ???
   }
