@@ -5,6 +5,7 @@
 package edu.neu.coe.csye7200
 
 import org.scalatest.{FlatSpec, Matchers}
+import S99Int._
 
 class ArithmeticSpec extends FlatSpec with Matchers {
 
@@ -40,12 +41,12 @@ class ArithmeticSpec extends FlatSpec with Matchers {
 
   behavior of "P37"
   it should "get " in {
-//    gcd(36,63) shouldBe 9
+    //    gcd(36,63) shouldBe 9
   }
 
   behavior of "P38"
   it should "get " in {
-//    gcd(36,63) shouldBe 9
+    //    gcd(36,63) shouldBe 9
   }
 
   behavior of "P39"
@@ -60,7 +61,7 @@ class ArithmeticSpec extends FlatSpec with Matchers {
 
   behavior of "P41"
   it should "get " in {
-//    gcd(36,63) shouldBe 9
+    //    gcd(36,63) shouldBe 9
   }
 }
 
